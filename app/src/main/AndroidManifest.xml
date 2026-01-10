@@ -2,6 +2,9 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+
     <application
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
@@ -12,13 +15,30 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.SagarSweets">
         <activity
-            android:name=".LinearActivityJava"
+            android:name=".UserAddAddressActivity"
+            android:exported="false" >
+
+
+        </activity>
+        <activity
+            android:name=".UpdateProfileActivity"
+            android:exported="false"></activity>
+        <activity
+            android:name=".ForgotPasswordActivity"
             android:exported="false" />
         <activity
-            android:name=".LinearActivity"
+            android:name=".RegisterActivity"
             android:exported="false"
-            android:label="@string/title_activity_linear"
-            android:theme="@style/Theme.SagarSweets" />
+            android:windowSoftInputMode="stateHidden|adjustResize" />
+        <activity
+            android:name=".LoginActivity"
+            android:exported="false"
+            android:label="@string/title_activity_login"
+            android:theme="@style/Theme.SagarSweets"
+            android:windowSoftInputMode="stateHidden|adjustResize" />
+        <activity
+            android:name=".LinearActivityJava"
+            android:exported="false" />
         <activity
             android:name=".MainActivity"
             android:exported="true">
