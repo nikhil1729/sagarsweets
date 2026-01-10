@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">Sagar Sweets</string>
+    <string name="title_activity_linear">LinearActivity</string>
 </resources>
