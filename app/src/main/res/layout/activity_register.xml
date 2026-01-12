@@ -37,7 +37,15 @@
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
                 android:padding="20dp">
-
+                <!-- Title -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:text="Register For New User"
+                    android:textColor="#8D2B0B"
+                    android:textSize="22sp"
+                    android:textStyle="bold" />
                 <!-- First Name -->
                 <com.google.android.material.textfield.TextInputLayout
                     android:layout_width="match_parent"

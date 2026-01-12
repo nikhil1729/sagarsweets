@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fillViewport="true"
+    android:id="@+id/main"
+    android:background="@color/white">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="20dp">
+
+        <!-- Heading -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Contact Us"
+            android:textSize="22sp"
+            android:textStyle="bold"
+            android:textColor="@color/black"
+            android:layout_gravity="center_horizontal"
+            android:paddingBottom="20dp"/>
+
+        <!-- ADDRESS CARD -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="@drawable/card_bg"
+            android:padding="16dp"
+            android:layout_marginBottom="16dp">
+
+            <TextView
+                android:layout_height="wrap_content"
+                android:layout_width="wrap_content"
+                android:text="Our Address"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:textColor="@color/black"
+                android:layout_marginBottom="8dp"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Sagar Sweets\nMG Road, Andheri East\nMumbai, Maharashtra - 400069\nIndia"
+                android:textSize="14sp"
+                android:textColor="#666666"
+                android:lineSpacingExtra="4dp"/>
+
+        </LinearLayout>
+
+        <!-- MAP SECTION -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="200dp"
+            android:background="@drawable/card_bg"
+            android:layout_marginBottom="20dp">
+
+            <!-- Replace ImageView with SupportMapFragment later -->
+            <ImageView
+                android:id="@+id/imgMap"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:scaleType="centerCrop"
+                android:src="@drawable/ic_map_placeholder"/>
+        </LinearLayout>
+
+        <!-- LEAVE A MESSAGE -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Leave a Message"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:textColor="@color/black"
+            android:paddingBottom="12dp"/>
+
+        <EditText
+            android:id="@+id/etName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Your Name"
+            android:background="@drawable/edittext_bg"
+            android:padding="12dp"
+            android:layout_marginBottom="12dp"/>
+
+        <EditText
+            android:id="@+id/etEmail"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Email Address"
+            android:inputType="textEmailAddress"
+            android:background="@drawable/edittext_bg"
+            android:padding="12dp"
+            android:layout_marginBottom="12dp"/>
+
+        <EditText
+            android:id="@+id/etMessage"
+            android:layout_width="match_parent"
+            android:layout_height="120dp"
+            android:hint="Your Message"
+            android:inputType="textMultiLine"
+            android:gravity="top"
+            android:background="@drawable/edittext_bg"
+            android:padding="12dp"
+            android:layout_marginBottom="20dp"/>
+
+        <Button
+            android:id="@+id/btnSendMessage"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Send Message"
+            android:textAllCaps="false"
+            android:backgroundTint="@color/sagar_button"
+            android:textColor="@color/white"/>
+
+    </LinearLayout>
+
+</ScrollView>

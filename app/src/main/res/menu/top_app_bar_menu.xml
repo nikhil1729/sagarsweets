@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:background="@color/black"
+    >
+
+    <!-- Search -->
+    <item
+        android:id="@+id/action_search"
+        android:icon="@drawable/ic_search"
+        android:title="Search"
+        app:showAsAction="always"
+        app:actionViewClass="androidx.appcompat.widget.SearchView" />
+
+    <!-- Cart -->
+    <item
+        android:id="@+id/action_cart"
+        android:icon="@drawable/ic_cart"
+        android:title="Cart"
+        app:showAsAction="always" />
+
+</menu>
