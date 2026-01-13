@@ -8,14 +8,18 @@
 
 
         <item
-            android:id="@+id/nav_login"
-            android:title="Login"
-            android:icon="@drawable/ic_orders"/>
+            android:id="@+id/draw_home"
+            android:title="Home"
+            android:icon="@drawable/ic_home"/>
 
         <item
-            android:id="@+id/nav_register"
+            android:id="@+id/draw_login"
+            android:title="Login"
+            android:icon="@drawable/ic_login"/>
+        <item
+            android:id="@+id/draw_register"
             android:title="Register"
-            android:icon="@drawable/ic_orders"/>
+            android:icon="@drawable/ic_user_register"/>
 
 
 
@@ -25,10 +29,17 @@
 
         <menu>
             <item
+                android:id="@+id/draw_about_us"
+                android:title="About Us"
+                android:icon="@drawable/ic_about_us"/>
+            <item
                 android:id="@+id/nav_contact"
                 android:title="Contact Us"
                 android:icon="@drawable/ic_contact"/>
-
+            <item
+                android:id="@+id/draw_term_and_condition"
+                android:title="Term And Condition"
+                android:icon="@drawable/ic_t_c"/>
             <item
                 android:id="@+id/nav_logout"
                 android:title="Logout"

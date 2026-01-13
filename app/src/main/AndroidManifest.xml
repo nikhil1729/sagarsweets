@@ -16,39 +16,10 @@
         android:theme="@style/Theme.SagarSweets">
         <activity
             android:name=".HomeActivity"
-            android:exported="true" >
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
-        <activity
-            android:name=".TermAndConditionActivity"
-            android:exported="false">
+            android:exported="false" >
 
         </activity>
-        <activity
-            android:name=".ContactUsActivity"
-            android:exported="false" />
-        <activity
-            android:name=".AboutUsActivity"
-            android:exported="false" />
-        <activity
-            android:name=".OrderTrackingActivity"
-            android:exported="false" />
-        <activity
-            android:name=".AskQuestionActivity"
-            android:exported="false" />
-        <activity
-            android:name=".ProductReviewActivity"
-            android:exported="false" />
-        <activity
-            android:name=".UserAddAddressActivity"
-            android:exported="false" />
-        <activity
-            android:name=".UpdateProfileActivity"
-            android:exported="false" />
+
         <activity
             android:name=".ForgotPasswordActivity"
             android:exported="false" />
@@ -67,8 +38,12 @@
             android:exported="false" />
         <activity
             android:name=".MainActivity"
-            android:exported="false">
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
 
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
         </activity>
     </application>
 

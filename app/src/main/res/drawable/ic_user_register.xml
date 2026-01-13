@@ -5,20 +5,25 @@
     android:viewportWidth="24"
     android:viewportHeight="24">
 
-    <!-- Door -->
+    <!-- User -->
     <path
         android:fillColor="?attr/colorOnSurface"
         android:pathData="
-            M5,3h9
-            c1.1,0 2,0.9 2,2v4h-2V5H5v14h9v-4h2v4
-            c0,1.1 -0.9,2 -2,2H5
-            c-1.1,0 -2,-0.9 -2,-2V5
-            c0,-1.1 0.9,-2 2,-2z"/>
+            M12,12
+            c2.21,0 4,-1.79 4,-4
+            s-1.79,-4 -4,-4
+            -4,1.79 -4,4
+            1.79,4 4,4z"/>
 
-    <!-- Logout arrow -->
+    <!-- Login arrow -->
     <path
         android:fillColor="?attr/colorOnSurface"
         android:pathData="
-            M16,12l-4,-4v3H8v2h4v3z"/>
+            M13,14h6v-2h-6V9l-4,4 4,4z"/>
+
+    <!-- Register plus -->
+    <path
+        android:fillColor="?attr/colorOnSurface"
+        android:pathData="
+            M18,18h-2v-2h-2v2h-2v2h2v2h2v-2h2z"/>
 </vector>
-

@@ -1,5 +1,6 @@
 package com.sagarsweets.in;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.TextView;
@@ -12,6 +13,7 @@ import androidx.core.view.GravityCompat;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.fragment.app.Fragment;
 
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.badge.BadgeDrawable;
@@ -55,6 +57,12 @@ public class HomeActivity extends AppCompatActivity {
             );
         });
 
+        // Default fragment (Home)
+        if (savedInstanceState == null) {
+            loadFragment(new HomeFragment(), "Home",true);
+            navigationView.setCheckedItem(R.id.nav_home);
+        }
+
         topAppBar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -62,7 +70,57 @@ public class HomeActivity extends AppCompatActivity {
             }
         });
 
+        navigationView.setNavigationItemSelectedListener(item -> {
+            openDrawerItem(item.getItemId());
+            return true;
 
+        });
+
+
+    }
+
+    private void openDrawerItem(int id) {
+        if (id == R.id.draw_home) {
+            loadFragment(new HomeFragment(), "Home", false);
+        } else if (id == R.id.draw_about_us) {
+            loadFragment(new AboutUsFragment(), "About Us", false);
+        } else if (id == R.id.nav_contact) {
+            loadFragment(new ContactUsFragment(), "Contact Us", false);
+        }else if (id == R.id.draw_term_and_condition) {
+            loadFragment(new TermAndConditionFragment(), "Our T&C", false);
+        }else if (id == R.id.draw_login) {
+            loadFragment(new LoginFragment(), "Login", false);
+        }else if (id == R.id.draw_register) {
+            loadFragment(new RegisterFragment(), "Register", false);
+        }
+
+    }
+
+    private void loadFragment(Fragment fragment, String title, boolean b) {
+        // Load fragment if true then add else replace fragment
+        if(b){
+            getSupportFragmentManager()
+                    .beginTransaction()
+                    .setCustomAnimations(
+                            android.R.anim.fade_in,
+                            android.R.anim.fade_out
+                    )
+                    .add(R.id.container, fragment)
+                    .addToBackStack(title) // optional
+                    .commit();
+        }else{
+            getSupportFragmentManager()
+                    .beginTransaction()
+                    .replace(R.id.container, fragment)
+                    .addToBackStack(title) // optional
+                    .commit();
+        }
+
+
+
+        // Close drawer
+        DrawerLayout drawerLayout = findViewById(R.id.drawerLayout);
+        drawerLayout.closeDrawer(GravityCompat.START);
     }
 
     private void myCartSet(BadgeDrawable badge) {
