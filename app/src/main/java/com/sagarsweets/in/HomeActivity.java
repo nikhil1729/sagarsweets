@@ -2,12 +2,16 @@ package com.sagarsweets.in;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.annotation.OptIn;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import androidx.core.graphics.Insets;
 import androidx.core.view.GravityCompat;
 import androidx.core.view.ViewCompat;
@@ -20,15 +24,18 @@ import com.google.android.material.badge.BadgeDrawable;
 import com.google.android.material.badge.BadgeUtils;
 import com.google.android.material.badge.ExperimentalBadgeUtils;
 import com.google.android.material.navigation.NavigationView;
+import com.sagarsweets.in.Session.LoginSession;
 
 public class HomeActivity extends AppCompatActivity {
 
     TextView tvLocation;
+    TextView drawName, drawEmail;
     DrawerLayout drawerLayout;
     MaterialToolbar topAppBar;
     NavigationView navigationView;
     BadgeDrawable badge;
-
+    LoginSession loginSession;
+    View headerView;
     @OptIn(markerClass = ExperimentalBadgeUtils.class)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,8 +53,16 @@ public class HomeActivity extends AppCompatActivity {
         navigationView = findViewById(R.id.navigationView);
         topAppBar.inflateMenu(R.menu.top_app_bar_menu);
 
+        headerView = navigationView.getHeaderView(0);
+        drawName = headerView.findViewById(R.id.drawName);
+        drawEmail = headerView.findViewById(R.id.drawEmail);
+        loginSession = new LoginSession(this);
+        showHideElementDrawer();
+        updateSessionName(); // Update session name by session class
+
         // cart count is setting here
         myCartSet(badge);
+
 
         topAppBar.post(() -> {
             BadgeUtils.attachBadgeDrawable(
@@ -56,7 +71,17 @@ public class HomeActivity extends AppCompatActivity {
                     R.id.action_cart
             );
         });
-
+        topAppBar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem item) {
+                Integer id = item.getItemId();
+                if (id == R.id.action_cart) {
+                    loadFragment(new CartFragment(), "Cart", false);
+                    return true;
+                }
+                return false;
+            }
+        });
         // Default fragment (Home)
         if (savedInstanceState == null) {
             loadFragment(new HomeFragment(), "Home",true);
@@ -79,6 +104,40 @@ public class HomeActivity extends AppCompatActivity {
 
     }
 
+    private void showHideElementDrawer() {
+        Menu menu = navigationView.getMenu();
+        if(loginSession.isLoggedIn()){
+            //show profile, my order
+            menu.findItem(R.id.draw_login).setVisible(false);
+            menu.findItem(R.id.draw_register).setVisible(false);
+
+            menu.findItem(R.id.draw_myorders).setVisible(true);
+            menu.findItem(R.id.draw_profile).setVisible(true);
+            menu.findItem(R.id.draw_logout).setVisible(true);
+        }else{
+            menu.findItem(R.id.draw_login).setVisible(true);
+            menu.findItem(R.id.draw_register).setVisible(true);
+
+            menu.findItem(R.id.draw_myorders).setVisible(false);
+            menu.findItem(R.id.draw_profile).setVisible(false);
+            menu.findItem(R.id.draw_logout).setVisible(false);
+        }
+    }
+
+    private void updateSessionName() {
+
+        if(loginSession.isLoggedIn()){
+           // true
+            drawName.setText("Hi! "+loginSession.getUserName());
+            drawEmail.setText(loginSession.getUserId());
+
+        }else{
+            // not logged
+            drawName.setText(R.string.hi_guest);
+            drawEmail.setText(R.string.email_afterlogged_in);
+        }
+    }
+
     private void openDrawerItem(int id) {
         if (id == R.id.draw_home) {
             loadFragment(new HomeFragment(), "Home", false);
@@ -92,7 +151,16 @@ public class HomeActivity extends AppCompatActivity {
             loadFragment(new LoginFragment(), "Login", false);
         }else if (id == R.id.draw_register) {
             loadFragment(new RegisterFragment(), "Register", false);
+        }if (id == R.id.draw_logout) {
+            LoginSession loginSession = new LoginSession(this);
+            loginSession.logout();
+            Toast.makeText(this,"Successfully logout from this device",Toast.LENGTH_SHORT).show();
+            Intent intent = new Intent(this, MainActivity.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intent);
+            finish();
         }
+
 
     }
 

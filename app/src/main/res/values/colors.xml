@@ -10,5 +10,8 @@
     <color name="md_theme_onSecondary">#000000</color>
     <color name="red" >#F00606</color>
     <color name="sagar_background">#FFF7EC</color>
+    <!-- Error -->
+    <color name="md_theme_error">#B3261E</color>
+    <color name="md_theme_onErrorContainer">#410E0B</color>
 
 </resources>

@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Sagar Sweets</string>
+    <string name="app_name">Sagar</string>
     <string name="title_activity_linear">LinearActivity</string>
     <string name="getting_started_heading">Welcome to Sagar Sweets</string>
     <string name="getting_started_under_heading">Order fresh sweets and snacks delivered to your doorstep</string>
@@ -8,4 +8,8 @@
     <string name="title_activity_login">LoginActivity</string>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="your_cart_is_empty">Your cart is empty</string>
+    <string name="sagar_sweets_logo">Sagar Sweets Logo</string>
+    <string name="email_afterlogged_in">Email afterLogged in</string>
+    <string name="hi_guest">Hi! Guest</string>
 </resources>
