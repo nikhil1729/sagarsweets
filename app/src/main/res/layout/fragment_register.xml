@@ -53,6 +53,38 @@
                         android:textColor="#8D2B0B"
                         android:textSize="22sp"
                         android:textStyle="bold" />
+                    <!-- Error Message -->
+                    <TextView
+                        android:id="@+id/tvSuccess"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="12dp"
+                        android:padding="10dp"
+                        android:text="Invalid mobile number or password"
+                        android:textSize="14sp"
+                        android:textColor="#D32F2F"
+                        android:background="@drawable/bg_success"
+                        android:visibility="gone"
+                        android:drawableStart="@drawable/ic_success"
+                        android:drawablePadding="8dp"
+                        android:fontFamily="sans-serif-medium"
+                        />
+
+                    <TextView
+                        android:id="@+id/tvError"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="12dp"
+                        android:padding="10dp"
+                        android:text="Invalid mobile number or password"
+                        android:textSize="14sp"
+                        android:textColor="#D32F2F"
+                        android:background="@drawable/bg_error"
+                        android:visibility="gone"
+                        android:drawableStart="@drawable/ic_error"
+                        android:drawablePadding="8dp"
+                        android:fontFamily="sans-serif-medium"/>
+
                     <!-- First Name -->
                     <com.google.android.material.textfield.TextInputLayout
                         android:layout_width="match_parent"
@@ -114,13 +146,28 @@
                                 android:maxLength="6"/>
                         </com.google.android.material.textfield.TextInputLayout>
 
-                        <Button
-                            android:id="@+id/btnGetOtp"
+                        <!-- OTP Button with Loader -->
+                        <FrameLayout
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Get OTP"
-                            android:backgroundTint="@color/sagar_button"
-                            android:layout_marginStart="10dp"/>
+                            android:layout_marginStart="10dp">
+
+                            <Button
+                                android:id="@+id/btnGetOtp"
+                                android:layout_width="wrap_content"
+                                android:layout_height="match_parent"
+                                android:text="Get OTP"
+                                android:backgroundTint="@color/sagar_button"/>
+
+                            <ProgressBar
+                                android:id="@+id/progressOtp"
+                                android:layout_width="20dp"
+                                android:layout_height="20dp"
+                                android:layout_gravity="center"
+                                android:indeterminate="true"
+                                android:visibility="gone"/>
+                        </FrameLayout>
+
                     </LinearLayout>
 
                     <!-- Password -->
@@ -154,13 +201,28 @@
                     </com.google.android.material.textfield.TextInputLayout>
 
                     <!-- Register Button -->
-                    <Button
-                        android:id="@+id/btnRegister"
+                    <FrameLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Register"
-                        android:backgroundTint="@color/sagar_button"
-                        android:layout_marginTop="20dp"/>
+                        android:layout_marginTop="20dp">
+
+                        <Button
+                            android:id="@+id/btnRegister"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="Register"
+                            android:backgroundTint="@color/sagar_button"
+                            android:padding="14dp"/>
+
+                        <ProgressBar
+                            android:id="@+id/progressRegister"
+                            android:layout_width="24dp"
+                            android:layout_height="24dp"
+                            android:layout_gravity="center"
+                            android:indeterminate="true"
+                            android:visibility="gone"/>
+                    </FrameLayout>
+
 
                 </LinearLayout>
             </androidx.cardview.widget.CardView>

@@ -23,6 +23,7 @@ import com.sagarsweets.in.ApiModel.LoginRequest;
 import com.sagarsweets.in.ApiModel.LoginResponse;
 import com.sagarsweets.in.ApiModel.User;
 import com.sagarsweets.in.Session.LoginSession;
+import com.sagarsweets.in.utils.ButtonLoaderUtil;
 import com.sagarsweets.in.utils.DeviceInfo;
 
 import java.io.IOException;
@@ -103,22 +104,19 @@ public class LoginFragment extends Fragment {
             return;
         }
 
+
         // Hide previous error
         tvError.setVisibility(View.GONE);
-        // Disable button
-        btnLogin.setEnabled(false);
-        btnLogin.setText("");
-        // Show progress
-        progressLogin.setVisibility(View.VISIBLE);
+        // Show loader
+        ButtonLoaderUtil.showLoading(btnLogin, progressLogin);
+
+
         // TODO: Call Login API here
         login(mobile,password);
         // Toast.makeText(getContext(), "Login Successful", Toast.LENGTH_SHORT).show();
     }
 
     private void login(String mobile, String password) {
-
-
-
         // creating login request class
         LoginRequest request = new LoginRequest(mobile, password, getDeviceString());
 
@@ -133,22 +131,17 @@ public class LoginFragment extends Fragment {
 
                     LoginResponse loginResponse = response.body();
                     if ( loginResponse.isStatus() ) {
-                        progressLogin.setVisibility(View.GONE);
-                        btnLogin.setEnabled(true);
-                        btnLogin.setText("Login");
+
+                        ButtonLoaderUtil.hideLoading(btnLogin, progressLogin, "Login");
                         // SAVE TOKEN
                         saveSession(loginResponse);
 
                     }else{
-                        progressLogin.setVisibility(View.GONE);
-                        btnLogin.setEnabled(true);
-                        btnLogin.setText("Login");
+                        ButtonLoaderUtil.hideLoading(btnLogin, progressLogin, "Login");
                         showErrorDialog(loginResponse.getMessage());
                     }
                 }else{
-                    progressLogin.setVisibility(View.GONE);
-                    btnLogin.setEnabled(true);
-                    btnLogin.setText("Login");
+                    ButtonLoaderUtil.hideLoading(btnLogin, progressLogin, "Login");
                     showErrorDialog("Invalid response from server.");
 
                 }
@@ -156,6 +149,7 @@ public class LoginFragment extends Fragment {
 
             @Override
             public void onFailure(Call<LoginResponse> call, Throwable t) {
+                ButtonLoaderUtil.hideLoading(btnLogin, progressLogin, "Login");
                 if (t instanceof IOException) {
                     showErrorDialog("No internet connection");
                 } else {
