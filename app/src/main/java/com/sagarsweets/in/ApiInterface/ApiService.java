@@ -2,6 +2,7 @@ package com.sagarsweets.in.ApiInterface;
 
 
 
+import com.sagarsweets.in.ApiModel.ForgetPasswordRequest;
 import com.sagarsweets.in.ApiModel.LoginRequest;
 import com.sagarsweets.in.ApiModel.LoginResponse;
 import com.sagarsweets.in.ApiModel.OtpResponse;
@@ -26,4 +27,14 @@ public interface ApiService {
     @POST("rest/user/registration")
     Call<OtpResponse> registerUser(@Body RegisterUserRequest registerUserRequest);
 
+    @FormUrlEncoded
+    @POST("rest/user/sendotpforreset")
+    Call<OtpResponse>sendOtpForReset(
+      @Field("mobile") String mobile,
+      @Field("ip") String ip,
+      @Field("device_info") String device_info
+    );
+
+    @POST("rest/user/forgetpassword")
+    Call<OtpResponse> forgetPassword(@Body ForgetPasswordRequest forgetPasswordRequest);
 }
