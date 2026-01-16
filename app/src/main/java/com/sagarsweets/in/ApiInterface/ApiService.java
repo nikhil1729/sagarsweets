@@ -3,6 +3,7 @@ package com.sagarsweets.in.ApiInterface;
 
 
 import com.sagarsweets.in.ApiModel.ForgetPasswordRequest;
+import com.sagarsweets.in.ApiModel.LoginOtpRequest;
 import com.sagarsweets.in.ApiModel.LoginRequest;
 import com.sagarsweets.in.ApiModel.LoginResponse;
 import com.sagarsweets.in.ApiModel.OtpResponse;
@@ -17,6 +18,8 @@ public interface ApiService {
     @POST("rest/user/login")
     Call<LoginResponse> loginUser(@Body LoginRequest loginRequest);
 
+    @POST("rest/user/loginbyotp")
+    Call<LoginResponse> loginUserByOtp(@Body LoginOtpRequest loginOtpRequest);
 
     @FormUrlEncoded
     @POST("rest/user/sendotp")
