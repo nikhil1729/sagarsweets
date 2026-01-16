@@ -180,7 +180,7 @@ public class RegisterFragment extends Fragment {
                 ButtonLoaderUtil.hideLoading(
                         btnRegister, progressRegister, "Register");
 
-                showError("Network error. Please check internet");
+                showError("Network error. Please check internet."+t.getMessage());
             }
         });
 
@@ -233,7 +233,10 @@ public class RegisterFragment extends Fragment {
 
     private void getOtpFunction() {
         String mobile = etMobile.getText().toString().trim();
-
+        if (!isValidMobile(mobile)) {
+            showError("Enter a valid 10 digit mobile number");
+            return;
+        }
         if (TextUtils.isEmpty(mobile)) {
             etMobile.setError("Required");
             return;

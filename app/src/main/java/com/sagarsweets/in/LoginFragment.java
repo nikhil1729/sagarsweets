@@ -1,10 +1,13 @@
 package com.sagarsweets.in;
 
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
 
+import android.os.Handler;
+import android.os.Looper;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
@@ -38,6 +41,8 @@ public class LoginFragment extends Fragment {
     private Button btnLogin;
     private TextView txtForgot,txtSignup,tvError;
     ProgressBar progressLogin;
+    private Runnable hideMessageRunnable;
+    private Handler messageHandler = new Handler(Looper.getMainLooper());
     public LoginFragment() {
         // Required empty public constructor
     }
@@ -54,15 +59,41 @@ public class LoginFragment extends Fragment {
         btnLogin = view.findViewById(R.id.btnLogin);
         tvError = view.findViewById(R.id.tvError);
         progressLogin = view.findViewById(R.id.progressLogin);
+        txtForgot = view.findViewById(R.id.txtForgot);
+        txtSignup = view.findViewById(R.id.txtSignup);
+
         removeError();
 
-
-
-
+        // signup textview clicked
+        txtSignup.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                RegisterFragment registerFragment = new RegisterFragment();
+                requireActivity()
+                        .getSupportFragmentManager()
+                        .beginTransaction()
+                        .replace(R.id.container, registerFragment)
+                        .addToBackStack("register_fragment")
+                        .commit();
+            }
+        });
+        // forgot password clicked
+        txtForgot.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ForgotPasswordFragment forgotPasswordFragment = new ForgotPasswordFragment();
+                requireActivity()
+                        .getSupportFragmentManager()
+                        .beginTransaction()
+                        .replace(R.id.container, forgotPasswordFragment)
+                        .addToBackStack("forgot_password")
+                        .commit();
+            }
+        });
+        // login button clicked
         btnLogin.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
                 validateLogin();
             }
         });
@@ -93,7 +124,10 @@ public class LoginFragment extends Fragment {
     private void validateLogin() {
         String mobile = edtMobile.getText().toString().trim();
         String password = edtPassword.getText().toString().trim();
-
+        if (!isValidMobile(mobile)) {
+            showErrorDialog("Enter a valid 10 digit mobile number");
+            return;
+        }
         if (TextUtils.isEmpty(mobile)) {
             edtMobile.setError("Required");
             return;
@@ -114,6 +148,17 @@ public class LoginFragment extends Fragment {
         // TODO: Call Login API here
         login(mobile,password);
         // Toast.makeText(getContext(), "Login Successful", Toast.LENGTH_SHORT).show();
+    }
+
+
+
+    private boolean isValidMobile(String mobile) {
+        mobile = mobile.replaceAll("^\\+91|^0", "");
+
+        if (!mobile.matches("^[6-9]\\d{9}$")) {
+            return false;
+        }
+        return true;
     }
 
     private void login(String mobile, String password) {
@@ -176,10 +221,28 @@ public class LoginFragment extends Fragment {
     }
 
     private void showErrorDialog(String message) {
+        if (hideMessageRunnable != null) {
+            messageHandler.removeCallbacks(hideMessageRunnable);
+        }
         tvError.setText(message);
+        tvError.setTextColor(Color.parseColor("#D32F2F"));
+        tvError.setBackgroundResource(R.drawable.bg_error);
+        tvError.setCompoundDrawablesWithIntrinsicBounds(
+                R.drawable.ic_error, 0, 0, 0);
         tvError.setVisibility(View.VISIBLE);
+        // Fade in
         tvError.setAlpha(0f);
-        tvError.animate().alpha(1f).setDuration(300).start();
+        tvError.animate().alpha(1f).setDuration(200).start();
+
+        // Auto hide after 3 seconds
+        hideMessageRunnable = () -> {
+            tvError.animate()
+                    .alpha(0f)
+                    .setDuration(200)
+                    .withEndAction(() -> tvError.setVisibility(View.GONE))
+                    .start();
+        };
+        messageHandler.postDelayed(hideMessageRunnable, 10000);
 
     }
 }
