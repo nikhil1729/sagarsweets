@@ -18,16 +18,26 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:padding="12dp">
+            android:paddingBottom="1dp">
 
             <!-- SEARCH -->
 
             <!-- BANNER SLIDER -->
             <androidx.viewpager2.widget.ViewPager2
-                android:id="@+id/bannerPager"
+                android:id="@+id/viewPagerSlider"
                 android:layout_width="match_parent"
-                android:layout_height="180dp"
-                android:layout_marginTop="12dp"/>
+                android:layout_height="150dp"
+                android:orientation="horizontal"  />
+            <com.google.android.material.tabs.TabLayout
+                android:id="@+id/tabDots"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginTop="8dp"
+                app:tabIndicatorHeight="0dp"
+                app:tabBackground="@drawable/tab_dot_selector"
+                app:tabRippleColor="@null"/>
+
 
             <!-- CATEGORY -->
             <LinearLayout
@@ -90,9 +100,6 @@
     </androidx.core.widget.NestedScrollView>
 
     <!-- SHIMMER -->
-    <include
-        android:id="@+id/shimmerHome"
-        layout="@layout/layout_home_shimmer"
-        android:visibility="gone"/>
+
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
