@@ -21,6 +21,7 @@ import com.bumptech.glide.request.target.CustomTarget;
 import com.bumptech.glide.request.target.Target;
 import com.bumptech.glide.request.transition.Transition;
 import com.facebook.shimmer.ShimmerFrameLayout;
+import com.sagarsweets.in.ApiControllers.SuperController;
 import com.sagarsweets.in.ApiModel.SliderModel;
 import com.sagarsweets.in.R;
 
@@ -54,7 +55,7 @@ public class ApiSliderAdapter extends RecyclerView.Adapter<ApiSliderAdapter.Slid
         SliderModel model = sliderList.get(position);
 
 
-        String imageUrl = BASE_IMAGE_URL  + model.getImage();
+        String imageUrl = SuperController.base_url_images + model.getImage();
         Log.d("FINAL_IMAGE_URL", imageUrl);
 
         holder.shimmer.setVisibility(View.VISIBLE);

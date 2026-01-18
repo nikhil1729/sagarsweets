@@ -36,30 +36,41 @@
                 android:layout_marginTop="8dp"
                 app:tabIndicatorHeight="0dp"
                 app:tabBackground="@drawable/tab_dot_selector"
-                app:tabRippleColor="@null"/>
+                app:tabRippleColor="@null"
+                android:visibility="gone"/>
 
 
             <!-- CATEGORY -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:gravity="center">
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:paddingHorizontal="16dp"
+                android:paddingVertical="8dp">
 
+                <!-- Title -->
                 <TextView
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_width="wrap_content"
+                    android:layout_weight="1"
                     android:text="Categories"
-                    android:textSize="18sp"
-                    android:textStyle="bold"/>
+                    android:textSize="20sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/md_theme_background" />
 
+                <!-- View All Chip -->
                 <TextView
-                    android:layout_height="wrap_content"
                     android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
                     android:text="View All"
-                    android:textSize="14sp"
-                    android:textColor="@color/md_theme_primary"/>
+                    android:textSize="13sp"
+                    android:textColor="@color/md_theme_primary"
+                    android:paddingHorizontal="14dp"
+                    android:paddingVertical="6dp"
+                    android:background="@drawable/bg_view_all_chip" />
             </LinearLayout>
+
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/rvCategories"
