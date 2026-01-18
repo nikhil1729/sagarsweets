@@ -4,7 +4,7 @@
     <color name="white">#FFFFFFFF</color>
     <color name="md_theme_primary">#8B0000</color>     <!-- Dark Maroon -->
     <color name="md_theme_secondary">#FFB703</color>   <!-- Premium Saffron Gold -->
-    <color name="md_theme_background">#FFF8F0</color>
+    <color name="md_theme_background">#F2C997</color>
     <color name="md_theme_surface">#FFFFFF</color>
     <color name="md_theme_onPrimary">#FFFFFF</color>
     <color name="md_theme_onSecondary">#000000</color>

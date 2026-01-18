@@ -2,11 +2,14 @@ package com.sagarsweets.in.ApiInterface;
 
 
 
+import com.sagarsweets.in.ApiModel.CategoryResponse;
 import com.sagarsweets.in.ApiModel.ForgetPasswordRequest;
 import com.sagarsweets.in.ApiModel.LoginOtpRequest;
 import com.sagarsweets.in.ApiModel.LoginRequest;
 import com.sagarsweets.in.ApiModel.LoginResponse;
 import com.sagarsweets.in.ApiModel.OtpResponse;
+import com.sagarsweets.in.ApiModel.PapularProductHome;
+import com.sagarsweets.in.ApiModel.PopularProductResponse;
 import com.sagarsweets.in.ApiModel.RegisterUserRequest;
 import com.sagarsweets.in.ApiModel.SliderResponse;
 
@@ -45,4 +48,10 @@ public interface ApiService {
 
     @GET("rest/homefragment/index")
     Call<SliderResponse> getSliderImages();
+
+    @GET("rest/homefragment/getcategory")   // 👈 homefragment category
+    Call<CategoryResponse> getCategories();
+
+    @POST("rest/homefragment/getlatestarrivals")
+    Call<PopularProductResponse> getPopularProducts(@Body PapularProductHome papularProductHome);
 }

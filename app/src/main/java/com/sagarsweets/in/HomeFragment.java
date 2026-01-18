@@ -3,6 +3,9 @@ package com.sagarsweets.in;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager2.widget.ViewPager2;
 
 import android.os.Handler;
@@ -15,8 +18,19 @@ import android.view.ViewGroup;
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
 import com.sagarsweets.in.Adapters.ApiSliderAdapter;
+import com.sagarsweets.in.Adapters.CategoryAdapter;
+import com.sagarsweets.in.Adapters.CategoryShimmerAdapter;
+import com.sagarsweets.in.Adapters.PopularProductAdapter;
+import com.sagarsweets.in.Adapters.PopularProductShimmerAdapter;
+import com.sagarsweets.in.ApiControllers.LoginRetrofitClient;
 import com.sagarsweets.in.ApiControllers.OtpRetrofitClient;
 import com.sagarsweets.in.ApiInterface.ApiService;
+import com.sagarsweets.in.ApiModel.CategoryModel;
+import com.sagarsweets.in.ApiModel.CategoryResponse;
+import com.sagarsweets.in.ApiModel.LoginRequest;
+import com.sagarsweets.in.ApiModel.PapularProductHome;
+import com.sagarsweets.in.ApiModel.PopularProductResponse;
+import com.sagarsweets.in.ApiModel.ProductModel;
 import com.sagarsweets.in.ApiModel.SliderModel;
 import com.sagarsweets.in.ApiModel.SliderResponse;
 
@@ -35,6 +49,7 @@ public class HomeFragment extends Fragment {
     private Runnable sliderRunnable;
     TabLayout tabDots ;
 
+    RecyclerView rvCategories,rvProducts;
     public HomeFragment() {
         // Required empty public constructor
     }
@@ -60,10 +75,93 @@ public class HomeFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_home, container, false);
         tabDots = view.findViewById(R.id.tabDots);// dot for slider
         viewPagerSlider = view.findViewById(R.id.viewPagerSlider);
-
+        rvCategories = view.findViewById(R.id.rvCategories);
+        rvProducts = view.findViewById(R.id.rvProducts);
+        rvCategories.setLayoutManager(
+                new LinearLayoutManager(
+                        getContext(),
+                        LinearLayoutManager.HORIZONTAL,
+                        false));
         loadSlider();
+        loadCategories();
+        loadPopularProducts();
         // Inflate the layout for this fragment
         return view;
+    }
+
+    private void loadPopularProducts() {
+        rvProducts.setLayoutManager(new GridLayoutManager(getContext(), 2));
+        rvProducts.setAdapter(new PopularProductShimmerAdapter());
+
+        PapularProductHome papularProductHome = new PapularProductHome("274204","");
+        ApiService apiService  = LoginRetrofitClient
+                .getClient()
+                .create(ApiService.class);
+        apiService.getPopularProducts(papularProductHome).enqueue(new Callback<PopularProductResponse>() {
+            @Override
+            public void onResponse(Call<PopularProductResponse> call,
+                                   Response<PopularProductResponse> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    List<ProductModel> productList = response.body().getResult();
+
+                    rvProducts.setLayoutManager(
+                            new GridLayoutManager(getContext(), 2)
+                    );
+
+                    PopularProductAdapter adapter =
+                            new PopularProductAdapter(getContext(), productList);
+
+                    rvProducts.setAdapter(adapter);
+                }else{
+
+                }
+
+
+
+            }
+
+            @Override
+            public void onFailure(Call<PopularProductResponse> call, Throwable t) {
+                Log.d("papular",t.getMessage());
+            }
+        });
+
+    }
+
+
+    private void loadCategories() {
+        rvCategories.setAdapter(new CategoryShimmerAdapter());
+
+        ApiService apiService = OtpRetrofitClient.getApiService();
+
+        apiService.getCategories().enqueue(new Callback<CategoryResponse>() {
+            @Override
+            public void onResponse(Call<CategoryResponse> call,
+                                   Response<CategoryResponse> response) {
+
+                if (response.isSuccessful()
+                        && response.body() != null
+                        && response.body().isStatus()) {
+
+                    List<CategoryModel> categoryList =
+                            response.body().getData();
+
+                    Log.d("CATEGORY_COUNT", String.valueOf(categoryList.size()));
+
+                    // TODO: set adapter to RecyclerView
+                    // CategoryAdapter adapter = new CategoryAdapter(getContext(), categoryList);
+                    // rvCategories.setAdapter(adapter);
+                    CategoryAdapter adapter =
+                            new CategoryAdapter(getContext(), categoryList);
+                    rvCategories.setAdapter(adapter);
+                }
+            }
+
+            @Override
+            public void onFailure(Call<CategoryResponse> call, Throwable t) {
+                Log.e("CATEGORY_API_ERROR", t.getMessage());
+            }
+        });
     }
 
     private void loadSlider() {
