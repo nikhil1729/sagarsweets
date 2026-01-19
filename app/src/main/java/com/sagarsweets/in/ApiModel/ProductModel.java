@@ -2,10 +2,13 @@ package com.sagarsweets.in.ApiModel;
 
 import com.google.gson.annotations.SerializedName;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class ProductModel {
 
     @SerializedName("id")
-    private String id;
+    private int id;
 
     @SerializedName("product_name")
     private String productName;
@@ -17,32 +20,31 @@ public class ProductModel {
     private String mrp;
 
     @SerializedName("selling_price")
-    private String selling_price;
+    private String sellingPrice;
 
-    @SerializedName("is_wishlist")
-    private int isWishlist;
+    @SerializedName("rating")
+    private float rating;
 
-    private Float rating;
+    public String getMrp() {
+        return mrp;
+    }
+
+
+    private Integer stock;
+
+    public Integer getStock() {
+        return stock;
+    }
+
+    @SerializedName("ratingCount")
     private String ratingCount;
 
-    public String getRatingCount() {
-        return ratingCount;
-    }
+    // IMPORTANT: Size is an ARRAY
+    @SerializedName("Size")
+    private List<SizeModel> sizeList;
 
-    public void setRatingCount(String ratingCount) {
-        this.ratingCount = ratingCount;
-    }
-
-    public float getRating() {
-        return rating;
-    }
-
-    public void setRating(String rating) {
-        this.rating = Float.parseFloat(rating);
-    }
-
-    public String getId() {
-        return id;
+    public List<SizeModel> getSizeList() {
+        return sizeList == null ? new ArrayList<>() : sizeList;
     }
 
     public String getProductName() {
@@ -53,16 +55,19 @@ public class ProductModel {
         return imagePath;
     }
 
-    public String getPrice() {
-        return mrp;
+    public String getSellingPrice() {
+        return sellingPrice;
     }
 
-    public String getSalePrice() {
-        return selling_price;
+    public float getRating() {
+        return rating;
     }
 
-    public int getIsWishlist() {
-        return isWishlist;
+    public String getRatingCount() {
+        return ratingCount;
+    }
+
+    public int getId() {
+        return id;
     }
 }
-

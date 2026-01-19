@@ -103,7 +103,7 @@ public class HomeFragment extends Fragment {
                                    Response<PopularProductResponse> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     List<ProductModel> productList = response.body().getResult();
-
+                    Log.d("here","sasasaaaa");
                     rvProducts.setLayoutManager(
                             new GridLayoutManager(getContext(), 2)
                     );
@@ -113,7 +113,7 @@ public class HomeFragment extends Fragment {
 
                     rvProducts.setAdapter(adapter);
                 }else{
-
+                    Log.d("here","elseeeeee");
                 }
 
 

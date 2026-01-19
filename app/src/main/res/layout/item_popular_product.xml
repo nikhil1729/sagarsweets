@@ -36,6 +36,24 @@
                 android:background="@drawable/bg_circle_white"
                 android:padding="4dp"
                 android:src="@drawable/ic_heart_outline"/>
+            <!-- Stock Status -->
+            <TextView
+                android:id="@+id/tvStockStatus"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="start|top"
+                android:layout_margin="6dp"
+                android:paddingStart="6dp"
+                android:paddingEnd="6dp"
+                android:paddingTop="2dp"
+                android:paddingBottom="2dp"
+                android:text="IN STOCK"
+                android:textSize="10sp"
+                android:textStyle="bold"
+                android:textColor="#FFFFFF"
+                android:background="@drawable/bg_stock_in"
+                android:visibility="visible"/>
+
         </FrameLayout>
 
         <!-- Product Name -->
@@ -110,6 +128,24 @@
                 android:textColor="#757575"/>
         </LinearLayout>
 
+        <!-- Size & Color Dropdown -->
+        <LinearLayout
+            android:id="@+id/layoutSize"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <!-- Size Spinner -->
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvSizes"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:overScrollMode="never"
+                android:scrollbars="none"/>
+
+        </LinearLayout>
 
         <!-- Buttons -->
         <!-- Action Icons -->
