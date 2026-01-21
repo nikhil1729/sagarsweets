@@ -1,5 +1,6 @@
 package com.sagarsweets.in.Adapters;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -28,6 +29,15 @@ public class SizeAdapter extends RecyclerView.Adapter<SizeAdapter.SizeVH> {
         this.sizeList = sizeList;
         this.listener = listener;
     }
+    public SizeAdapter(
+            List<SizeModel> sizeList,
+            int selectedPosition,
+            OnSizeClickListener listener
+    ) {
+        this.sizeList = sizeList;
+        this.selectedPosition = selectedPosition;
+        this.listener = listener;
+    }
 
     @NonNull
     @Override
@@ -50,6 +60,7 @@ public class SizeAdapter extends RecyclerView.Adapter<SizeAdapter.SizeVH> {
         holder.txtPrice.setText("₹" + size.getSellingPrice());
 
         // STOCK HANDLING
+        Log.d("sizeadapter", size.getTitle()+"-"+String.valueOf(size.getStock()));
         if (size.getStock() <= 0) {
             holder.itemView.setAlpha(0.4f);
             holder.itemView.setEnabled(false);

@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <!-- Header -->
+    <TextView
+        android:id="@+id/txtTitle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Customer Reviews"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:paddingBottom="8dp"/>
+
+    <!-- Divider -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="#DDD"/>
+
+    <TextView
+        android:id="@+id/tvNoReviews"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="No reviews available"
+        android:textSize="16sp"
+        android:textColor="@color/black"
+        android:gravity="center"
+        android:visibility="gone"
+        android:padding="16dp"/>
+    <!-- Reviews List -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvReviews"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"/>
+    <!-- WRITE REVIEW BUTTON -->
+    <Button
+        android:id="@+id/btnWriteReview"
+        android:text="Write Review"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:layout_marginTop="16dp"
+        android:backgroundTint="@color/sagar_button"
+        android:textColor="@android:color/white"/>
+</LinearLayout>

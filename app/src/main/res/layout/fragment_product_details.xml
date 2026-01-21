@@ -1,0 +1,244 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#F5F5F5">
+
+    <!-- MAIN CONTAINER -->
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <!-- SHIMMER -->
+        <com.facebook.shimmer.ShimmerFrameLayout
+            android:id="@+id/shimmerLayout"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:shimmer_auto_start="true">
+
+            <include
+                layout="@layout/fragment_product_details_shimmer"/>
+        </com.facebook.shimmer.ShimmerFrameLayout>
+
+        <!-- REAL CONTENT -->
+        <androidx.core.widget.NestedScrollView
+            android:id="@+id/contentLayout"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:fillViewport="true"
+            android:visibility="visible">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="5dp"
+                android:layout_marginBottom="80dp">
+
+                <!-- Product Images + Wishlist -->
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="220dp">
+
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/rvImages"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"/>
+
+                    <!-- Wishlist Icon -->
+                    <ImageView
+                        android:id="@+id/imgWishlist"
+                        android:layout_width="36dp"
+                        android:layout_height="36dp"
+                        android:layout_gravity="top|end"
+                        android:layout_margin="12dp"
+                        android:padding="6dp"
+                        android:background="@drawable/bg_circle_white"
+                        android:src="@drawable/ic_heart_outline"
+                        app:tint="#E53935" />
+                </FrameLayout>
+
+                <!-- Brand -->
+                <TextView
+                    android:id="@+id/txtBrand"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="14sp"
+                    android:textColor="#666"
+                    android:layout_marginTop="8dp"/>
+
+                <!-- Title -->
+                <TextView
+                    android:id="@+id/txtTitle"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textSize="24sp"
+                    android:textStyle="bold"
+                    android:layout_marginTop="4dp"/>
+
+                <!-- Rating -->
+                <!-- Rating + Review Count -->
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginTop="4dp">
+
+                    <RatingBar
+                        android:id="@+id/ratingBar"
+                        style="?android:attr/ratingBarStyleSmall"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:isIndicator="true"
+                        android:numStars="5"
+                        android:stepSize="0.5"/>
+
+                    <TextView
+                        android:id="@+id/txtReviewCount"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="(124 reviews)"
+                        android:textSize="13sp"
+                        android:textColor="@color/sagar_button"
+                        android:layout_marginStart="6dp"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:foreground="?attr/selectableItemBackgroundBorderless"/>
+
+                </LinearLayout>
+
+
+
+                <!-- Price -->
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginTop="8dp">
+
+                    <TextView
+                        android:layout_height="wrap_content"
+                        android:layout_width="wrap_content"
+                        android:id="@+id/txtSellingPrice"
+                        android:textSize="20sp"
+                        android:textStyle="bold"
+                        android:textColor="#E53935"/>
+
+                    <TextView
+                        android:layout_height="wrap_content"
+                        android:layout_width="wrap_content"
+                        android:id="@+id/txtMrp"
+                        android:textSize="14sp"
+                        android:textColor="#999"
+                        android:layout_marginStart="8dp"/>
+
+                    <TextView
+                        android:layout_height="wrap_content"
+                        android:layout_width="wrap_content"
+                        android:id="@+id/txtDiscount"
+                        android:textSize="14sp"
+                        android:textColor="#388E3C"
+                        android:layout_marginStart="8dp"/>
+
+                </LinearLayout>
+                <!-- Stock Status -->
+                <TextView
+                    android:id="@+id/txtStockStatus"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="IN STOCK"
+                    android:textSize="13sp"
+                    android:textStyle="bold"
+                    android:textColor="#FFF"
+                    android:layout_marginTop="6dp"
+                    android:background="@drawable/bg_stock_in"
+                    android:paddingStart="10dp"
+                    android:paddingEnd="10dp"
+                    android:paddingTop="4dp"
+                    android:paddingBottom="4dp"/>
+
+                <!-- Delivery -->
+                <TextView
+                    android:id="@+id/txtDelivery"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"/>
+
+                <!-- Size -->
+                <TextView
+                    android:layout_height="wrap_content"
+                    android:layout_width="wrap_content"
+                    android:id="@+id/tvSizeTitle"
+                    android:text="Select Size"
+                    android:textStyle="bold"
+                    android:layout_marginTop="16dp"/>
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/rvSizes"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"/>
+
+                <!-- Description -->
+                <TextView
+                    android:layout_height="wrap_content"
+                    android:layout_width="wrap_content"
+                    android:text="Description"
+                    android:textStyle="bold"
+                    android:layout_marginTop="16dp"/>
+
+                <TextView
+                    android:id="@+id/txtDescription"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"/>
+
+                <!-- Specifications -->
+                <TextView
+                    android:layout_height="wrap_content"
+                    android:layout_width="wrap_content"
+                    android:text="Specifications"
+                    android:textStyle="bold"
+                    android:layout_marginTop="16dp"/>
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/rvSpecification"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"/>
+
+                <!-- Related -->
+                <TextView
+                    android:layout_height="wrap_content"
+                    android:layout_width="wrap_content"
+                    android:text="Related Products"
+                    android:textStyle="bold"
+                    android:layout_marginTop="16dp"/>
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/rvRelatedProducts"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"/>
+            </LinearLayout>
+
+        </androidx.core.widget.NestedScrollView>
+
+    </FrameLayout>
+
+    <!-- ADD TO CART -->
+    <Button
+        android:visibility="gone"
+        android:id="@+id/btnAddToCart"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:text="ADD TO CART"
+        android:textStyle="bold"
+        android:textColor="#FFF"
+        android:backgroundTint="@color/sagar_button"
+        android:layout_gravity="bottom"
+        android:layout_margin="0dp"/>
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

@@ -10,7 +10,12 @@ import com.sagarsweets.in.ApiModel.LoginResponse;
 import com.sagarsweets.in.ApiModel.OtpResponse;
 import com.sagarsweets.in.ApiModel.PapularProductHome;
 import com.sagarsweets.in.ApiModel.PopularProductResponse;
+import com.sagarsweets.in.ApiModel.ProductDetailsModel;
+import com.sagarsweets.in.ApiModel.ProductDetailsRequest;
+import com.sagarsweets.in.ApiModel.ProductDetailsResponse;
+import com.sagarsweets.in.ApiModel.ProductReviewRequest;
 import com.sagarsweets.in.ApiModel.RegisterUserRequest;
+import com.sagarsweets.in.ApiModel.ReviewResponse;
 import com.sagarsweets.in.ApiModel.SliderResponse;
 
 import retrofit2.Call;
@@ -54,4 +59,12 @@ public interface ApiService {
 
     @POST("rest/homefragment/getlatestarrivals")
     Call<PopularProductResponse> getPopularProducts(@Body PapularProductHome papularProductHome);
+
+
+    @POST("rest/product/productdetails")
+    Call<ProductDetailsModel> getProductDetails(@Body ProductDetailsRequest productDetailsRequest);
+
+    @POST("rest/product/getreviewdetails")
+    Call<ReviewResponse> getProductReview(@Body ProductReviewRequest productReviewRequest);
+
 }

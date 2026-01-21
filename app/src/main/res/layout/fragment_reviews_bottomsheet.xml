@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="16dp">
+
+    <!-- DRAG HANDLE -->
+    <View
+        android:layout_width="40dp"
+        android:layout_height="5dp"
+        android:layout_gravity="center"
+        android:background="@drawable/bg_drag_handle"/>
+
+    <!-- TITLE -->
+    <TextView
+        android:text="Reviews"
+        android:textStyle="bold"
+        android:textSize="18sp"
+        android:layout_marginTop="12dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
+
+    <!-- REVIEWS LIST -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvReviews"
+        android:layout_width="match_parent"
+        android:layout_height="300dp"
+        android:layout_marginTop="12dp"/>
+
+    <!-- WRITE REVIEW BUTTON -->
+    <Button
+        android:id="@+id/btnWriteReview"
+        android:text="Write Review"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:layout_marginTop="16dp"
+        android:backgroundTint="@color/sagar_button"
+        android:textColor="@android:color/white"/>
+
+</LinearLayout>

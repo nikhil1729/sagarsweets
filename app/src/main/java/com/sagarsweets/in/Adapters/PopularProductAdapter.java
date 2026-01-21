@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -18,6 +19,7 @@ import android.widget.SpinnerAdapter;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.fragment.app.FragmentActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -25,7 +27,9 @@ import com.bumptech.glide.Glide;
 import com.sagarsweets.in.ApiControllers.SuperController;
 import com.sagarsweets.in.ApiModel.ProductModel;
 import com.sagarsweets.in.ApiModel.SizeModel;
+import com.sagarsweets.in.ProductDetailsFragment;
 import com.sagarsweets.in.R;
+import com.sagarsweets.in.RegisterFragment;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -68,6 +72,26 @@ public class PopularProductAdapter
         holder.ratingBar.setRating(product.getRating());
         holder.tvRatingCount.setText("(" + product.getRatingCount() + ")");
         Log.d("stock", String.valueOf(product.getStock() ));
+        holder.tvProductName.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.d("product_clicked", String.valueOf(product.getId()));
+            }
+        });
+        holder.imgProduct.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.d("product_clicked", String.valueOf(product.getId()));
+                Integer product_id = product.getId();
+                openProductDetails(product_id);
+            }
+        });
+        holder.imgWishlist.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.d("product_clicked","withlist clicked");
+            }
+        });
         if(product.getStock() !=null){
             Log.d("stock", "if !null");
             if(product.getStock() == 0){
@@ -114,6 +138,27 @@ public class PopularProductAdapter
 
 
     }
+
+    private void openProductDetails(Integer productId) {
+
+        if (!(context instanceof FragmentActivity)) return;
+
+        FragmentActivity activity = (FragmentActivity) context;
+
+        ProductDetailsFragment fragment = new ProductDetailsFragment();
+
+        // Optional: pass productId
+        Bundle bundle = new Bundle();
+        bundle.putInt("product_id", productId);
+        fragment.setArguments(bundle);
+
+        activity.getSupportFragmentManager()
+                .beginTransaction()
+                .replace(R.id.container, fragment)
+                .addToBackStack("product_details")
+                .commit();
+    }
+
 
     private void updatePriceAndStock(ProductVH holder, SizeModel size) {
 
