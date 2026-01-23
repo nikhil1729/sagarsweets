@@ -1,12 +1,17 @@
 package com.sagarsweets.in.ApiModel;
 
+import android.content.Context;
+
+import com.sagarsweets.in.utils.DeviceInfo;
+
 public class PapularProductHome {
     String pincode ;
     String user_id;
-
-    public PapularProductHome(String pincode, String user_id) {
+    String device;
+    public PapularProductHome(String pincode, String user_id, Context context) {
         this.pincode = pincode;
         this.user_id = user_id;
+        this.device = DeviceInfo.getDeviceString(context);
     }
 
     public String getPincode() {
@@ -23,5 +28,13 @@ public class PapularProductHome {
 
     public void setUser_id(String user_id) {
         this.user_id = user_id;
+    }
+
+    public String getDevice() {
+        return device;
+    }
+
+    public void setDevice(String device) {
+        this.device = device;
     }
 }

@@ -2,6 +2,7 @@ package com.sagarsweets.in.ApiInterface;
 
 
 
+import com.sagarsweets.in.ApiModel.AllCategoryResponse;
 import com.sagarsweets.in.ApiModel.CategoryResponse;
 import com.sagarsweets.in.ApiModel.ForgetPasswordRequest;
 import com.sagarsweets.in.ApiModel.LoginOtpRequest;
@@ -9,6 +10,8 @@ import com.sagarsweets.in.ApiModel.LoginRequest;
 import com.sagarsweets.in.ApiModel.LoginResponse;
 import com.sagarsweets.in.ApiModel.OtpResponse;
 import com.sagarsweets.in.ApiModel.PapularProductHome;
+import com.sagarsweets.in.ApiModel.PincodeRequest;
+import com.sagarsweets.in.ApiModel.PincodeResponse;
 import com.sagarsweets.in.ApiModel.PopularProductResponse;
 import com.sagarsweets.in.ApiModel.ProductDetailsModel;
 import com.sagarsweets.in.ApiModel.ProductDetailsRequest;
@@ -57,6 +60,9 @@ public interface ApiService {
     @GET("rest/homefragment/getcategory")   // 👈 homefragment category
     Call<CategoryResponse> getCategories();
 
+    @GET("rest/homefragment/getallcategory")   // 👈 homefragment category
+    Call<AllCategoryResponse> getAllCategories();
+
     @POST("rest/homefragment/getlatestarrivals")
     Call<PopularProductResponse> getPopularProducts(@Body PapularProductHome papularProductHome);
 
@@ -67,4 +73,6 @@ public interface ApiService {
     @POST("rest/product/getreviewdetails")
     Call<ReviewResponse> getProductReview(@Body ProductReviewRequest productReviewRequest);
 
+    @POST("rest/default/getpincodebypin")
+    Call<PincodeResponse> getPincodeStatus(@Body PincodeRequest pincodeRequest);
 }

@@ -1,27 +1,18 @@
 package com.sagarsweets.in.ApiModel;
 
-import android.content.Context;
-
-import com.sagarsweets.in.utils.DeviceInfo;
-
-public class ProductDetailsRequest {
-    Integer product_id;
-    String pincode ;
+public class PincodeRequest {
+    String pincode;
     String user_id;
     String device;
-    public ProductDetailsRequest(Integer product_id, String pincode, String user_id, Context context) {
-        this.product_id = product_id;
+    String lon;
+    String lat;
+
+    public PincodeRequest(String pincode, String user_id, String device, String lon, String lat) {
         this.pincode = pincode;
         this.user_id = user_id;
-        this.device = DeviceInfo.getDeviceString(context);
-    }
-
-    public Integer getProduct_id() {
-        return product_id;
-    }
-
-    public void setProduct_id(Integer product_id) {
-        this.product_id = product_id;
+        this.device = device;
+        this.lon = lon;
+        this.lat = lat;
     }
 
     public String getPincode() {
@@ -46,5 +37,21 @@ public class ProductDetailsRequest {
 
     public void setDevice(String device) {
         this.device = device;
+    }
+
+    public String getLon() {
+        return lon;
+    }
+
+    public void setLon(String lon) {
+        this.lon = lon;
+    }
+
+    public String getLat() {
+        return lat;
+    }
+
+    public void setLat(String lat) {
+        this.lat = lat;
     }
 }

@@ -14,6 +14,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
@@ -33,6 +34,7 @@ import com.sagarsweets.in.ApiModel.PopularProductResponse;
 import com.sagarsweets.in.ApiModel.ProductModel;
 import com.sagarsweets.in.ApiModel.SliderModel;
 import com.sagarsweets.in.ApiModel.SliderResponse;
+import com.sagarsweets.in.Session.LoginSession;
 
 import java.util.List;
 
@@ -48,8 +50,10 @@ public class HomeFragment extends Fragment {
     private Handler sliderHandler = new Handler(Looper.getMainLooper());
     private Runnable sliderRunnable;
     TabLayout tabDots ;
-
+    LoginSession loginSession;
+    String userId;
     RecyclerView rvCategories,rvProducts;
+    TextView tvViewAllCategory;
     public HomeFragment() {
         // Required empty public constructor
     }
@@ -77,6 +81,25 @@ public class HomeFragment extends Fragment {
         viewPagerSlider = view.findViewById(R.id.viewPagerSlider);
         rvCategories = view.findViewById(R.id.rvCategories);
         rvProducts = view.findViewById(R.id.rvProducts);
+        loginSession = new LoginSession(getContext());
+        tvViewAllCategory = view.findViewById(R.id.tvViewAllCategory);
+        userId = "";
+
+        tvViewAllCategory.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ViewCategoryFragment viewCategoryFragment = new ViewCategoryFragment();
+                requireActivity()
+                        .getSupportFragmentManager()
+                        .beginTransaction()
+                        .replace(R.id.container, viewCategoryFragment)
+                        .addToBackStack("view_all_category")
+                        .commit();
+            }
+        });
+        if(loginSession.isLoggedIn()){
+            userId = loginSession.getUserId();
+        }
         rvCategories.setLayoutManager(
                 new LinearLayoutManager(
                         getContext(),
@@ -92,8 +115,8 @@ public class HomeFragment extends Fragment {
     private void loadPopularProducts() {
         rvProducts.setLayoutManager(new GridLayoutManager(getContext(), 2));
         rvProducts.setAdapter(new PopularProductShimmerAdapter());
-
-        PapularProductHome papularProductHome = new PapularProductHome("274204","");
+        PapularProductHome papularProductHome =
+                new PapularProductHome("274204",userId,getContext());
         ApiService apiService  = LoginRetrofitClient
                 .getClient()
                 .create(ApiService.class);
@@ -107,17 +130,12 @@ public class HomeFragment extends Fragment {
                     rvProducts.setLayoutManager(
                             new GridLayoutManager(getContext(), 2)
                     );
-
                     PopularProductAdapter adapter =
                             new PopularProductAdapter(getContext(), productList);
-
                     rvProducts.setAdapter(adapter);
                 }else{
                     Log.d("here","elseeeeee");
                 }
-
-
-
             }
 
             @Override

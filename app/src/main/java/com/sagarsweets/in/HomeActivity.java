@@ -2,9 +2,14 @@ package com.sagarsweets.in;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -23,8 +28,20 @@ import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.badge.BadgeDrawable;
 import com.google.android.material.badge.BadgeUtils;
 import com.google.android.material.badge.ExperimentalBadgeUtils;
+import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.navigation.NavigationView;
+import com.sagarsweets.in.ApiControllers.LoginRetrofitClient;
+import com.sagarsweets.in.ApiInterface.ApiService;
+import com.sagarsweets.in.ApiModel.PincodeData;
+import com.sagarsweets.in.ApiModel.PincodeRequest;
+import com.sagarsweets.in.ApiModel.PincodeResponse;
 import com.sagarsweets.in.Session.LoginSession;
+import com.sagarsweets.in.Session.PincodeSession;
+import com.sagarsweets.in.utils.DeviceInfo;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class HomeActivity extends AppCompatActivity {
 
@@ -52,14 +69,26 @@ public class HomeActivity extends AppCompatActivity {
         topAppBar = findViewById(R.id.topAppBar);
         navigationView = findViewById(R.id.navigationView);
         topAppBar.inflateMenu(R.menu.top_app_bar_menu);
+        tvLocation = findViewById(R.id.tvLocation);
 
         headerView = navigationView.getHeaderView(0);
         drawName = headerView.findViewById(R.id.drawName);
         drawEmail = headerView.findViewById(R.id.drawEmail);
         loginSession = new LoginSession(this);
+
+        tvLocation.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.d("location_clicked","locaadkasdnsalk");
+                openPincodeBottomSheet();
+            }
+        });
+
         showHideElementDrawer();
         updateSessionName(); // Update session name by session class
-
+        // tvlocation change
+        setLocationSession();
+        //tvLocation.setText("sasasas");
         // cart count is setting here
         myCartSet(badge);
 
@@ -84,8 +113,14 @@ public class HomeActivity extends AppCompatActivity {
         });
         // Default fragment (Home)
         if (savedInstanceState == null) {
-            loadFragment(new HomeFragment(), "Home",true);
-            navigationView.setCheckedItem(R.id.nav_home);
+            if(loginSession.isLoggedIn()){
+                loadFragment(new HomeFragment(), "Home",true);
+                navigationView.setCheckedItem(R.id.draw_home);
+            }else{
+                loadFragment(new LoginFragment(), "Login",true);
+                navigationView.setCheckedItem(R.id.draw_login);
+            }
+
         }
 
         topAppBar.setNavigationOnClickListener(new View.OnClickListener() {
@@ -102,6 +137,113 @@ public class HomeActivity extends AppCompatActivity {
         });
 
 
+    }
+
+    private void openPincodeBottomSheet() {
+        Log.d("openBottom","first");
+        BottomSheetDialog bottomSheetDialog =
+                new BottomSheetDialog(HomeActivity.this);
+
+        View view = getLayoutInflater()
+                .inflate(R.layout.bottomsheet_pincode, null);
+
+        EditText etPincode = view.findViewById(R.id.etPincode);
+        TextView tvPincodeError = view.findViewById(R.id.tvPincodeError);
+        Button btnConfirm = view.findViewById(R.id.btnConfirmPincode);
+        Log.d("openBottom","second");
+        etPincode.addTextChangedListener(new TextWatcher() {
+            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            @Override public void onTextChanged(CharSequence s, int start, int before, int count) {
+                tvPincodeError.setVisibility(View.GONE);
+            }
+            @Override public void afterTextChanged(Editable s) {}
+        });
+
+        btnConfirm.setOnClickListener(v -> {
+            String pincode = etPincode.getText().toString().trim();
+
+            if (pincode.isEmpty()) {
+                tvPincodeError.setText("Pincode is required");
+                tvPincodeError.setVisibility(View.VISIBLE);
+                return;
+            }
+            if (pincode.length() != 6) {
+                tvPincodeError.setText("Please enter a valid 6-digit pincode");
+                tvPincodeError.setVisibility(View.VISIBLE);
+                return;
+            }
+            String user_id ="";
+            String device = DeviceInfo.getDeviceString(this);
+            String lot = "";
+            String lon = "";
+            Log.d("latNikhil",lot+" "+lon);
+            PincodeRequest pincodeRequest = new PincodeRequest(pincode,user_id,device,lon,lot);
+            ApiService apiService  = LoginRetrofitClient
+                    .getClient()
+                    .create(ApiService.class);
+            apiService.getPincodeStatus(pincodeRequest).enqueue(new Callback<PincodeResponse>() {
+                @Override
+                public void onResponse(Call<PincodeResponse> call, Response<PincodeResponse> response) {
+                    if (response.isSuccessful() && response.body() != null) {
+                        PincodeResponse pincodeResponse = response.body();
+                        if (pincodeResponse.isStatus()
+                                && pincodeResponse.getData() != null
+                                && !pincodeResponse.getData().isEmpty()) {
+                            // ✅ SUCCESS
+                            PincodeData data = pincodeResponse.getData().get(0);
+                            PincodeSession sessionManager = new PincodeSession(getApplicationContext());
+                            if(sessionManager.hasPincode()){
+                                sessionManager.clearPincode();
+                            }
+                            sessionManager.savePincode(
+                                    data.getPincode(),
+                                    data.getCity_name(),
+                                    data.getDistric_name(),
+                                    data.getState()
+                            );
+                            tvLocation.setText("Deliver to "+data.getCity_name()+","+data.getDistric_name());
+                            //tvPincodeError.setVisibility(View.GONE);
+                            // ✅ proceed with API / delivery check
+                            Log.d("PINCODE", "User entered pincode: " + pincode);
+                            recreate();
+                            // TODO: Save pincode or call API
+                            bottomSheetDialog.dismiss();
+                        } else {
+                            // ❌ Status false OR empty data
+                            tvPincodeError.setText(pincodeResponse.getMessage());
+                            tvPincodeError.setVisibility(View.VISIBLE);
+                            //showError("Delivery not available for this pincode");
+                        }
+                    }else {
+                        tvPincodeError.setText("Something went wrong");
+                        tvPincodeError.setVisibility(View.VISIBLE);
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<PincodeResponse> call, Throwable t) {
+
+                }
+            });
+
+
+
+        });
+        Log.d("openBottom","last");
+        bottomSheetDialog.setContentView(view);
+        bottomSheetDialog.setCancelable(true);
+        bottomSheetDialog.show();
+    }
+
+    private void setLocationSession() {
+        PincodeSession pincodeSession = new PincodeSession(this);
+        if(pincodeSession.hasPincode()){
+            String location = pincodeSession.getCity() + ", " + pincodeSession.getPincode();
+            tvLocation.setText("Deliver to "+location);
+
+        }else{
+            tvLocation.setText("please change location");
+        }
     }
 
     private void showHideElementDrawer() {
@@ -129,12 +271,12 @@ public class HomeActivity extends AppCompatActivity {
         if(loginSession.isLoggedIn()){
            // true
             drawName.setText("Hi! "+loginSession.getUserName());
-            drawEmail.setText(loginSession.getUserId());
+            drawEmail.setText("");
 
         }else{
             // not logged
             drawName.setText(R.string.hi_guest);
-            drawEmail.setText(R.string.email_afterlogged_in);
+            //drawEmail.setText(R.string.email_afterlogged_in);
         }
     }
 
@@ -208,6 +350,21 @@ public class HomeActivity extends AppCompatActivity {
             this.badge.setVisible(false);
         }
 
+    }
+
+    @Override
+    public void onBackPressed() {
+        Fragment currentFragment = getSupportFragmentManager()
+                .findFragmentById(R.id.container); // replace with your container ID
+
+        if (currentFragment instanceof HomeFragment) {
+            Toast.makeText(this,"Thank You, Shop again",Toast.LENGTH_LONG).show();
+            // Close the app
+            finishAffinity(); // closes all activities and exits
+        } else {
+            // Let the fragment manager handle back normally
+            super.onBackPressed();
+        }
     }
 
 

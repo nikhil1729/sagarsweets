@@ -32,6 +32,7 @@ import com.sagarsweets.in.ApiModel.ProductReviewRequest;
 import com.sagarsweets.in.ApiModel.ReviewModel;
 import com.sagarsweets.in.ApiModel.ReviewResponse;
 import com.sagarsweets.in.ApiModel.SizeModel;
+import com.sagarsweets.in.Session.LoginSession;
 
 import java.io.Serializable;
 import java.util.List;
@@ -64,11 +65,15 @@ public class ProductDetailsFragment extends Fragment {
     Button btnAddToCart;
     ShimmerFrameLayout shimmerLayout;
     View contentLayout;
+    LoginSession loginSession;
     public ProductDetailsFragment() {
         // Required empty public constructor
         //this.productId = "12";
-        this.pincode = "274204";
+
         this.userId = "";
+
+        this.pincode = "274204";
+
     }
 
     @Override
@@ -89,14 +94,25 @@ public class ProductDetailsFragment extends Fragment {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_product_details, container, false);
         initViews(view);
+        setPincodeAndUserId();
         loadProductDetails(productId,view);
         getReviewBottomSheet();
         return view;
     }
 
+    private void setPincodeAndUserId() {
+        loginSession = new LoginSession(getContext());
+        this.userId = "";
+        if(loginSession.isLoggedIn()){
+            this.userId = loginSession.getUserId();
+        }
+
+        pincode = "274204";
+    }
+
     private void getReviewBottomSheet() {
         txtReviewCount.setOnClickListener(v -> {
-            ProductReviewRequest productReviewRequest = new ProductReviewRequest(productId,userId);
+            ProductReviewRequest productReviewRequest = new ProductReviewRequest(productId,userId,getContext());
             ApiService apiService  = LoginRetrofitClient
                     .getClient()
                     .create(ApiService.class);
@@ -163,7 +179,7 @@ public class ProductDetailsFragment extends Fragment {
         shimmerLayout.setVisibility(View.VISIBLE);
         contentLayout.setVisibility(View.GONE);
         ProductDetailsRequest productDetailsRequest =
-                new ProductDetailsRequest(productId,pincode,userId);
+                new ProductDetailsRequest(productId,pincode,userId,getContext());
         //ApiService apiService = ApiClient.getClient().create(ApiService.class);
         ApiService apiService  = LoginRetrofitClient
                 .getClient()

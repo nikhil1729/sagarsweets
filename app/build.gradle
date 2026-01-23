@@ -64,4 +64,8 @@ dependencies {
     annotationProcessor 'com.github.bumptech.glide:compiler:4.16.0'
     // OkHttp
     implementation 'com.squareup.okhttp3:logging-interceptor:4.12.0'
+    // googlelocation
+    implementation 'com.google.android.gms:play-services-location:21.0.1'
+
+
 }

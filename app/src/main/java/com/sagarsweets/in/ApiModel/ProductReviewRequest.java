@@ -1,12 +1,17 @@
 package com.sagarsweets.in.ApiModel;
 
+import android.content.Context;
+
+import com.sagarsweets.in.utils.DeviceInfo;
+
 public class ProductReviewRequest {
     Integer product_id;
     String user_id;
-
-    public ProductReviewRequest(Integer product_id, String user_id) {
+    String device;
+    public ProductReviewRequest(Integer product_id, String user_id, Context context) {
         this.product_id = product_id;
         this.user_id = user_id;
+        this.device = DeviceInfo.getDeviceString(context);
     }
 
     public Integer getProduct_id() {
@@ -23,5 +28,13 @@ public class ProductReviewRequest {
 
     public void setUser_id(String user_id) {
         this.user_id = user_id;
+    }
+
+    public String getDevice() {
+        return device;
+    }
+
+    public void setDevice(String device) {
+        this.device = device;
     }
 }
