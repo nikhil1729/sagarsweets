@@ -17,10 +17,10 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.google.android.material.tabs.TabLayout;
-import com.google.android.material.tabs.TabLayoutMediator;
 import com.sagarsweets.in.Adapters.ApiSliderAdapter;
 import com.sagarsweets.in.Adapters.CategoryAdapter;
 import com.sagarsweets.in.Adapters.CategoryShimmerAdapter;
+import com.sagarsweets.in.Adapters.CategoryWiseAdapter;
 import com.sagarsweets.in.Adapters.PopularProductAdapter;
 import com.sagarsweets.in.Adapters.PopularProductShimmerAdapter;
 import com.sagarsweets.in.ApiControllers.LoginRetrofitClient;
@@ -28,13 +28,16 @@ import com.sagarsweets.in.ApiControllers.OtpRetrofitClient;
 import com.sagarsweets.in.ApiInterface.ApiService;
 import com.sagarsweets.in.ApiModel.CategoryModel;
 import com.sagarsweets.in.ApiModel.CategoryResponse;
-import com.sagarsweets.in.ApiModel.LoginRequest;
 import com.sagarsweets.in.ApiModel.PapularProductHome;
 import com.sagarsweets.in.ApiModel.PopularProductResponse;
 import com.sagarsweets.in.ApiModel.ProductModel;
 import com.sagarsweets.in.ApiModel.SliderModel;
 import com.sagarsweets.in.ApiModel.SliderResponse;
+import com.sagarsweets.in.ApiModel.TopCategoryDataModel;
+import com.sagarsweets.in.ApiModel.TopCategoryRequest;
+import com.sagarsweets.in.ApiModel.TopCategoryResponse;
 import com.sagarsweets.in.Session.LoginSession;
+import com.sagarsweets.in.Session.PincodeSession;
 
 import java.util.List;
 
@@ -51,9 +54,14 @@ public class HomeFragment extends Fragment {
     private Runnable sliderRunnable;
     TabLayout tabDots ;
     LoginSession loginSession;
+    PincodeSession pincodeSession;
     String userId;
+    String pincode;
     RecyclerView rvCategories,rvProducts;
     TextView tvViewAllCategory;
+    RecyclerView rvCategoryWiseProducts;
+    CategoryWiseAdapter categoryWiseAdapter;
+    List<TopCategoryResponse> categoryWiseList;
     public HomeFragment() {
         // Required empty public constructor
     }
@@ -82,8 +90,15 @@ public class HomeFragment extends Fragment {
         rvCategories = view.findViewById(R.id.rvCategories);
         rvProducts = view.findViewById(R.id.rvProducts);
         loginSession = new LoginSession(getContext());
+        pincodeSession = new PincodeSession(getContext());
         tvViewAllCategory = view.findViewById(R.id.tvViewAllCategory);
+        rvCategoryWiseProducts = view.findViewById(R.id.rvCategoryWiseProducts);
+
         userId = "";
+        pincode = "";
+        if(pincodeSession.hasPincode()){
+            pincode = pincodeSession.getPincode();
+        }
 
         tvViewAllCategory.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -108,15 +123,56 @@ public class HomeFragment extends Fragment {
         loadSlider();
         loadCategories();
         loadPopularProducts();
+        loadTopCategoryProducts();
         // Inflate the layout for this fragment
         return view;
+    }
+
+    private void loadTopCategoryProducts() {
+        rvCategoryWiseProducts.setLayoutManager(
+                new LinearLayoutManager(getContext())
+        );
+        rvCategoryWiseProducts.setNestedScrollingEnabled(false);
+
+
+        TopCategoryRequest topCategoryModel = new TopCategoryRequest(pincode,userId);
+        ApiService apiService = LoginRetrofitClient
+                .getClient()
+                .create(ApiService.class);
+        apiService.getTopCategory(topCategoryModel).enqueue(new Callback<TopCategoryResponse>() {
+            @Override
+            public void onResponse(Call<TopCategoryResponse> call, Response<TopCategoryResponse> response) {
+                if (response.isSuccessful()
+                        && response.body() != null
+                        && response.body().isStatus()) {
+                    List<TopCategoryDataModel> topCategoryDataModels =
+                            response.body().getData();
+
+                    Log.d("topcategory",
+                            "Category count = " + topCategoryDataModels.size());
+                    categoryWiseAdapter =
+                            new CategoryWiseAdapter(
+                                    requireContext(),
+                                    topCategoryDataModels
+                            );
+
+                    rvCategoryWiseProducts.setAdapter(categoryWiseAdapter);
+
+                }
+            }
+
+            @Override
+            public void onFailure(Call<TopCategoryResponse> call, Throwable t) {
+
+            }
+        });
     }
 
     private void loadPopularProducts() {
         rvProducts.setLayoutManager(new GridLayoutManager(getContext(), 2));
         rvProducts.setAdapter(new PopularProductShimmerAdapter());
         PapularProductHome papularProductHome =
-                new PapularProductHome("274204",userId,getContext());
+                new PapularProductHome(pincode,userId,getContext());
         ApiService apiService  = LoginRetrofitClient
                 .getClient()
                 .create(ApiService.class);

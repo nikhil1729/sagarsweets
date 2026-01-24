@@ -15,11 +15,12 @@ import com.sagarsweets.in.ApiModel.PincodeResponse;
 import com.sagarsweets.in.ApiModel.PopularProductResponse;
 import com.sagarsweets.in.ApiModel.ProductDetailsModel;
 import com.sagarsweets.in.ApiModel.ProductDetailsRequest;
-import com.sagarsweets.in.ApiModel.ProductDetailsResponse;
 import com.sagarsweets.in.ApiModel.ProductReviewRequest;
 import com.sagarsweets.in.ApiModel.RegisterUserRequest;
 import com.sagarsweets.in.ApiModel.ReviewResponse;
 import com.sagarsweets.in.ApiModel.SliderResponse;
+import com.sagarsweets.in.ApiModel.TopCategoryRequest;
+import com.sagarsweets.in.ApiModel.TopCategoryResponse;
 
 import retrofit2.Call;
 import retrofit2.http.Body;
@@ -65,6 +66,9 @@ public interface ApiService {
 
     @POST("rest/homefragment/getlatestarrivals")
     Call<PopularProductResponse> getPopularProducts(@Body PapularProductHome papularProductHome);
+
+    @POST("rest/homefragment/topcategory")
+    Call<TopCategoryResponse> getTopCategory(@Body TopCategoryRequest topCategoryModel);
 
 
     @POST("rest/product/productdetails")

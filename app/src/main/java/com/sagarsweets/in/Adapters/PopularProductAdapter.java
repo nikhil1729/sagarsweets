@@ -1,10 +1,14 @@
 package com.sagarsweets.in.Adapters;
 
+import static androidx.core.util.TypedValueCompat.dpToPx;
+
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.os.Bundle;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -39,10 +43,16 @@ public class PopularProductAdapter
 
     private Context context;
     private List<ProductModel> productList;
-
+    Boolean category_wise;
     public PopularProductAdapter(Context context, List<ProductModel> productList) {
         this.context = context;
         this.productList = productList;
+        this.category_wise = false;
+    }
+    public PopularProductAdapter(Context context, List<ProductModel> productList,Boolean category_wise) {
+        this.context = context;
+        this.productList = productList;
+        this.category_wise = category_wise;
     }
 
     @NonNull
@@ -58,7 +68,30 @@ public class PopularProductAdapter
 
     @Override
     public void onBindViewHolder(@NonNull ProductVH holder, int position) {
+        if(category_wise){
+            // 🟢 SET PRODUCT WIDTH = 75% OF SCREEN
+            DisplayMetrics metrics =
+                    holder.itemView.getContext()
+                            .getResources()
+                            .getDisplayMetrics();
 
+            int screenWidth = metrics.widthPixels;
+            int itemWidth = (int) (screenWidth * 0.45); // ⭐ 1.5 view
+
+            RecyclerView.LayoutParams params =
+                    (RecyclerView.LayoutParams) holder.itemView.getLayoutParams();
+
+            params.width = itemWidth;
+            params.rightMargin = dpToPx(12);
+
+            holder.itemView.setLayoutParams(params);
+        }else{
+            // NORMAL GRID / FULL WIDTH
+            RecyclerView.LayoutParams params =
+                    (RecyclerView.LayoutParams) holder.itemView.getLayoutParams();
+            params.width = ViewGroup.LayoutParams.MATCH_PARENT;
+            holder.itemView.setLayoutParams(params);
+        }
         ProductModel product = productList.get(position);
 
         Glide.with(context)
@@ -138,6 +171,11 @@ public class PopularProductAdapter
 
 
     }
+
+    private int dpToPx(int i) {
+        return (int) (i * Resources.getSystem().getDisplayMetrics().density);
+    }
+
 
     private void openProductDetails(Integer productId) {
 
