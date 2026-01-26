@@ -1,25 +1,14 @@
 package com.sagarsweets.in.Adapters;
 
-import static androidx.core.util.TypedValueCompat.dpToPx;
-
 import android.content.Context;
-import android.content.Intent;
 import android.content.res.Resources;
-import android.graphics.Color;
-import android.graphics.Paint;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.RatingBar;
-import android.widget.Spinner;
-import android.widget.SpinnerAdapter;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -33,162 +22,207 @@ import com.sagarsweets.in.ApiModel.ProductModel;
 import com.sagarsweets.in.ApiModel.SizeModel;
 import com.sagarsweets.in.ProductDetailsFragment;
 import com.sagarsweets.in.R;
-import com.sagarsweets.in.RegisterFragment;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class PopularProductAdapter
-        extends RecyclerView.Adapter<PopularProductAdapter.ProductVH> {
+        extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     private Context context;
     private List<ProductModel> productList;
-    Boolean category_wise;
-    public PopularProductAdapter(Context context, List<ProductModel> productList) {
+    private boolean categoryWise;
+    private boolean showEndMessage = false;
+
+    private static final int TYPE_PRODUCT = 1;
+    private static final int TYPE_LOADER  = 2;
+    private static final int TYPE_END     = 3;
+
+    public PopularProductAdapter(Context context,
+                                 List<ProductModel> productList,
+                                 boolean categoryWise) {
         this.context = context;
         this.productList = productList;
-        this.category_wise = false;
+        this.categoryWise = categoryWise;
     }
-    public PopularProductAdapter(Context context, List<ProductModel> productList,Boolean category_wise) {
-        this.context = context;
-        this.productList = productList;
-        this.category_wise = category_wise;
-    }
+
+    // --------------------------------------------------
+    // VIEW HOLDER CREATION
+    // --------------------------------------------------
 
     @NonNull
     @Override
-    public ProductVH onCreateViewHolder(
+    public RecyclerView.ViewHolder onCreateViewHolder(
             @NonNull ViewGroup parent, int viewType) {
 
-        View view = LayoutInflater.from(context)
-                .inflate(R.layout.item_popular_product, parent, false);
+        LayoutInflater inflater = LayoutInflater.from(parent.getContext());
 
-        return new ProductVH(view);
+        if (viewType == TYPE_LOADER) {
+            View v = inflater.inflate(R.layout.item_load_more_shimmer, parent, false);
+            return new LoaderVH(v);
+        }
+
+        if (viewType == TYPE_END) {
+            View v = inflater.inflate(R.layout.item_no_more_products, parent, false);
+            return new EndVH(v);
+        }
+
+        View v = inflater.inflate(R.layout.item_popular_product, parent, false);
+        return new ProductVH(v);
     }
 
+    // --------------------------------------------------
+    // BIND
+    // --------------------------------------------------
+
     @Override
-    public void onBindViewHolder(@NonNull ProductVH holder, int position) {
-        if(category_wise){
-            // 🟢 SET PRODUCT WIDTH = 75% OF SCREEN
-            DisplayMetrics metrics =
-                    holder.itemView.getContext()
-                            .getResources()
-                            .getDisplayMetrics();
+    public void onBindViewHolder(
+            @NonNull RecyclerView.ViewHolder holder, int position) {
 
-            int screenWidth = metrics.widthPixels;
-            int itemWidth = (int) (screenWidth * 0.45); // ⭐ 1.5 view
-
-            RecyclerView.LayoutParams params =
-                    (RecyclerView.LayoutParams) holder.itemView.getLayoutParams();
-
-            params.width = itemWidth;
-            params.rightMargin = dpToPx(12);
-
-            holder.itemView.setLayoutParams(params);
-        }else{
-            // NORMAL GRID / FULL WIDTH
-            RecyclerView.LayoutParams params =
-                    (RecyclerView.LayoutParams) holder.itemView.getLayoutParams();
-            params.width = ViewGroup.LayoutParams.MATCH_PARENT;
-            holder.itemView.setLayoutParams(params);
+        if (holder instanceof LoaderVH || holder instanceof EndVH) {
+            return;
         }
+
+        ProductVH vh = (ProductVH) holder;
         ProductModel product = productList.get(position);
 
+        // ---------- WIDTH (CATEGORY WISE) ----------
+        if (categoryWise) {
+            DisplayMetrics metrics =
+                    vh.itemView.getResources().getDisplayMetrics();
+            int itemWidth = (int) (metrics.widthPixels * 0.45);
+
+            RecyclerView.LayoutParams params =
+                    (RecyclerView.LayoutParams) vh.itemView.getLayoutParams();
+            params.width = itemWidth;
+            params.rightMargin = dpToPx(12);
+            vh.itemView.setLayoutParams(params);
+        } else {
+            RecyclerView.LayoutParams params =
+                    (RecyclerView.LayoutParams) vh.itemView.getLayoutParams();
+            params.width = ViewGroup.LayoutParams.MATCH_PARENT;
+            vh.itemView.setLayoutParams(params);
+        }
+
+        // ---------- IMAGE ----------
         Glide.with(context)
                 .load(SuperController.base_url_images + product.getImagePath())
                 .placeholder(R.drawable.category_placeholder)
                 .error(R.drawable.category_error)
-                .into(holder.imgProduct);
-        holder.tvProductName.setText(product.getProductName());
-        holder.tvSalePrice.setText("₹" + product.getSellingPrice());
-        holder.tvPrice.setText("₹" + product.getMrp());
-        holder.ratingBar.setRating(product.getRating());
-        holder.tvRatingCount.setText("(" + product.getRatingCount() + ")");
-        Log.d("stock", String.valueOf(product.getStock() ));
-        holder.tvProductName.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Log.d("product_clicked", String.valueOf(product.getId()));
-            }
-        });
-        holder.imgProduct.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Log.d("product_clicked", String.valueOf(product.getId()));
-                Integer product_id = product.getId();
-                openProductDetails(product_id);
-            }
-        });
-        holder.imgWishlist.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Log.d("product_clicked","withlist clicked");
-            }
-        });
-        if(product.getStock() !=null){
-            Log.d("stock", "if !null");
-            if(product.getStock() == 0){
-                Log.d("stock", "if == 0");
-                holder.tvStockStatus.setText("OUT OF STOCK");
-                holder.tvStockStatus.setBackgroundResource(R.drawable.bg_stock_out);
-                holder.ivAddToCart.setEnabled(false);
-                holder.ivBuyNow.setEnabled(false);
-                holder.itemView.setAlpha(0.6f);
-            }else{
-                Log.d("stock","else");
-                holder.tvStockStatus.setText("IN STOCK");
-                holder.tvStockStatus.setBackgroundResource(R.drawable.bg_stock_in);
-                holder.ivAddToCart.setEnabled(true);
-                holder.ivBuyNow.setEnabled(true);
-                holder.itemView.setAlpha(1f);
-            }
-        }
-        List<SizeModel> sizeList = product.getSizeList();
+                .into(vh.imgProduct);
 
-        // -------- SIZE HANDLING --------
-        List<SizeModel> sizes = product.getSizeList();
+        // ---------- TEXT ----------
+        vh.tvProductName.setText(product.getProductName());
+        vh.tvSalePrice.setText("₹" + product.getSellingPrice());
+        vh.tvPrice.setText("₹" + product.getMrp());
+        vh.ratingBar.setRating(product.getRating());
+        vh.tvRatingCount.setText("(" + product.getRatingCount() + ")");
 
-        if (sizes != null && !sizes.isEmpty()) {
-
-            holder.rvSizes.setVisibility(View.VISIBLE);
-
-            holder.rvSizes.setLayoutManager(
-                    new LinearLayoutManager(
-                            holder.itemView.getContext(),
-                            LinearLayoutManager.HORIZONTAL,
-                            false
-                    )
-            );
-
-            SizeAdapter sizeAdapter = new SizeAdapter(sizeList, size -> {
-                updatePriceAndStock(holder, size);
-            });
-            holder.rvSizes.setAdapter(sizeAdapter);
-
+        // ---------- STOCK ----------
+        if (product.getStock() != null && product.getStock() == 0) {
+            vh.tvStockStatus.setText("OUT OF STOCK");
+            vh.tvStockStatus.setBackgroundResource(R.drawable.bg_stock_out);
+            vh.ivAddToCart.setEnabled(false);
+            vh.itemView.setAlpha(0.6f);
         } else {
-            holder.rvSizes.setVisibility(View.GONE);
+            vh.tvStockStatus.setText("IN STOCK");
+            vh.tvStockStatus.setBackgroundResource(R.drawable.bg_stock_in);
+            vh.ivAddToCart.setEnabled(true);
+            vh.itemView.setAlpha(1f);
         }
 
+        // ---------- SIZE LIST ----------
+        List<SizeModel> sizes = product.getSizeList();
+        if (sizes != null && !sizes.isEmpty()) {
+            vh.rvSizes.setVisibility(View.VISIBLE);
+            vh.rvSizes.setLayoutManager(
+                    new LinearLayoutManager(context,
+                            LinearLayoutManager.HORIZONTAL, false));
 
+            SizeAdapter adapter =
+                    new SizeAdapter(sizes, size -> updatePriceAndStock(vh, size));
+            vh.rvSizes.setAdapter(adapter);
+        } else {
+            vh.rvSizes.setVisibility(View.GONE);
+        }
+
+        // ---------- CLICK ----------
+        vh.itemView.setOnClickListener(v ->
+                openProductDetails(product.getId()));
     }
 
-    private int dpToPx(int i) {
-        return (int) (i * Resources.getSystem().getDisplayMetrics().density);
+    // --------------------------------------------------
+    // ITEM COUNT / TYPE
+    // --------------------------------------------------
+
+    @Override
+    public int getItemCount() {
+        int count = productList == null ? 0 : productList.size();
+        return showEndMessage ? count + 1 : count;
     }
 
+    @Override
+    public int getItemViewType(int position) {
+
+        if (position < productList.size()
+                && productList.get(position) == null) {
+            return TYPE_LOADER;
+        }
+
+        if (position == productList.size() && showEndMessage) {
+            return TYPE_END;
+        }
+
+        return TYPE_PRODUCT;
+    }
+
+    // --------------------------------------------------
+    // HELPERS
+    // --------------------------------------------------
+
+    public void addLoader() {
+        productList.add(null);
+        notifyItemInserted(productList.size() - 1);
+    }
+
+    public void removeLoader() {
+        int pos = productList.size() - 1;
+        if (pos >= 0 && productList.get(pos) == null) {
+            productList.remove(pos);
+            notifyItemRemoved(pos);
+        }
+    }
+
+    public void setShowEndMessage(boolean show) {
+        showEndMessage = show;
+        notifyDataSetChanged();
+    }
+
+    private void updatePriceAndStock(ProductVH vh, SizeModel size) {
+        vh.tvSalePrice.setText("₹" + size.getSellingPrice());
+        vh.tvPrice.setText("₹" + size.getMrp());
+
+        if (size.getStock() > 0) {
+            vh.tvStockStatus.setText("IN STOCK");
+            vh.tvStockStatus.setBackgroundResource(R.drawable.bg_stock_in);
+            vh.ivAddToCart.setEnabled(true);
+            vh.itemView.setAlpha(1f);
+        } else {
+            vh.tvStockStatus.setText("OUT OF STOCK");
+            vh.tvStockStatus.setBackgroundResource(R.drawable.bg_stock_out);
+            vh.ivAddToCart.setEnabled(false);
+            vh.itemView.setAlpha(0.6f);
+        }
+    }
 
     private void openProductDetails(Integer productId) {
-
         if (!(context instanceof FragmentActivity)) return;
 
         FragmentActivity activity = (FragmentActivity) context;
-
         ProductDetailsFragment fragment = new ProductDetailsFragment();
 
-        // Optional: pass productId
-        Bundle bundle = new Bundle();
-        bundle.putInt("product_id", productId);
-        fragment.setArguments(bundle);
+        Bundle b = new Bundle();
+        b.putInt("product_id", productId);
+        fragment.setArguments(b);
 
         activity.getSupportFragmentManager()
                 .beginTransaction()
@@ -197,62 +231,46 @@ public class PopularProductAdapter
                 .commit();
     }
 
-
-    private void updatePriceAndStock(ProductVH holder, SizeModel size) {
-
-        holder.tvSalePrice.setText("₹" + size.getSellingPrice());
-        holder.tvPrice.setText("₹" + size.getMrp());
-
-        if (size.getStock() > 0) {
-            holder.tvStockStatus.setText("IN STOCK");
-            holder.tvStockStatus.setBackgroundResource(R.drawable.bg_stock_in);
-            holder.ivAddToCart.setEnabled(true);
-            holder.itemView.setAlpha(1f);
-        } else {
-            holder.tvStockStatus.setText("OUT OF STOCK");
-            holder.tvStockStatus.setBackgroundResource(R.drawable.bg_stock_out);
-            holder.ivAddToCart.setEnabled(false);
-            holder.itemView.setAlpha(0.6f);
-        }
+    private int dpToPx(int dp) {
+        return (int) (dp * Resources.getSystem()
+                .getDisplayMetrics().density);
     }
 
+    // --------------------------------------------------
+    // VIEW HOLDERS
+    // --------------------------------------------------
 
-    private void updatePrice(ProductVH holder, SizeModel size) {
-        //holder.tvSalePrice.setText("₹" + size.getSelling_price());
-        //holder.tvPrice.setText("₹" + size.getMrp());
-    }
+    public static class ProductVH extends RecyclerView.ViewHolder {
 
-    @Override
-    public int getItemCount() {
-        return productList == null ? 0 : productList.size();
-    }
-
-    public class ProductVH extends RecyclerView.ViewHolder {
-
-        ImageView imgProduct, imgWishlist, ivAddToCart, ivBuyNow;
-        TextView tvProductName, tvSalePrice, tvPrice, tvRatingCount, tvStockStatus;
+        ImageView imgProduct, ivAddToCart;
+        TextView tvProductName, tvSalePrice, tvPrice,
+                tvRatingCount, tvStockStatus;
         RatingBar ratingBar;
         RecyclerView rvSizes;
 
-
-
         public ProductVH(@NonNull View itemView) {
             super(itemView);
-
             imgProduct = itemView.findViewById(R.id.imgProduct);
-            imgWishlist = itemView.findViewById(R.id.imgWishlist);
             ivAddToCart = itemView.findViewById(R.id.ivAddToCart);
-            ivBuyNow = itemView.findViewById(R.id.ivBuyNow);
-
             tvProductName = itemView.findViewById(R.id.tvProductName);
             tvSalePrice = itemView.findViewById(R.id.tvSalePrice);
             tvPrice = itemView.findViewById(R.id.tvPrice);
             tvRatingCount = itemView.findViewById(R.id.tvRatingCount);
             tvStockStatus = itemView.findViewById(R.id.tvStockStatus);
-
             ratingBar = itemView.findViewById(R.id.ratingBar);
             rvSizes = itemView.findViewById(R.id.rvSizes);
         }
     }
 
+    public static class LoaderVH extends RecyclerView.ViewHolder {
+        public LoaderVH(@NonNull View itemView) {
+            super(itemView);
+        }
+    }
+
+    public static class EndVH extends RecyclerView.ViewHolder {
+        public EndVH(@NonNull View itemView) {
+            super(itemView);
+        }
+    }
 }

@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <!-- Drag Handle -->
+    <View
+        android:layout_width="40dp"
+        android:layout_height="4dp"
+        android:layout_gravity="center"
+        android:background="#CCCCCC"
+        android:layout_marginBottom="12dp"/>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Sort By"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:textColor="#000"
+        android:paddingBottom="12dp"/>
+
+    <!-- Popularity -->
+    <TextView
+        android:id="@+id/sortPopularity"
+        style="@style/SortItemStyle"
+        android:text="🔥 Popularity"/>
+
+    <!-- Newest -->
+    <TextView
+        android:id="@+id/sortNewest"
+        style="@style/SortItemStyle"
+        android:text="🆕 Newest First"/>
+
+    <!-- Price Low to High -->
+    <TextView
+        android:id="@+id/sortLowHigh"
+        style="@style/SortItemStyle"
+        android:text="💰 Price: Low to High"/>
+
+    <!-- Price High to Low -->
+    <TextView
+        android:id="@+id/sortHighLow"
+        style="@style/SortItemStyle"
+        android:text="💰 Price: High to Low"/>
+
+    <!-- Rating -->
+    <TextView
+        android:id="@+id/sortRating"
+        style="@style/SortItemStyle"
+        android:text="⭐ Customer Rating"/>
+
+</LinearLayout>

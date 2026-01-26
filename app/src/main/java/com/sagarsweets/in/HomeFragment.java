@@ -187,7 +187,7 @@ public class HomeFragment extends Fragment {
                             new GridLayoutManager(getContext(), 2)
                     );
                     PopularProductAdapter adapter =
-                            new PopularProductAdapter(getContext(), productList);
+                            new PopularProductAdapter(getContext(), productList,false);
                     rvProducts.setAdapter(adapter);
                 }else{
                     Log.d("here","elseeeeee");

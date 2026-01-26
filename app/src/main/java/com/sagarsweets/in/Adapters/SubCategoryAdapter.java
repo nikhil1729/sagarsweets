@@ -1,6 +1,7 @@
 package com.sagarsweets.in.Adapters;
 
 import android.content.Context;
+import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -8,12 +9,14 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.fragment.app.FragmentActivity;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.google.android.material.card.MaterialCardView;
 import com.sagarsweets.in.ApiControllers.SuperController;
 import com.sagarsweets.in.ApiModel.AllSubCategoryModel;
+import com.sagarsweets.in.ProductViewCategoryFragment;
 import com.sagarsweets.in.R;
 
 import java.util.ArrayList;
@@ -61,7 +64,27 @@ public class SubCategoryAdapter
             // TODO: Open product list / sub-category screen
             // Example:
             // openSubCategory(model.getId(), model.getName());
+            String categoryId = String.valueOf(model.getId());
+            String categoryName = model.getName();
+            openCategoryProduct(categoryId,categoryName);
         });
+    }
+
+    private void openCategoryProduct(String categoryId, String categoryName) {
+        if (!(context instanceof FragmentActivity)) return;
+        FragmentActivity activity = (FragmentActivity) context;
+        ProductViewCategoryFragment productViewCategoryFragment = new ProductViewCategoryFragment();
+        // Optional: pass categoryId
+        Bundle bundle = new Bundle();
+        bundle.putString("category_id", categoryId);
+        bundle.putString("category_name", categoryName);
+        productViewCategoryFragment.setArguments(bundle);
+
+        activity.getSupportFragmentManager()
+                .beginTransaction()
+                .replace(R.id.container, productViewCategoryFragment)
+                .addToBackStack("product_details_By_sub_category")
+                .commit();
     }
 
     @Override

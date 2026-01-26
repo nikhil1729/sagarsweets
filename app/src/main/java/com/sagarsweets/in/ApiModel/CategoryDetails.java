@@ -2,9 +2,9 @@ package com.sagarsweets.in.ApiModel;
 
 import com.google.gson.annotations.SerializedName;
 
-public class CategoryModel {
+public class CategoryDetails {
     @SerializedName("id")
-    private String id;
+    private int id;
 
     @SerializedName("name")
     private String name;
@@ -12,12 +12,7 @@ public class CategoryModel {
     @SerializedName("image")
     private String image;
 
-    public CategoryModel(String i, String selectSubCategory) {
-        this.id = i;
-        this.name = selectSubCategory;
-    }
-
-    public String getId() {
+    public int getId() {
         return id;
     }
 
@@ -27,9 +22,5 @@ public class CategoryModel {
 
     public String getImage() {
         return image;
-    }
-    @Override
-    public String toString() {
-        return name; // MaterialAutoCompleteTextView uses this
     }
 }

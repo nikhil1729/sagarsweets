@@ -3,6 +3,8 @@ package com.sagarsweets.in.ApiInterface;
 
 
 import com.sagarsweets.in.ApiModel.AllCategoryResponse;
+import com.sagarsweets.in.ApiModel.CategoryProductRequest;
+import com.sagarsweets.in.ApiModel.CategoryProductResponse;
 import com.sagarsweets.in.ApiModel.CategoryResponse;
 import com.sagarsweets.in.ApiModel.ForgetPasswordRequest;
 import com.sagarsweets.in.ApiModel.LoginOtpRequest;
@@ -61,11 +63,15 @@ public interface ApiService {
     @GET("rest/homefragment/getcategory")   // 👈 homefragment category
     Call<CategoryResponse> getCategories();
 
-    @GET("rest/homefragment/getallcategory")   // 👈 homefragment category
+    @GET("rest/homefragment/getallcategory")   // 👈 homefragment category and sub category
     Call<AllCategoryResponse> getAllCategories();
 
     @POST("rest/homefragment/getlatestarrivals")
     Call<PopularProductResponse> getPopularProducts(@Body PapularProductHome papularProductHome);
+
+    @POST("rest/product/getproductbycategoryid")
+    Call<CategoryProductResponse> getCategoryProduct(@Body CategoryProductRequest categoryProductRequest);
+
 
     @POST("rest/homefragment/topcategory")
     Call<TopCategoryResponse> getTopCategory(@Body TopCategoryRequest topCategoryModel);

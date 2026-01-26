@@ -290,7 +290,7 @@ public class ProductDetailsFragment extends Fragment {
                     );
 
                     PopularProductAdapter adapter =
-                                new PopularProductAdapter(getContext(), productList);
+                                new PopularProductAdapter(getContext(), productList,false);
 
                     rvRelatedProducts.setAdapter(adapter);
 
