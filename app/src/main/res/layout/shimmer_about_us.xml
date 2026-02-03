@@ -1,0 +1,239 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.facebook.shimmer.ShimmerFrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/shimmerAbout"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="20dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+        <!-- About title -->
+        <View
+            android:layout_width="120dp"
+            android:layout_height="20dp"
+            android:background="@drawable/shimmer_bg"
+            android:layout_marginBottom="10dp"/>
+
+        <!-- About description -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="14dp"
+            android:background="@drawable/shimmer_bg"
+            android:layout_marginBottom="6dp"/>
+
+        <View
+            android:layout_width="250dp"
+            android:layout_height="14dp"
+            android:background="@drawable/shimmer_bg"
+            android:layout_marginBottom="20dp"/>
+
+        <!-- Team title -->
+        <View
+            android:layout_width="150dp"
+            android:layout_height="20dp"
+            android:background="@drawable/shimmer_bg"
+            android:layout_marginBottom="12dp"/>
+
+        <!-- Team shimmer item -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <View
+                android:layout_width="60dp"
+                android:layout_height="60dp"
+                android:background="@drawable/shimmer_bg"/>
+
+            <LinearLayout
+                android:layout_marginStart="12dp"
+                android:orientation="vertical"
+                android:layout_height="40dp"
+                android:layout_width="80dp">
+
+                <View
+                    android:layout_width="150dp"
+                    android:layout_height="14dp"
+                    android:background="@drawable/shimmer_bg"/>
+
+                <View
+                    android:layout_width="100dp"
+                    android:layout_height="12dp"
+                    android:layout_marginTop="6dp"
+                    android:background="@drawable/shimmer_bg"/>
+            </LinearLayout>
+        </LinearLayout>
+        <!-- About title -->
+        <View
+            android:layout_width="120dp"
+            android:layout_height="20dp"
+            android:background="@drawable/shimmer_bg"
+            android:layout_marginBottom="10dp"/>
+
+        <!-- About description -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="14dp"
+            android:background="@drawable/shimmer_bg"
+            android:layout_marginBottom="6dp"/>
+
+        <View
+            android:layout_width="250dp"
+            android:layout_height="14dp"
+            android:background="@drawable/shimmer_bg"
+            android:layout_marginBottom="20dp"/>
+
+        <!-- Team title -->
+        <View
+            android:layout_width="150dp"
+            android:layout_height="20dp"
+            android:background="@drawable/shimmer_bg"
+            android:layout_marginBottom="12dp"/>
+
+        <!-- Team shimmer item -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <View
+                android:layout_width="60dp"
+                android:layout_height="60dp"
+                android:background="@drawable/shimmer_bg"/>
+
+            <LinearLayout
+                android:layout_marginStart="12dp"
+                android:orientation="vertical"
+                android:layout_height="40dp"
+                android:layout_width="80dp">
+
+                <View
+                    android:layout_width="150dp"
+                    android:layout_height="14dp"
+                    android:background="@drawable/shimmer_bg"/>
+
+                <View
+                    android:layout_width="100dp"
+                    android:layout_height="12dp"
+                    android:layout_marginTop="6dp"
+                    android:background="@drawable/shimmer_bg"/>
+            </LinearLayout>
+        </LinearLayout>
+        <!-- About title -->
+        <View
+            android:layout_width="120dp"
+            android:layout_height="20dp"
+            android:background="@drawable/shimmer_bg"
+            android:layout_marginBottom="10dp"/>
+
+        <!-- About description -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="14dp"
+            android:background="@drawable/shimmer_bg"
+            android:layout_marginBottom="6dp"/>
+
+        <View
+            android:layout_width="250dp"
+            android:layout_height="14dp"
+            android:background="@drawable/shimmer_bg"
+            android:layout_marginBottom="20dp"/>
+
+        <!-- Team title -->
+        <View
+            android:layout_width="150dp"
+            android:layout_height="20dp"
+            android:background="@drawable/shimmer_bg"
+            android:layout_marginBottom="12dp"/>
+
+        <!-- Team shimmer item -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <View
+                android:layout_width="60dp"
+                android:layout_height="60dp"
+                android:background="@drawable/shimmer_bg"/>
+
+            <LinearLayout
+                android:layout_marginStart="12dp"
+                android:orientation="vertical"
+                android:layout_height="40dp"
+                android:layout_width="80dp">
+
+                <View
+                    android:layout_width="150dp"
+                    android:layout_height="14dp"
+                    android:background="@drawable/shimmer_bg"/>
+
+                <View
+                    android:layout_width="100dp"
+                    android:layout_height="12dp"
+                    android:layout_marginTop="6dp"
+                    android:background="@drawable/shimmer_bg"/>
+            </LinearLayout>
+        </LinearLayout>
+        <!-- About title -->
+        <View
+            android:layout_width="120dp"
+            android:layout_height="20dp"
+            android:background="@drawable/shimmer_bg"
+            android:layout_marginBottom="10dp"/>
+
+        <!-- About description -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="14dp"
+            android:background="@drawable/shimmer_bg"
+            android:layout_marginBottom="6dp"/>
+
+        <View
+            android:layout_width="250dp"
+            android:layout_height="14dp"
+            android:background="@drawable/shimmer_bg"
+            android:layout_marginBottom="20dp"/>
+
+        <!-- Team title -->
+        <View
+            android:layout_width="150dp"
+            android:layout_height="20dp"
+            android:background="@drawable/shimmer_bg"
+            android:layout_marginBottom="12dp"/>
+
+        <!-- Team shimmer item -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <View
+                android:layout_width="60dp"
+                android:layout_height="60dp"
+                android:background="@drawable/shimmer_bg"/>
+
+            <LinearLayout
+                android:layout_marginStart="12dp"
+                android:orientation="vertical"
+                android:layout_height="40dp"
+                android:layout_width="80dp">
+
+                <View
+                    android:layout_width="150dp"
+                    android:layout_height="14dp"
+                    android:background="@drawable/shimmer_bg"/>
+
+                <View
+                    android:layout_width="100dp"
+                    android:layout_height="12dp"
+                    android:layout_marginTop="6dp"
+                    android:background="@drawable/shimmer_bg"/>
+            </LinearLayout>
+        </LinearLayout>
+
+    </LinearLayout>
+
+</com.facebook.shimmer.ShimmerFrameLayout>

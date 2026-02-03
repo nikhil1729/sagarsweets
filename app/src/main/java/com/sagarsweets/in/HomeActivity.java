@@ -1,13 +1,20 @@
 package com.sagarsweets.in;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -23,6 +30,7 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
 
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.badge.BadgeDrawable;
@@ -30,6 +38,8 @@ import com.google.android.material.badge.BadgeUtils;
 import com.google.android.material.badge.ExperimentalBadgeUtils;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.navigation.NavigationView;
+import com.google.android.material.textfield.MaterialAutoCompleteTextView;
+import com.sagarsweets.in.Adapters.SearchSuggestionAdapter;
 import com.sagarsweets.in.ApiControllers.LoginRetrofitClient;
 import com.sagarsweets.in.ApiInterface.ApiService;
 import com.sagarsweets.in.ApiModel.PincodeData;
@@ -38,6 +48,9 @@ import com.sagarsweets.in.ApiModel.PincodeResponse;
 import com.sagarsweets.in.Session.LoginSession;
 import com.sagarsweets.in.Session.PincodeSession;
 import com.sagarsweets.in.utils.DeviceInfo;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -53,12 +66,22 @@ public class HomeActivity extends AppCompatActivity {
     BadgeDrawable badge;
     LoginSession loginSession;
     View headerView;
+
+    MaterialAutoCompleteTextView searchAuto;
+    List<String> suggestions;
+    SearchSuggestionAdapter adapter;
+
+    private Handler searchHandler = new Handler(Looper.getMainLooper());
+    private Runnable searchRunnable;
+
     @OptIn(markerClass = ExperimentalBadgeUtils.class)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_home);
+
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
@@ -68,7 +91,6 @@ public class HomeActivity extends AppCompatActivity {
         drawerLayout = findViewById(R.id.drawerLayout);
         topAppBar = findViewById(R.id.topAppBar);
         navigationView = findViewById(R.id.navigationView);
-        topAppBar.inflateMenu(R.menu.top_app_bar_menu);
         tvLocation = findViewById(R.id.tvLocation);
 
         headerView = navigationView.getHeaderView(0);
@@ -76,92 +98,198 @@ public class HomeActivity extends AppCompatActivity {
         drawEmail = headerView.findViewById(R.id.drawEmail);
         loginSession = new LoginSession(this);
 
-        tvLocation.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Log.d("location_clicked","locaadkasdnsalk");
-                openPincodeBottomSheet();
-            }
-        });
+        tvLocation.setOnClickListener(v -> openPincodeBottomSheet());
+
+        // Autocomplete
+        initAutoComplete();
 
         showHideElementDrawer();
-        updateSessionName(); // Update session name by session class
-        // tvlocation change
+        updateSessionName();
         setLocationSession();
-        //tvLocation.setText("sasasas");
-        // cart count is setting here
-        myCartSet(badge);
+        myCartSet(10);
 
+        topAppBar.post(() -> BadgeUtils.attachBadgeDrawable(badge, topAppBar, R.id.action_cart));
 
-        topAppBar.post(() -> {
-            BadgeUtils.attachBadgeDrawable(
-                    badge,
-                    topAppBar,
-                    R.id.action_cart
-            );
-        });
-        topAppBar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
-            @Override
-            public boolean onMenuItemClick(MenuItem item) {
-                Integer id = item.getItemId();
-                if (id == R.id.action_cart) {
-                    loadFragment(new CartFragment(), "Cart", false);
-                    return true;
-                }
-                return false;
+        topAppBar.setNavigationOnClickListener(v -> drawerLayout.openDrawer(GravityCompat.START));
+
+        topAppBar.setOnMenuItemClickListener(item -> {
+            if (item.getItemId() == R.id.action_cart) {
+                loadFragment(new CartFragment(), "Cart", false);
+                return true;
             }
-        });
-        // Default fragment (Home)
-        if (savedInstanceState == null) {
-            if(loginSession.isLoggedIn()){
-                loadFragment(new HomeFragment(), "Home",true);
-                navigationView.setCheckedItem(R.id.draw_home);
-            }else{
-                loadFragment(new LoginFragment(), "Login",true);
-                navigationView.setCheckedItem(R.id.draw_login);
-            }
-
-        }
-
-        topAppBar.setNavigationOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                drawerLayout.openDrawer(GravityCompat.START);
-            }
+            return false;
         });
 
         navigationView.setNavigationItemSelectedListener(item -> {
             openDrawerItem(item.getItemId());
             return true;
-
         });
 
+        // Default fragment
+        if (savedInstanceState == null) {
+            if (loginSession.isLoggedIn()) {
+                loadFragment(new HomeFragment(), "Home", true);
+                navigationView.setCheckedItem(R.id.draw_home);
+            } else {
+                loadFragment(new LoginFragment(), "Login", true);
+                navigationView.setCheckedItem(R.id.draw_login);
+            }
+        }
+    }
+
+    /** -------------------- AUTOCOMPLETE -------------------- **/
+// ================= AUTOCOMPLETE INIT =================
+    private void initAutoComplete() {
+
+        searchAuto = findViewById(R.id.searchAuto);
+
+        suggestions = new ArrayList<>();
+
+        adapter = new SearchSuggestionAdapter(this,suggestions);
+
+        searchAuto.setAdapter(adapter);
+        searchAuto.setThreshold(1);
+
+        // ⚠️ REQUIRED FOR ANDROID 13
+        searchAuto.setOnFocusChangeListener((v, hasFocus) -> {
+            if (hasFocus && !suggestions.isEmpty()) {
+                searchAuto.post(searchAuto::showDropDown);
+            }
+        });
+        searchAuto.setOnClickListener(v -> {
+            if (!suggestions.isEmpty()) {
+                searchAuto.showDropDown();
+            }
+        });
+
+        searchAuto.addTextChangedListener(new TextWatcher() {
+            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            @Override public void afterTextChanged(Editable s) {}
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+                if (searchRunnable != null) {
+                    searchHandler.removeCallbacks(searchRunnable);
+                }
+
+                searchRunnable = () -> fetchSuggestionsFromAPI(s.toString());
+                searchHandler.postDelayed(searchRunnable, 400);
+            }
+        });
+
+        searchAuto.setOnItemClickListener((parent, view, position, id) -> {
+            String value = adapter.getItem(position);
+            searchAuto.setText(value);
+            searchAuto.setSelection(value.length());
+            searchAuto.dismissDropDown();
+        });
+
+        searchAuto.setOnEditorActionListener((v, actionId, event) -> {
+
+            // Handle keyboard search / enter
+            if (actionId == EditorInfo.IME_ACTION_SEARCH ||
+                    actionId == EditorInfo.IME_ACTION_DONE ||
+                    (event != null && event.getKeyCode() == KeyEvent.KEYCODE_ENTER
+                            && event.getAction() == KeyEvent.ACTION_DOWN)) {
+
+                String query = searchAuto.getText().toString().trim();
+
+                if (!query.isEmpty()) {
+                    openSearchFragment(query);
+                    InputMethodManager imm =
+                            (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                    imm.hideSoftInputFromWindow(searchAuto.getWindowToken(), 0);
+                }
+                return true; // consume event
+            }
+            return false;
+        });
 
     }
 
-    private void openPincodeBottomSheet() {
-        Log.d("openBottom","first");
-        BottomSheetDialog bottomSheetDialog =
-                new BottomSheetDialog(HomeActivity.this);
+    private void openSearchFragment(String query) {
 
-        View view = getLayoutInflater()
-                .inflate(R.layout.bottomsheet_pincode, null);
+        Fragment fragment = SearchFragment.newInstance(query);
+        loadFragment(fragment,"search fragment",false);
+
+    }
+
+
+    // ================= API CALL =================
+    private void fetchSuggestionsFromAPI(String query) {
+
+        if (query.length() < 2) {
+            suggestions.clear();
+            adapter.notifyDataSetChanged();
+            searchAuto.dismissDropDown();
+            return;
+        }
+
+        ApiService apiService =
+                LoginRetrofitClient.getClient().create(ApiService.class);
+
+        apiService.getSuggestions(query).enqueue(new Callback<List<String>>() {
+            @Override
+            public void onResponse(Call<List<String>> call, Response<List<String>> response) {
+
+                if (!response.isSuccessful() || response.body() == null) return;
+
+                runOnUiThread(() -> {
+
+                    List<String> data = response.body();
+
+                    if (data == null || data.isEmpty()) {
+                        adapter.clear();
+                        searchAuto.dismissDropDown();
+                        return;
+                    }
+
+                    adapter.clear();
+                    adapter.addAll(data);
+                    adapter.notifyDataSetChanged();
+
+                    // ✅ SAFE LOG
+                    Log.d("responseNikhil", "Count = " + adapter.getCount());
+
+                    searchAuto.post(() -> {
+                        if (searchAuto.hasFocus() && adapter.getCount() > 0) {
+                            searchAuto.showDropDown();
+                        }
+                    });
+                });
+
+
+
+            }
+
+            @Override
+            public void onFailure(Call<List<String>> call, Throwable t) {
+                Log.e("SearchAPI", t.getMessage());
+            }
+        });
+    }
+
+
+    /** -------------------- PINCODE BOTTOM SHEET -------------------- **/
+    private void openPincodeBottomSheet() {
+        BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(this);
+        View view = getLayoutInflater().inflate(R.layout.bottomsheet_pincode, null);
 
         EditText etPincode = view.findViewById(R.id.etPincode);
         TextView tvPincodeError = view.findViewById(R.id.tvPincodeError);
         Button btnConfirm = view.findViewById(R.id.btnConfirmPincode);
-        Log.d("openBottom","second");
+
         etPincode.addTextChangedListener(new TextWatcher() {
             @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            @Override public void afterTextChanged(Editable s) {}
             @Override public void onTextChanged(CharSequence s, int start, int before, int count) {
                 tvPincodeError.setVisibility(View.GONE);
             }
-            @Override public void afterTextChanged(Editable s) {}
         });
 
         btnConfirm.setOnClickListener(v -> {
             String pincode = etPincode.getText().toString().trim();
-
             if (pincode.isEmpty()) {
                 tvPincodeError.setText("Pincode is required");
                 tvPincodeError.setVisibility(View.VISIBLE);
@@ -172,49 +300,28 @@ public class HomeActivity extends AppCompatActivity {
                 tvPincodeError.setVisibility(View.VISIBLE);
                 return;
             }
-            String user_id ="";
+
             String device = DeviceInfo.getDeviceString(this);
-            String lot = "";
-            String lon = "";
-            Log.d("latNikhil",lot+" "+lon);
-            PincodeRequest pincodeRequest = new PincodeRequest(pincode,user_id,device,lon,lot);
-            ApiService apiService  = LoginRetrofitClient
-                    .getClient()
-                    .create(ApiService.class);
-            apiService.getPincodeStatus(pincodeRequest).enqueue(new Callback<PincodeResponse>() {
+            PincodeRequest request = new PincodeRequest(pincode,"",device,"","");
+
+            ApiService apiService = LoginRetrofitClient.getClient().create(ApiService.class);
+            apiService.getPincodeStatus(request).enqueue(new Callback<PincodeResponse>() {
                 @Override
                 public void onResponse(Call<PincodeResponse> call, Response<PincodeResponse> response) {
                     if (response.isSuccessful() && response.body() != null) {
-                        PincodeResponse pincodeResponse = response.body();
-                        if (pincodeResponse.isStatus()
-                                && pincodeResponse.getData() != null
-                                && !pincodeResponse.getData().isEmpty()) {
-                            // ✅ SUCCESS
-                            PincodeData data = pincodeResponse.getData().get(0);
-                            PincodeSession sessionManager = new PincodeSession(getApplicationContext());
-                            if(sessionManager.hasPincode()){
-                                sessionManager.clearPincode();
-                            }
-                            sessionManager.savePincode(
-                                    data.getPincode(),
-                                    data.getCity_name(),
-                                    data.getDistric_name(),
-                                    data.getState()
-                            );
+                        PincodeResponse res = response.body();
+                        if (res.isStatus() && res.getData() != null && !res.getData().isEmpty()) {
+                            PincodeData data = res.getData().get(0);
+                            PincodeSession session = new PincodeSession(getApplicationContext());
+                            session.clearPincode();
+                            session.savePincode(data.getPincode(), data.getCity_name(), data.getDistric_name(), data.getState());
                             tvLocation.setText("Deliver to "+data.getCity_name()+","+data.getDistric_name());
-                            //tvPincodeError.setVisibility(View.GONE);
-                            // ✅ proceed with API / delivery check
-                            Log.d("PINCODE", "User entered pincode: " + pincode);
-                            recreate();
-                            // TODO: Save pincode or call API
                             bottomSheetDialog.dismiss();
                         } else {
-                            // ❌ Status false OR empty data
-                            tvPincodeError.setText(pincodeResponse.getMessage());
+                            tvPincodeError.setText(res.getMessage());
                             tvPincodeError.setVisibility(View.VISIBLE);
-                            //showError("Delivery not available for this pincode");
                         }
-                    }else {
+                    } else {
                         tvPincodeError.setText("Something went wrong");
                         tvPincodeError.setVisibility(View.VISIBLE);
                     }
@@ -222,44 +329,60 @@ public class HomeActivity extends AppCompatActivity {
 
                 @Override
                 public void onFailure(Call<PincodeResponse> call, Throwable t) {
-
+                    tvPincodeError.setText("Network Error");
+                    tvPincodeError.setVisibility(View.VISIBLE);
                 }
             });
-
-
-
         });
-        Log.d("openBottom","last");
+
         bottomSheetDialog.setContentView(view);
         bottomSheetDialog.setCancelable(true);
         bottomSheetDialog.show();
     }
 
-    private void setLocationSession() {
-        PincodeSession pincodeSession = new PincodeSession(this);
-        if(pincodeSession.hasPincode()){
-            String location = pincodeSession.getCity() + ", " + pincodeSession.getPincode();
-            tvLocation.setText("Deliver to "+location);
-
-        }else{
-            tvLocation.setText("please change location");
+    /** -------------------- DRAWER & FRAGMENTS -------------------- **/
+    private void openDrawerItem(int id) {
+        if (id == R.id.draw_home) loadFragment(new HomeFragment(), "Home", false);
+        else if (id == R.id.draw_about_us) loadFragment(new AboutUsFragment(), "About Us", false);
+        else if (id == R.id.nav_contact) loadFragment(new ContactUsFragment(), "Contact Us", false);
+        else if (id == R.id.draw_term_and_condition) loadFragment(new TermAndConditionFragment(), "Our T&C", false);
+        else if (id == R.id.draw_login) loadFragment(new LoginFragment(), "Login", false);
+        else if (id == R.id.draw_register) loadFragment(new RegisterFragment(), "Register", false);
+        else if (id == R.id.draw_logout) {
+            loginSession.logout();
+            Toast.makeText(this,"Successfully logout",Toast.LENGTH_SHORT).show();
+            startActivity(new Intent(this, MainActivity.class).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_CLEAR_TASK));
+            finish();
         }
+    }
+
+    private void loadFragment(Fragment fragment, String title, boolean add) {
+        if(add){
+            getSupportFragmentManager().beginTransaction()
+                    .setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out)
+                    .add(R.id.container, fragment)
+                    .addToBackStack(title)
+                    .commit();
+        } else {
+            getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.container, fragment)
+                    .addToBackStack(title)
+                    .commit();
+        }
+        drawerLayout.closeDrawer(GravityCompat.START);
     }
 
     private void showHideElementDrawer() {
         Menu menu = navigationView.getMenu();
         if(loginSession.isLoggedIn()){
-            //show profile, my order
             menu.findItem(R.id.draw_login).setVisible(false);
             menu.findItem(R.id.draw_register).setVisible(false);
-
             menu.findItem(R.id.draw_myorders).setVisible(true);
             menu.findItem(R.id.draw_profile).setVisible(true);
             menu.findItem(R.id.draw_logout).setVisible(true);
-        }else{
+        } else {
             menu.findItem(R.id.draw_login).setVisible(true);
             menu.findItem(R.id.draw_register).setVisible(true);
-
             menu.findItem(R.id.draw_myorders).setVisible(false);
             menu.findItem(R.id.draw_profile).setVisible(false);
             menu.findItem(R.id.draw_logout).setVisible(false);
@@ -267,105 +390,48 @@ public class HomeActivity extends AppCompatActivity {
     }
 
     private void updateSessionName() {
-
         if(loginSession.isLoggedIn()){
-           // true
             drawName.setText("Hi! "+loginSession.getUserName());
             drawEmail.setText("");
-
-        }else{
-            // not logged
-            drawName.setText(R.string.hi_guest);
-            //drawEmail.setText(R.string.email_afterlogged_in);
-        }
-    }
-
-    private void openDrawerItem(int id) {
-        if (id == R.id.draw_home) {
-            loadFragment(new HomeFragment(), "Home", false);
-        } else if (id == R.id.draw_about_us) {
-            loadFragment(new AboutUsFragment(), "About Us", false);
-        } else if (id == R.id.nav_contact) {
-            loadFragment(new ContactUsFragment(), "Contact Us", false);
-        }else if (id == R.id.draw_term_and_condition) {
-            loadFragment(new TermAndConditionFragment(), "Our T&C", false);
-        }else if (id == R.id.draw_login) {
-            loadFragment(new LoginFragment(), "Login", false);
-        }else if (id == R.id.draw_register) {
-            loadFragment(new RegisterFragment(), "Register", false);
-        }if (id == R.id.draw_logout) {
-            LoginSession loginSession = new LoginSession(this);
-            loginSession.logout();
-            Toast.makeText(this,"Successfully logout from this device",Toast.LENGTH_SHORT).show();
-            Intent intent = new Intent(this, MainActivity.class);
-            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-            startActivity(intent);
-            finish();
-        }
-
-
-    }
-
-    private void loadFragment(Fragment fragment, String title, boolean b) {
-        // Load fragment if true then add else replace fragment
-        if(b){
-            getSupportFragmentManager()
-                    .beginTransaction()
-                    .setCustomAnimations(
-                            android.R.anim.fade_in,
-                            android.R.anim.fade_out
-                    )
-                    .add(R.id.container, fragment)
-                    .addToBackStack(title) // optional
-                    .commit();
-        }else{
-            getSupportFragmentManager()
-                    .beginTransaction()
-                    .replace(R.id.container, fragment)
-                    .addToBackStack(title) // optional
-                    .commit();
-        }
-
-
-
-        // Close drawer
-        DrawerLayout drawerLayout = findViewById(R.id.drawerLayout);
-        drawerLayout.closeDrawer(GravityCompat.START);
-    }
-
-    private void myCartSet(BadgeDrawable badge) {
-
-        // Create badge
-        this.badge = BadgeDrawable.create(this);
-        this.badge.setBackgroundColor(getResources().getColor(R.color.red));
-        this.badge.setBadgeTextColor(getResources().getColor(android.R.color.white));
-        // Example count
-        int cartCount = 99;
-
-        if (cartCount > 0) {
-            this.badge.setNumber(cartCount);
-            this.badge.setVisible(true);
         } else {
-            this.badge.clearNumber();
-            this.badge.setVisible(false);
+            drawName.setText(R.string.hi_guest);
         }
+    }
 
+    private void setLocationSession() {
+        PincodeSession session = new PincodeSession(this);
+        if(session.hasPincode()){
+            tvLocation.setText("Deliver to "+session.getCity()+", "+session.getPincode());
+        } else tvLocation.setText("Please change location");
+    }
+
+    private void myCartSet(int cartCount) {
+        badge = BadgeDrawable.create(this);
+        badge.setBackgroundColor(getResources().getColor(R.color.red));
+        badge.setBadgeTextColor(getResources().getColor(android.R.color.white));
+
+        if(cartCount>0){
+            badge.setNumber(cartCount);
+            badge.setVisible(true);
+        } else {
+            badge.clearNumber();
+            badge.setVisible(false);
+        }
     }
 
     @Override
     public void onBackPressed() {
-        Fragment currentFragment = getSupportFragmentManager()
-                .findFragmentById(R.id.container); // replace with your container ID
+        FragmentManager fm = getSupportFragmentManager();
+        Fragment currentFragment = getSupportFragmentManager().findFragmentById(R.id.container);
+        Log.d("currentfragment", String.valueOf(fm.getBackStackEntryCount()));
 
-        if (currentFragment instanceof HomeFragment) {
+        if(currentFragment == null|| fm.getBackStackEntryCount() == 1){
             Toast.makeText(this,"Thank You, Shop again",Toast.LENGTH_LONG).show();
-            // Close the app
-            finishAffinity(); // closes all activities and exits
-        } else {
-            // Let the fragment manager handle back normally
-            super.onBackPressed();
+            finishAffinity();
         }
+        if(currentFragment instanceof HomeFragment){
+            Toast.makeText(this,"Thank You, Shop again",Toast.LENGTH_LONG).show();
+            finishAffinity();
+        } else super.onBackPressed();
     }
-
-
 }

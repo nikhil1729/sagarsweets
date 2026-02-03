@@ -12,6 +12,11 @@ public class CategoryDetails {
     @SerializedName("image")
     private String image;
 
+    public CategoryDetails(String number, String selectSubCategory) {
+        this.id = Integer.parseInt(number);
+        this.name = selectSubCategory;
+    }
+
     public int getId() {
         return id;
     }
@@ -22,5 +27,10 @@ public class CategoryDetails {
 
     public String getImage() {
         return image;
+    }
+
+    @Override
+    public String toString() {
+        return name;
     }
 }

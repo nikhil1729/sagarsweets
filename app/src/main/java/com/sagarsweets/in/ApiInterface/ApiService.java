@@ -2,6 +2,7 @@ package com.sagarsweets.in.ApiInterface;
 
 
 
+import com.sagarsweets.in.ApiModel.AboutResponse;
 import com.sagarsweets.in.ApiModel.AllCategoryResponse;
 import com.sagarsweets.in.ApiModel.CategoryProductRequest;
 import com.sagarsweets.in.ApiModel.CategoryProductResponse;
@@ -20,9 +21,13 @@ import com.sagarsweets.in.ApiModel.ProductDetailsRequest;
 import com.sagarsweets.in.ApiModel.ProductReviewRequest;
 import com.sagarsweets.in.ApiModel.RegisterUserRequest;
 import com.sagarsweets.in.ApiModel.ReviewResponse;
+import com.sagarsweets.in.ApiModel.SearchProductRequest;
+import com.sagarsweets.in.ApiModel.SearchResponse;
 import com.sagarsweets.in.ApiModel.SliderResponse;
 import com.sagarsweets.in.ApiModel.TopCategoryRequest;
 import com.sagarsweets.in.ApiModel.TopCategoryResponse;
+
+import java.util.List;
 
 import retrofit2.Call;
 import retrofit2.http.Body;
@@ -30,6 +35,8 @@ import retrofit2.http.Field;
 import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.GET;
 import retrofit2.http.POST;
+import retrofit2.http.Query;
+
 public interface ApiService {
     @POST("rest/user/login")
     Call<LoginResponse> loginUser(@Body LoginRequest loginRequest);
@@ -60,6 +67,9 @@ public interface ApiService {
     @GET("rest/homefragment/index")
     Call<SliderResponse> getSliderImages();
 
+    @GET("rest/default/aboutus")
+    Call<AboutResponse> getAboutUs();
+
     @GET("rest/homefragment/getcategory")   // 👈 homefragment category
     Call<CategoryResponse> getCategories();
 
@@ -72,6 +82,8 @@ public interface ApiService {
     @POST("rest/product/getproductbycategoryid")
     Call<CategoryProductResponse> getCategoryProduct(@Body CategoryProductRequest categoryProductRequest);
 
+    @POST("rest/default/searchproduct")
+    Call<SearchResponse> getSearchProduct(@Body SearchProductRequest searchProductRequest);
 
     @POST("rest/homefragment/topcategory")
     Call<TopCategoryResponse> getTopCategory(@Body TopCategoryRequest topCategoryModel);
@@ -85,4 +97,8 @@ public interface ApiService {
 
     @POST("rest/default/getpincodebypin")
     Call<PincodeResponse> getPincodeStatus(@Body PincodeRequest pincodeRequest);
+
+    @GET("rest/default/searchsuggestions")
+    Call<List<String>> getSuggestions(@Query("query") String query);
+
 }

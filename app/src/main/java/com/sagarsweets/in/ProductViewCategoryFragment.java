@@ -25,6 +25,7 @@ import android.widget.TextView;
 import com.facebook.shimmer.ShimmerFrameLayout;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.textfield.MaterialAutoCompleteTextView;
+import com.google.android.material.textfield.TextInputLayout;
 import com.sagarsweets.in.Adapters.PopularProductAdapter;
 import com.sagarsweets.in.Adapters.PopularProductShimmerAdapter;
 import com.sagarsweets.in.Adapters.SubCategorySpinnerAdapter;
@@ -155,6 +156,7 @@ public class ProductViewCategoryFragment extends Fragment {
 
 
     private void loadProduct() {
+        if (isLoading) return;
         filterCount =0;
         if(!filterSubCategoryId.isEmpty()){
             filterCount++;
@@ -165,8 +167,14 @@ public class ProductViewCategoryFragment extends Fragment {
         if(!filterMin.isEmpty()){
             filterCount++;
         }
-        if(!filterRating.isEmpty()){
-            filterCount++;
+        Log.d("filterRating","hhhhhh"+filterRating);
+        if(!filterRating.isEmpty() ){
+
+            if(!filterRating.equals("0.0")){
+                Log.d("filterRating","asas-"+filterRating);
+                filterCount++;
+            }
+
         }
         if(filterCount > 0 ){
             tvFilterBadge.setVisibility(View.VISIBLE);
@@ -174,7 +182,7 @@ public class ProductViewCategoryFragment extends Fragment {
         }else{
             tvFilterBadge.setVisibility(View.GONE);
         }
-        if (isLoading) return;
+
         isLoading = true;
         String actual_category_id;
         if (pageNumber == 1) showShimmer();
@@ -241,15 +249,18 @@ public class ProductViewCategoryFragment extends Fragment {
         EditText etMinPrice = view.findViewById(R.id.etMinPrice);
         EditText etMaxPrice = view.findViewById(R.id.etMaxPrice);
         RatingBar ratingBar = view.findViewById(R.id.ratingBar);
-
+        TextInputLayout tilSubcategory = view.findViewById(R.id.tilSubcategory);
         etMaxPrice.setText(filterMax);
         etMinPrice.setText(filterMin);
         // 🔥 CREATE NEW LIST EVERY TIME
         List<CategoryModel> spinnerList = new ArrayList<>();
 
         // Add default item ONCE
-        spinnerList.add(new CategoryModel("0", "Select All"));
-
+        spinnerList.add(new CategoryModel("0", "All"));
+        Log.d("spinnerListNikhil", "spinner size = "+String.valueOf(subCategoryList.size()));
+        if(subCategoryList.size() == 0){
+            tilSubcategory.setVisibility(View.GONE);
+        }
         if (subCategoryList != null) {
             spinnerList.addAll(subCategoryList);
         }
@@ -322,6 +333,15 @@ public class ProductViewCategoryFragment extends Fragment {
             filterMin = etMinPrice.getText().toString().trim();
             filterRating = String.valueOf(ratingBar.getRating());
 
+            if (!filterMin.isEmpty() && !filterMax.isEmpty()) {
+                Integer max = Integer.valueOf(filterMax);
+                Integer min = Integer.valueOf(filterMin);
+                if (min > max) {
+                    etMaxPrice.setError("Max price must be greater than min price.");
+                    etMinPrice.setError("Min price must be less than max price.");
+                    return;
+                }
+            }
             pageNumber = 1;
             isLastPage = false;
             loadProduct();

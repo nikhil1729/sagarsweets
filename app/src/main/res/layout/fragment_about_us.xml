@@ -4,12 +4,17 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".AboutUsFragment">
+    <!-- SHIMMER -->
+    <include
+        android:id="@+id/shimmerLayout"
+        layout="@layout/shimmer_about_us"/>
 
     <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:fillViewport="true"
         android:id="@+id/main"
+        android:visibility="gone"
         android:background="@color/white">
 
         <LinearLayout
@@ -20,6 +25,7 @@
 
             <!-- ABOUT US -->
             <TextView
+                android:id="@+id/aboutUsTitle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="About Us"
@@ -29,6 +35,7 @@
                 android:paddingBottom="8dp"/>
 
             <TextView
+                android:id="@+id/about_us_description"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="We are committed to delivering the best quality products with love, trust, and customer satisfaction. Our journey started with a passion for excellence."
@@ -39,6 +46,7 @@
 
             <!-- PRESENTS -->
             <TextView
+                android:id="@+id/present_title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Presents"
@@ -48,6 +56,7 @@
                 android:paddingBottom="8dp"/>
 
             <TextView
+                android:id="@+id/presentDescription"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="A wide range of sweets, snacks, and delights crafted with traditional recipes and modern quality standards."
@@ -57,6 +66,7 @@
 
             <!-- TESTIMONIALS -->
             <TextView
+                android:id="@+id/testimonialTitle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Testimonials"
@@ -75,6 +85,7 @@
                 android:layout_marginBottom="16dp">
 
                 <TextView
+                    android:id="@+id/testimonialDesc"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="“Amazing quality and taste! Highly recommended.”"
@@ -85,7 +96,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="- Rahul Sharma"
+                    android:text="- Someone Says"
                     android:textSize="13sp"
                     android:textStyle="bold"
                     android:textColor="@color/black"/>
@@ -102,44 +113,11 @@
                 android:paddingBottom="12dp"/>
 
             <!-- Team Member -->
-            <LinearLayout
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvTeam"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:background="@drawable/card_bg"
-                android:padding="12dp"
-                android:gravity="center_vertical"
-                android:layout_marginBottom="12dp">
-
-                <ImageView
-                    android:layout_width="60dp"
-                    android:layout_height="60dp"
-                    android:src="@drawable/ic_user"
-                    android:background="@drawable/image_bg"
-                    android:padding="6dp"/>
-
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:layout_marginStart="12dp">
-
-                    <TextView
-                        android:layout_height="wrap_content"
-                        android:layout_width="wrap_content"
-                        android:text="Nikhil Gupta"
-                        android:textSize="16sp"
-                        android:textStyle="bold"
-                        android:textColor="@color/black"/>
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Founder and CEO"
-                        android:textSize="13sp"
-                        android:textColor="#777777"/>
-                </LinearLayout>
-            </LinearLayout>
+                android:nestedScrollingEnabled="false"/>
 
         </LinearLayout>
     </ScrollView>
