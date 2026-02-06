@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="12dp">
+
+    <TextView
+        android:id="@+id/tvContent"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textColor="#333"/>
+    <TextView
+        android:id="@+id/tvLastEditedTime"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Last:57:55:88:sasaa"
+        android:textColor="#333"/>
+</LinearLayout>

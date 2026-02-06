@@ -7,6 +7,9 @@ import com.sagarsweets.in.ApiModel.AllCategoryResponse;
 import com.sagarsweets.in.ApiModel.CategoryProductRequest;
 import com.sagarsweets.in.ApiModel.CategoryProductResponse;
 import com.sagarsweets.in.ApiModel.CategoryResponse;
+import com.sagarsweets.in.ApiModel.ContactUsFormRequest;
+import com.sagarsweets.in.ApiModel.ContactUsFormResponse;
+import com.sagarsweets.in.ApiModel.ContactUsResponse;
 import com.sagarsweets.in.ApiModel.ForgetPasswordRequest;
 import com.sagarsweets.in.ApiModel.LoginOtpRequest;
 import com.sagarsweets.in.ApiModel.LoginRequest;
@@ -15,6 +18,7 @@ import com.sagarsweets.in.ApiModel.OtpResponse;
 import com.sagarsweets.in.ApiModel.PapularProductHome;
 import com.sagarsweets.in.ApiModel.PincodeRequest;
 import com.sagarsweets.in.ApiModel.PincodeResponse;
+import com.sagarsweets.in.ApiModel.PolicyResponse;
 import com.sagarsweets.in.ApiModel.PopularProductResponse;
 import com.sagarsweets.in.ApiModel.ProductDetailsModel;
 import com.sagarsweets.in.ApiModel.ProductDetailsRequest;
@@ -38,6 +42,10 @@ import retrofit2.http.POST;
 import retrofit2.http.Query;
 
 public interface ApiService {
+
+    @POST("rest/default/savecontactus")
+    Call<ContactUsFormResponse> saveContactUs(@Body ContactUsFormRequest contactUsFormRequest);
+
     @POST("rest/user/login")
     Call<LoginResponse> loginUser(@Body LoginRequest loginRequest);
 
@@ -69,6 +77,12 @@ public interface ApiService {
 
     @GET("rest/default/aboutus")
     Call<AboutResponse> getAboutUs();
+
+    @GET("rest/default/privacy")
+    Call<PolicyResponse> getPolicy();
+    @GET("rest/default/contactus")
+    Call<ContactUsResponse> getContactUs();
+
 
     @GET("rest/homefragment/getcategory")   // 👈 homefragment category
     Call<CategoryResponse> getCategories();

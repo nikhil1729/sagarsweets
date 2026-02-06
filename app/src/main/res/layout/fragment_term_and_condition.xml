@@ -3,37 +3,36 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context=".TermAndConditionFragment">
 
-    <!-- TODO: Update blank fragment layout -->
-    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:app="http://schemas.android.com/apk/res-auto"
+    <LinearLayout
+        android:id="@+id/main"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
-        android:id="@+id/main"
         android:background="@color/white">
 
-        <!-- Toolbar Title -->
+        <!-- Title -->
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Terms and Conditions"
             android:textSize="20sp"
             android:textStyle="bold"
-            android:textColor="@color/black"
+            android:gravity="center"
             android:padding="16dp"
-            android:gravity="center"/>
+            android:textColor="@color/black"/>
 
         <!-- Tabs -->
         <com.google.android.material.tabs.TabLayout
             android:id="@+id/tabLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            app:tabMode="scrollable"
             app:tabIndicatorColor="@color/sagar_button"
             app:tabSelectedTextColor="@color/sagar_button"
-            app:tabTextColor="#777777"
-            app:tabMode="scrollable"/>
+            app:tabTextColor="#777"/>
 
         <!-- ViewPager -->
         <androidx.viewpager2.widget.ViewPager2
@@ -43,6 +42,4 @@
             android:layout_weight="1"/>
 
     </LinearLayout>
-
-
 </FrameLayout>

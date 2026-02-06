@@ -16,6 +16,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -40,6 +41,7 @@ import com.sagarsweets.in.ApiModel.PincodeRequest;
 import com.sagarsweets.in.ApiModel.PincodeResponse;
 import com.sagarsweets.in.Session.LoginSession;
 import com.sagarsweets.in.Session.PincodeSession;
+import com.sagarsweets.in.utils.ButtonLoaderUtil;
 import com.sagarsweets.in.utils.DeviceInfo;
 
 import java.util.List;
@@ -61,12 +63,15 @@ public class MainActivity extends AppCompatActivity {
     Address address;
     PincodeSession pincodeSession;
     LoginSession loginSession;
+    ProgressBar progressGetStarted;
     public void init(){
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
         btnGetStarted = findViewById(R.id.btnGetStarted);
+        progressGetStarted = findViewById(R.id.progressGetStarted);
         txtSkip = findViewById(R.id.txtSkip);
-        btnGetStarted.setVisibility(View.GONE);
+        ButtonLoaderUtil.showLoading(btnGetStarted, progressGetStarted);
+        //btnGetStarted.setVisibility(View.GONE);
         txtSkip.setVisibility(View.GONE);
     }
     @Override
@@ -230,7 +235,8 @@ public class MainActivity extends AppCompatActivity {
                                 finish();
                             }else{
                                 // if equal then button make visible
-                                btnGetStarted.setVisibility(View.VISIBLE);
+                                ButtonLoaderUtil.hideLoading(btnGetStarted, progressGetStarted,
+                                        "Get Started");
                             }
 
                         }else{
@@ -311,7 +317,8 @@ public class MainActivity extends AppCompatActivity {
                             );
                             //tvPincodeError.setVisibility(View.GONE);
                             // ✅ proceed with API / delivery check
-                            btnGetStarted.setVisibility(View.VISIBLE);
+                            ButtonLoaderUtil.hideLoading(btnGetStarted, progressGetStarted,
+                                    "Get Started");
                             Log.d("PINCODE", "User entered pincode: " + pincode);
                             // TODO: Save pincode or call API
                             bottomSheetDialog.dismiss();
