@@ -2,9 +2,24 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
     android:padding="20dp">
 
+    <TextView
+        android:id="@+id/tvPincodeError"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:padding="10dp"
+        android:text="Invalid mobile number or password"
+        android:textSize="14sp"
+        android:textColor="#D32F2F"
+        android:background="@drawable/bg_error"
+        android:visibility="gone"
+        android:drawableStart="@drawable/ic_error"
+        android:drawablePadding="8dp"
+        android:fontFamily="sans-serif-medium"/>
     <TextView
         android:text="Enter Your Pincode"
         android:textSize="18sp"
@@ -29,21 +44,31 @@
         android:inputType="number"
         android:maxLength="6"
         android:layout_marginTop="16dp"/>
-    <TextView
-        android:id="@+id/tvPincodeError"
+
+    <!-- Button  -->
+    <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Please enter a valid 6-digit pincode"
-        android:textSize="12sp"
-        android:textColor="#D32F2F"
-        android:visibility="gone"
-        android:layout_marginTop="4dp"/>
-    <Button
-        android:id="@+id/btnConfirmPincode"
-        android:text="Confirm"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:backgroundTint="@color/sagar_button"
-        android:layout_marginTop="20dp"/>
+        android:layout_marginTop="20dp">
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnConfirmPincode"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="14dp"
+            android:text="Check Pincode"
+            android:textAllCaps="false"
+            android:textSize="16sp"
+            app:backgroundTint="@color/sagar_button" />
+        <ProgressBar
+            android:id="@+id/progressPincode"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_gravity="center"
+            android:indeterminate="true"
+            android:visibility="gone" />
+    </FrameLayout>
+
+    <!--  button end -->
+
 
 </LinearLayout>

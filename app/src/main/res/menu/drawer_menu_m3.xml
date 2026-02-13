@@ -29,7 +29,10 @@
             android:title="My Profile"
             android:icon="@drawable/ic_user_register"/>
 
-
+        <item
+            android:id="@+id/draw_wishlist"
+            android:title="My Wish List"
+            android:icon="@drawable/ic_heart_filled"/>
     </group>
 
     <item android:title="Other">

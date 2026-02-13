@@ -9,7 +9,8 @@ public class ProductModel {
 
     @SerializedName("id")
     private int id;
-
+    @SerializedName("isWIshListed")
+    Boolean isWIshListed;
     @SerializedName("product_name")
     private String productName;
 
@@ -69,5 +70,13 @@ public class ProductModel {
 
     public int getId() {
         return id;
+    }
+
+    public Boolean getWIshListed() {
+        return isWIshListed;
+    }
+
+    public void setWIshListed(Boolean WIshListed) {
+        isWIshListed = WIshListed;
     }
 }

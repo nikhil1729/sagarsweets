@@ -30,6 +30,10 @@ import com.sagarsweets.in.ApiModel.SearchResponse;
 import com.sagarsweets.in.ApiModel.SliderResponse;
 import com.sagarsweets.in.ApiModel.TopCategoryRequest;
 import com.sagarsweets.in.ApiModel.TopCategoryResponse;
+import com.sagarsweets.in.ApiModel.WishListProductResponse;
+import com.sagarsweets.in.ApiModel.WishListRequest;
+import com.sagarsweets.in.ApiModel.WishListResponse;
+import com.sagarsweets.in.Session.WishlistItem;
 
 import java.util.List;
 
@@ -49,6 +53,11 @@ public interface ApiService {
     @POST("rest/user/login")
     Call<LoginResponse> loginUser(@Body LoginRequest loginRequest);
 
+    @POST("rest/user/savewishlist")
+    Call<WishListResponse> toggelWishList(@Body WishListRequest wishListRequest);
+
+    @POST("rest/user/getwishlistdatanonlogin")
+    Call<WishListProductResponse> getwishlistdatanonlogin(@Body List<WishlistItem> wishlistItem);
     @POST("rest/user/loginbyotp")
     Call<LoginResponse> loginUserByOtp(@Body LoginOtpRequest loginOtpRequest);
 

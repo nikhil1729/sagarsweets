@@ -17,6 +17,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -47,6 +48,7 @@ import com.sagarsweets.in.ApiModel.PincodeRequest;
 import com.sagarsweets.in.ApiModel.PincodeResponse;
 import com.sagarsweets.in.Session.LoginSession;
 import com.sagarsweets.in.Session.PincodeSession;
+import com.sagarsweets.in.utils.ButtonLoaderUtil;
 import com.sagarsweets.in.utils.DeviceInfo;
 
 import java.util.ArrayList;
@@ -277,6 +279,7 @@ public class HomeActivity extends AppCompatActivity {
         View view = getLayoutInflater().inflate(R.layout.bottomsheet_pincode, null);
 
         EditText etPincode = view.findViewById(R.id.etPincode);
+        ProgressBar progressPincode = view.findViewById(R.id.progressPincode);
         TextView tvPincodeError = view.findViewById(R.id.tvPincodeError);
         Button btnConfirm = view.findViewById(R.id.btnConfirmPincode);
 
@@ -303,12 +306,15 @@ public class HomeActivity extends AppCompatActivity {
 
             String device = DeviceInfo.getDeviceString(this);
             PincodeRequest request = new PincodeRequest(pincode,"",device,"","");
+            ButtonLoaderUtil.showLoading(btnConfirm,progressPincode);
 
             ApiService apiService = LoginRetrofitClient.getClient().create(ApiService.class);
             apiService.getPincodeStatus(request).enqueue(new Callback<PincodeResponse>() {
                 @Override
                 public void onResponse(Call<PincodeResponse> call, Response<PincodeResponse> response) {
+                    ButtonLoaderUtil.hideLoading(btnConfirm,progressPincode,"Check Pincode");
                     if (response.isSuccessful() && response.body() != null) {
+
                         PincodeResponse res = response.body();
                         if (res.isStatus() && res.getData() != null && !res.getData().isEmpty()) {
                             PincodeData data = res.getData().get(0);
@@ -329,6 +335,7 @@ public class HomeActivity extends AppCompatActivity {
 
                 @Override
                 public void onFailure(Call<PincodeResponse> call, Throwable t) {
+                    ButtonLoaderUtil.hideLoading(btnConfirm,progressPincode,"Check Pincode");
                     tvPincodeError.setText("Network Error");
                     tvPincodeError.setVisibility(View.VISIBLE);
                 }
@@ -348,6 +355,7 @@ public class HomeActivity extends AppCompatActivity {
         else if (id == R.id.draw_term_and_condition) loadFragment(new TermAndConditionFragment(), "Our T&C", false);
         else if (id == R.id.draw_login) loadFragment(new LoginFragment(), "Login", false);
         else if (id == R.id.draw_register) loadFragment(new RegisterFragment(), "Register", false);
+        else if (id == R.id.draw_wishlist) loadFragment(new WishListFragment(),"my_wish_list",false);
         else if (id == R.id.draw_logout) {
             loginSession.logout();
             Toast.makeText(this,"Successfully logout",Toast.LENGTH_SHORT).show();

@@ -54,8 +54,18 @@ public class ProductDetailsModel {
 
     // Local UI state (NOT from API)
     private int selectedSizePosition = -1;
-
+    @SerializedName("isWishListedMain")
+    Boolean isWishListedMain;
     // ---------- GETTERS ----------
+
+
+    public Boolean getWishListedMain() {
+        return isWishListedMain;
+    }
+
+    public void setWishListedMain(Boolean wishListedMain) {
+        isWishListedMain = wishListedMain;
+    }
 
     public List<SizeModel> getSizeList() {
         return sizeList;

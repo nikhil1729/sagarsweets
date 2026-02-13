@@ -15,8 +15,10 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.RatingBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.facebook.shimmer.ShimmerFrameLayout;
 import com.sagarsweets.in.Adapters.ImageAdapter;
@@ -33,6 +35,8 @@ import com.sagarsweets.in.ApiModel.ReviewModel;
 import com.sagarsweets.in.ApiModel.ReviewResponse;
 import com.sagarsweets.in.ApiModel.SizeModel;
 import com.sagarsweets.in.Session.LoginSession;
+import com.sagarsweets.in.Session.PincodeSession;
+import com.sagarsweets.in.utils.WishListClicked;
 
 import java.io.Serializable;
 import java.util.List;
@@ -65,14 +69,15 @@ public class ProductDetailsFragment extends Fragment {
     Button btnAddToCart;
     ShimmerFrameLayout shimmerLayout;
     View contentLayout;
+    ImageView imgWishlist;
     LoginSession loginSession;
+    PincodeSession pincodeSession;
     public ProductDetailsFragment() {
         // Required empty public constructor
         //this.productId = "12";
 
-        this.userId = "";
 
-        this.pincode = "274204";
+
 
     }
 
@@ -94,6 +99,18 @@ public class ProductDetailsFragment extends Fragment {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_product_details, container, false);
         initViews(view);
+        loginSession = new LoginSession(getContext());
+        if(loginSession.isLoggedIn()){
+            this.userId = loginSession.getUserId();
+        }else{
+            this.userId = "";
+        }
+        pincodeSession = new PincodeSession(getContext());
+        if(pincodeSession.hasPincode()){
+            this.pincode = pincodeSession.getPincode();
+        }else{
+            this.pincode = "";
+        }
         setPincodeAndUserId();
         loadProductDetails(productId,view);
         getReviewBottomSheet();
@@ -171,6 +188,7 @@ public class ProductDetailsFragment extends Fragment {
         btnAddToCart = view.findViewById(R.id.btnAddToCart);
         txtStockStatus = view.findViewById(R.id.txtStockStatus);
         txtReviewCount = view.findViewById(R.id.txtReviewCount);
+        imgWishlist = view.findViewById(R.id.imgWishlist);
     }
 
 
@@ -188,7 +206,6 @@ public class ProductDetailsFragment extends Fragment {
             @Override
             public void onResponse(Call<ProductDetailsModel> call, Response<ProductDetailsModel> response) {
                 if (response.isSuccessful() && response.body() != null) {
-                    Log.d("testnikhil","here");
                     shimmerLayout.stopShimmer();
                     shimmerLayout.setVisibility(View.GONE);
                     contentLayout.setVisibility(View.VISIBLE);
@@ -220,21 +237,21 @@ public class ProductDetailsFragment extends Fragment {
                     txtMrp.setText("₹" + product.getMrp());
                     txtDiscount.setText(Math.round(product.getDiscountPercentage()) + "% OFF");
 
-// HTML DELIVERY TEXT
+                    // HTML DELIVERY TEXT
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
                         txtDelivery.setText(
                                 Html.fromHtml(product.getExpectedDay(), Html.FROM_HTML_MODE_LEGACY)
                         );
                     }
 
-// HTML DESCRIPTION
+                    // HTML DESCRIPTION
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
                         txtDescription.setText(
                                 Html.fromHtml(product.getDescription(), Html.FROM_HTML_MODE_LEGACY)
                         );
                     }
 
-// -------- IMAGES --------
+                    // -------- IMAGES --------
                     ImageAdapter imageAdapter =
                             new ImageAdapter(product.getImages(), product.getDefaultImage());
                     rvImages.setAdapter(imageAdapter);
@@ -275,7 +292,18 @@ public class ProductDetailsFragment extends Fragment {
                     } else {
                         Log.e("SPEC_DEBUG", "Specification is NULL");
                     }
-
+                    Log.e("WISHLIST_DEBUG", "Wish list is "+String.valueOf(product.getWishListedMain()));
+                    if(product.getWishListedMain()){
+                        imgWishlist.setImageResource(R.drawable.ic_heart_filled);
+                    }else{
+                        imgWishlist.setImageResource(R.drawable.ic_heart_outline);
+                    }
+                    imgWishlist.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            wishListCkicked(productId);
+                        }
+                    });
 
 //                    SpecificationAdapter specificationAdapter =
   //                          new SpecificationAdapter(product.getSpecification());
@@ -307,6 +335,16 @@ public class ProductDetailsFragment extends Fragment {
 
 
 
+    }
+
+    private void wishListCkicked(Integer pId) {
+        Toast.makeText(getContext(),"Product id = "+String.valueOf(pId),Toast.LENGTH_LONG).show();
+        if(loginSession.isLoggedIn()){
+            // save in api
+            WishListClicked.clicked(getContext(),loginSession.getUserId(),String.valueOf(pId),imgWishlist);
+        }else{
+            // save in local
+        }
     }
 
     private void updatePriceAndStock(SizeModel size) {

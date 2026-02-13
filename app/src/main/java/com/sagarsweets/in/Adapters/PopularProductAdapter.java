@@ -4,12 +4,14 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.RatingBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.FragmentActivity;
@@ -17,13 +19,27 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
+import com.sagarsweets.in.ApiControllers.LoginRetrofitClient;
+import com.sagarsweets.in.ApiControllers.ResetOtpRetrofitClient;
 import com.sagarsweets.in.ApiControllers.SuperController;
+import com.sagarsweets.in.ApiInterface.ApiService;
 import com.sagarsweets.in.ApiModel.ProductModel;
 import com.sagarsweets.in.ApiModel.SizeModel;
+import com.sagarsweets.in.ApiModel.WishListRequest;
+import com.sagarsweets.in.ApiModel.WishListResponse;
 import com.sagarsweets.in.ProductDetailsFragment;
 import com.sagarsweets.in.R;
+import com.sagarsweets.in.RoomDatabase.AppDatabase;
+import com.sagarsweets.in.Session.LoginSession;
+import com.sagarsweets.in.utils.DeviceInfo;
+import com.sagarsweets.in.utils.WishListClicked;
 
 import java.util.List;
+import java.util.concurrent.Executors;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class PopularProductAdapter
         extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
@@ -36,6 +52,7 @@ public class PopularProductAdapter
     private static final int TYPE_PRODUCT = 1;
     private static final int TYPE_LOADER  = 2;
     private static final int TYPE_END     = 3;
+
 
     public PopularProductAdapter(Context context,
                                  List<ProductModel> productList,
@@ -144,10 +161,51 @@ public class PopularProductAdapter
         } else {
             vh.rvSizes.setVisibility(View.GONE);
         }
+        // ---------- WISH LIST CHECK --------
+        LoginSession loginSession = new LoginSession(context);
+        if(loginSession.isLoggedIn()){
+            if(product.getWIshListed()){
+                vh.imgWishlist.setImageResource(R.drawable.ic_heart_filled);
+            }else{
+                vh.imgWishlist.setImageResource(R.drawable.ic_heart_outline);
+            }
+        }else{
+            AppDatabase db = AppDatabase.getInstance(context);
+            Executors.newSingleThreadExecutor().execute(new Runnable() {
+                @Override
+                public void run() {
+                    if (db.wishlistDao().isExists(product.getId())) {
+                        vh.imgWishlist.setImageResource(R.drawable.ic_heart_filled);
+                    }else{
+                        vh.imgWishlist.setImageResource(R.drawable.ic_heart_outline);
+                    }
+                }
+            });
+
+        }
+
 
         // ---------- CLICK ----------
-        vh.itemView.setOnClickListener(v ->
+        vh.tvProductName.setOnClickListener(v ->
                 openProductDetails(product.getId()));
+        vh.imgWishlist.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                wishListSaved(product.getId(),vh);
+            }
+        });
+    }
+
+    private void wishListSaved(int pId, ProductVH vh) {
+        LoginSession loginSession = new LoginSession(context);
+        if(loginSession.isLoggedIn()){
+            // if user login then call api
+            WishListClicked.clicked(context, loginSession.getUserId(), String.valueOf(pId),vh.imgWishlist);
+        }else{
+            // else save in locally
+            Log.d("Non Login User","clicked");
+            WishListClicked.clickNonLogin(context, String.valueOf(pId),vh.imgWishlist);
+        }
     }
 
     // --------------------------------------------------
@@ -242,7 +300,7 @@ public class PopularProductAdapter
 
     public static class ProductVH extends RecyclerView.ViewHolder {
 
-        ImageView imgProduct, ivAddToCart;
+        ImageView imgProduct, ivAddToCart,imgWishlist;
         TextView tvProductName, tvSalePrice, tvPrice,
                 tvRatingCount, tvStockStatus;
         RatingBar ratingBar;
@@ -251,6 +309,7 @@ public class PopularProductAdapter
         public ProductVH(@NonNull View itemView) {
             super(itemView);
             imgProduct = itemView.findViewById(R.id.imgProduct);
+            imgWishlist = itemView.findViewById(R.id.imgWishlist);
             ivAddToCart = itemView.findViewById(R.id.ivAddToCart);
             tvProductName = itemView.findViewById(R.id.tvProductName);
             tvSalePrice = itemView.findViewById(R.id.tvSalePrice);
