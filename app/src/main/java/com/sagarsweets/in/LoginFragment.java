@@ -31,11 +31,17 @@ import com.sagarsweets.in.ApiModel.LoginRequest;
 import com.sagarsweets.in.ApiModel.LoginResponse;
 import com.sagarsweets.in.ApiModel.OtpResponse;
 import com.sagarsweets.in.ApiModel.User;
+import com.sagarsweets.in.ApiModel.WishListSyncronizeRequest;
+import com.sagarsweets.in.ApiModel.WishListSyncronizeResponse;
+import com.sagarsweets.in.RoomDatabase.AppDatabase;
 import com.sagarsweets.in.Session.LoginSession;
+import com.sagarsweets.in.Session.WishlistItem;
 import com.sagarsweets.in.utils.ButtonLoaderUtil;
 import com.sagarsweets.in.utils.DeviceInfo;
 
 import java.io.IOException;
+import java.util.List;
+import java.util.concurrent.Executors;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -55,6 +61,8 @@ public class LoginFragment extends Fragment {
     boolean isOtpLogin = false;
     boolean otpSent = false;
     String deviceInfo,ip;
+    AppDatabase db;
+    LoginSession loginSession;
     public LoginFragment() {
         // Required empty public constructor
     }
@@ -81,6 +89,7 @@ public class LoginFragment extends Fragment {
         edtOtp = view.findViewById(R.id.edtOtp);
         ip = DeviceInfo.getLocalIpAddress();
         deviceInfo = DeviceInfo.getDeviceString(getContext());
+        db = AppDatabase.getInstance(getContext());
         removeError();
 
         txtLoginWithOtp.setOnClickListener(new View.OnClickListener() {
@@ -371,10 +380,8 @@ public class LoginFragment extends Fragment {
             LoginResponse loginResponse = response.body();
             if ( loginResponse.isStatus() ) {
 
-                ButtonLoaderUtil.hideLoading(btnLogin, progressLogin, "Login");
                 // SAVE TOKEN
                 saveSession(loginResponse);
-
             }else{
                 ButtonLoaderUtil.hideLoading(btnLogin, progressLogin, "Login");
                 showErrorDialog(loginResponse.getMessage());
@@ -386,20 +393,73 @@ public class LoginFragment extends Fragment {
         }
     }
 
+    private void synchronize() {
+        syncWishlistAfterLogin();
+    }
+
+    private void syncWishlistAfterLogin() {
+        Executors.newSingleThreadExecutor().execute(() -> {
+
+            List<WishlistItem> localItems = db.wishlistDao().getAllItems();
+
+            if (localItems == null || localItems.isEmpty()) {
+                return; // nothing to sync
+            }
+
+            ApiService apiService = LoginRetrofitClient
+                    .getClient()
+                    .create(ApiService.class);
+
+            String user_id = loginSession.getUserId();
+            String device = DeviceInfo.getDeviceString(getContext());
+            WishListSyncronizeRequest wishListSyncronizeRequest = new WishListSyncronizeRequest(user_id,device,localItems);
+            Call<WishListSyncronizeResponse> call =
+                    apiService.syncWishlist(wishListSyncronizeRequest);
+
+            call.enqueue(new Callback<WishListSyncronizeResponse>() {
+                @Override
+                public void onResponse(Call<WishListSyncronizeResponse> call,
+                                       Response<WishListSyncronizeResponse> response) {
+
+                    if (response.body() != null && response.body().getStatus()) {
+                        Log.d("WISH_DEBUG",response.body().getMessage());
+                        // Clear local DB after successful sync
+                        Executors.newSingleThreadExecutor().execute(() -> {
+                            db.wishlistDao().deleteAll();
+                        });
+
+                    }else{
+                        Log.d("WISH_DEBUG",response.body().getMessage());
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<WishListSyncronizeResponse> call,
+                                      Throwable t) {
+                    Log.e("WISH_DEBUG", t.getMessage());
+                }
+            });
+
+        });
+    }
+
     private String getDeviceString() {
         return DeviceInfo.getDeviceString(getContext());
     }
 
     private void saveSession(LoginResponse loginResponse) {
-        LoginSession loginSession = new LoginSession(getContext() );
+        loginSession = new LoginSession(getContext() );
         User user;
         user = loginResponse.getUser();
         String userId = String.valueOf(user.getId());
         String userName = user.getFirst_name()+" "+user.getLast_name();
+        // setting session here
         loginSession.createLoginSession(userId, userName);
 
+        // synchronize function for wish list and cart
+        synchronize(); // this is for wishlist
+        ButtonLoaderUtil.hideLoading(btnLogin, progressLogin, "Login");
         startActivity(new Intent(getContext(), HomeActivity.class));
-
     }
 
     private void showErrorDialog(String message) {

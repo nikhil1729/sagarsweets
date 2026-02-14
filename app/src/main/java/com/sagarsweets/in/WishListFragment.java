@@ -19,17 +19,22 @@ import android.view.animation.AccelerateDecelerateInterpolator;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
+import com.facebook.shimmer.ShimmerFrameLayout;
 import com.sagarsweets.in.Adapters.PopularProductAdapter;
 import com.sagarsweets.in.ApiControllers.LoginRetrofitClient;
 import com.sagarsweets.in.ApiInterface.ApiService;
 import com.sagarsweets.in.ApiModel.ProductModel;
+import com.sagarsweets.in.ApiModel.WishListByLoggedInUserRequest;
+import com.sagarsweets.in.ApiModel.WishListByLoggedInUserResponse;
 import com.sagarsweets.in.ApiModel.WishListProductResponse;
 import com.sagarsweets.in.RoomDatabase.AppDatabase;
 import com.sagarsweets.in.Session.LoginSession;
 import com.sagarsweets.in.Session.PincodeSession;
 import com.sagarsweets.in.Session.WishlistItem;
+import com.sagarsweets.in.utils.DeviceInfo;
 
 import java.util.List;
 import java.util.concurrent.Executors;
@@ -46,6 +51,8 @@ public class WishListFragment extends Fragment {
     LinearLayout layoutEmpty;
     List<WishlistItem> wishlistItem;
     ImageView imgHeart;
+    TextView tvMessage;
+    ShimmerFrameLayout shimmer;
     Button btnStartShopping;
     private AnimatorSet heartBeatAnimator;
     public WishListFragment() {
@@ -59,9 +66,63 @@ public class WishListFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_wish_list, container, false);
         initView(view);
         startButtonClicked();
-        getWishListProducts();
+        if(loginSession.isLoggedIn()){
+            getWishListProductsByUser();
+        }else{
+            getWishListProducts();
+        }
+
         // Inflate the layout for this fragment
         return view;
+    }
+
+    private void getWishListProductsByUser() {
+        shimmer.startShimmer();
+        shimmer.setVisibility(View.VISIBLE);
+        rvWishlist.setVisibility(View.GONE);
+        layoutEmpty.setVisibility(View.GONE);
+        ApiService apiService = LoginRetrofitClient
+                .getClient()
+                .create(ApiService.class);
+        WishListByLoggedInUserRequest wishListByLoggedInUserRequest =
+                new WishListByLoggedInUserRequest(loginSession.getUserId(),
+                        pincodeSession.getPincode(), DeviceInfo.getDeviceString(getContext()));
+        Call<WishListByLoggedInUserResponse> call =
+                apiService.getWishListLoggedUser(wishListByLoggedInUserRequest);
+        call.enqueue(new Callback<WishListByLoggedInUserResponse>() {
+            @Override
+            public void onResponse(Call<WishListByLoggedInUserResponse> call, Response<WishListByLoggedInUserResponse> response) {
+                if (response.body() != null && response.body().isStatus()) {
+                    shimmer.stopShimmer();
+                    shimmer.setVisibility(View.GONE);
+                    rvWishlist.setVisibility(View.VISIBLE);
+                    List<ProductModel> productList = response.body().getResult();
+                    rvWishlist.setLayoutManager(
+                            new GridLayoutManager(getContext(), 2)
+                    );
+                    PopularProductAdapter adapter =
+                            new PopularProductAdapter(getContext(), productList, false);
+                    rvWishlist.setAdapter(adapter);
+                }else{
+                    shimmer.stopShimmer();
+                    shimmer.setVisibility(View.GONE);
+                    rvWishlist.setVisibility(View.GONE);
+                    layoutEmpty.setVisibility(View.VISIBLE);
+                    tvMessage.setText(response.body().getMessage());
+                }
+            }
+
+            @Override
+            public void onFailure(Call<WishListByLoggedInUserResponse> call, Throwable t) {
+                shimmer.stopShimmer();
+                shimmer.setVisibility(View.GONE);
+                rvWishlist.setVisibility(View.GONE);
+                layoutEmpty.setVisibility(View.VISIBLE);
+                tvMessage.setText(t.getMessage());
+            }
+        });
+
+
     }
 
     private void startButtonClicked() {
@@ -79,31 +140,42 @@ public class WishListFragment extends Fragment {
         });
     }
 
+
     private void getWishListProducts() {
-        if(loginSession.isLoggedIn()){
-            // get wish list from api
 
-        }else{
-            // get from room db
-            AppDatabase db = AppDatabase.getInstance(getContext());
+        AppDatabase db = AppDatabase.getInstance(getContext());
 
-            Executors.newSingleThreadExecutor().execute(new Runnable() {
-                @Override
-                public void run() {
-                    wishlistItem = db.wishlistDao().getAllItems();
-                    if (wishlistItem == null || wishlistItem.size() == 0) {
+        // Start shimmer on MAIN thread
+        shimmer.startShimmer();
+        shimmer.setVisibility(View.VISIBLE);
+        rvWishlist.setVisibility(View.GONE);
+        layoutEmpty.setVisibility(View.GONE);
+
+        Executors.newSingleThreadExecutor().execute(() -> {
+
+            wishlistItem = db.wishlistDao().getAllItems();
+
+            // Switch back to MAIN thread for UI updates
+            if (isAdded()) {
+                requireActivity().runOnUiThread(() -> {
+
+                    if (wishlistItem == null || wishlistItem.isEmpty()) {
+
+                        shimmer.stopShimmer();
+                        shimmer.setVisibility(View.GONE);
                         layoutEmpty.setVisibility(View.VISIBLE);
                         rvWishlist.setVisibility(View.GONE);
 
                     } else {
-                        layoutEmpty.setVisibility(View.GONE);
-                        rvWishlist.setVisibility(View.VISIBLE);
-                        fetchDataFromApi();
+
+                        fetchDataFromApi(); // safe (Retrofit callback runs on main thread)
                     }
-                }
-            });
-        }
+
+                });
+            }
+        });
     }
+
 
 
 
@@ -139,6 +211,8 @@ public class WishListFragment extends Fragment {
 
 
     private void fetchDataFromApi() {
+
+        //layoutEmpty.setVisibility(View.GONE);
         ApiService apiService = LoginRetrofitClient
                 .getClient()
                 .create(ApiService.class);
@@ -146,6 +220,9 @@ public class WishListFragment extends Fragment {
             @Override
             public void onResponse(Call<WishListProductResponse> call, Response<WishListProductResponse> response) {
                 if (response.body() != null && response.body().isStatus()) {
+                    shimmer.stopShimmer();
+                    shimmer.setVisibility(View.GONE);
+                    rvWishlist.setVisibility(View.VISIBLE);
                     List<ProductModel> productList = response.body().getResult();
                     rvWishlist.setLayoutManager(
                             new GridLayoutManager(getContext(), 2)
@@ -160,15 +237,26 @@ public class WishListFragment extends Fragment {
 
             @Override
             public void onFailure(Call<WishListProductResponse> call, Throwable t) {
-                Toast.makeText(getContext(),t.getMessage(),Toast.LENGTH_LONG).show();
+                if (isAdded()) {
+                    shimmer.stopShimmer();
+                    shimmer.setVisibility(View.GONE);
+
+                    if (wishlistItem == null || wishlistItem.isEmpty()) {
+                        layoutEmpty.setVisibility(View.VISIBLE);
+                    }
+                }
+
+                Toast.makeText(getContext(), t.getMessage(), Toast.LENGTH_LONG).show();
             }
         });
     }
 
     private void initView(View view) {
+        shimmer = view.findViewById(R.id.shimmerLayout);
         rvWishlist = view.findViewById(R.id.rvWishlist);
         layoutEmpty = view.findViewById(R.id.layoutEmpty);
         imgHeart = view.findViewById(R.id.imgEmptyWishlist);
+        tvMessage = view.findViewById(R.id.tvMessage);
         dhakDhakHeart();
         btnStartShopping = view.findViewById(R.id.btnStartShopping);
         loginSession = new LoginSession(getContext());
@@ -183,6 +271,21 @@ public class WishListFragment extends Fragment {
             heartBeatAnimator.cancel();
         }
     }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+
+        if (shimmer != null) {
+            shimmer.stopShimmer();
+        }
+
+        if (heartBeatAnimator != null) {
+            heartBeatAnimator.cancel();
+        }
+    }
+
+
 
 
 }

@@ -38,6 +38,7 @@ import com.sagarsweets.in.ApiModel.TopCategoryRequest;
 import com.sagarsweets.in.ApiModel.TopCategoryResponse;
 import com.sagarsweets.in.Session.LoginSession;
 import com.sagarsweets.in.Session.PincodeSession;
+import com.sagarsweets.in.utils.DeviceInfo;
 
 import java.util.List;
 
@@ -135,7 +136,8 @@ public class HomeFragment extends Fragment {
         rvCategoryWiseProducts.setNestedScrollingEnabled(false);
 
 
-        TopCategoryRequest topCategoryModel = new TopCategoryRequest(pincode,userId);
+        TopCategoryRequest topCategoryModel = new TopCategoryRequest(pincode,userId,
+                DeviceInfo.getDeviceString(getContext()));
         ApiService apiService = LoginRetrofitClient
                 .getClient()
                 .create(ApiService.class);

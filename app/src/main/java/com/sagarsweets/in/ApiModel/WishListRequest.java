@@ -4,12 +4,21 @@ public class WishListRequest {
     String user_id;
     String product_id;
     String device_info;
-
+    String device;
 
     public WishListRequest(String user_id, String product_id, String device_info) {
         this.user_id = user_id;
         this.product_id = product_id;
         this.device_info = device_info;
+        this.device = device_info;
+    }
+
+    public String getDevice() {
+        return device;
+    }
+
+    public void setDevice(String device) {
+        this.device = device;
     }
 
     public String getUser_id() {

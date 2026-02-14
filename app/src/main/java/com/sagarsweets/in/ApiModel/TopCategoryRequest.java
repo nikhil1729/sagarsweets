@@ -4,9 +4,12 @@ public class TopCategoryRequest {
     String pincode;
     String user_id;
 
-    public TopCategoryRequest(String pincode, String user_id) {
+    String device;
+
+    public TopCategoryRequest(String pincode, String user_id, String device) {
         this.pincode = pincode;
         this.user_id = user_id;
+        this.device = device;
     }
 
     public String getPincode() {

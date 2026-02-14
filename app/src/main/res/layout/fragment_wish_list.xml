@@ -19,7 +19,43 @@
         android:layout_marginTop="16dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+    <!-- Shimmer Layout -->
+    <com.facebook.shimmer.ShimmerFrameLayout
+        android:id="@+id/shimmerLayout"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:visibility="visible"
+        app:shimmer_auto_start="true"
+        app:shimmer_duration="1000"
+        app:layout_constraintTop_toBottomOf="@id/tvWishlistTitle"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
 
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <!-- Fake Item 1 -->
+            <include layout="@layout/item_popular_product_shimmer"/>
+
+            <!-- Fake Item 2 -->
+            <include layout="@layout/item_popular_product_shimmer"/>
+
+            <!-- Fake Item 3 -->
+            <include layout="@layout/item_popular_product_shimmer"/>
+            <!-- Fake Item 4 -->
+            <include layout="@layout/item_popular_product_shimmer"/>
+            <!-- Fake Item 5 -->
+            <include layout="@layout/item_popular_product_shimmer"/>
+            <!-- Fake Item 6 -->
+            <include layout="@layout/item_popular_product_shimmer"/>
+
+        </LinearLayout>
+
+    </com.facebook.shimmer.ShimmerFrameLayout>
     <!-- RecyclerView -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rvWishlist"
@@ -27,6 +63,7 @@
         android:layout_height="0dp"
         android:layout_marginTop="12dp"
         android:padding="8dp"
+        android:visibility="gone"
         app:layout_constraintTop_toBottomOf="@id/tvWishlistTitle"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -53,6 +90,7 @@
             android:contentDescription="Empty Wishlist" />
 
         <TextView
+            android:id="@+id/tvMessage"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Your Wishlist is Empty"

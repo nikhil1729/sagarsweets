@@ -24,5 +24,7 @@ public interface WishlistDao {
 
     @Query("SELECT EXISTS(SELECT 1 FROM wishlist WHERE productId = :id)")
     boolean isExists(int id);
+    @Query("DELETE FROM wishlist")
+    void deleteAll();
 }
 
