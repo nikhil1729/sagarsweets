@@ -46,7 +46,8 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 
-public class ProductDetailsFragment extends Fragment {
+public class ProductDetailsFragment extends Fragment
+        implements PopularProductAdapter.CartUpdateListener{
 
     Integer productId;
     String pincode;
@@ -318,7 +319,9 @@ public class ProductDetailsFragment extends Fragment {
                     );
 
                     PopularProductAdapter adapter =
-                                new PopularProductAdapter(getContext(), productList,false);
+                                new PopularProductAdapter(
+                                        getContext(), productList,
+                                        false,ProductDetailsFragment.this);
 
                     rvRelatedProducts.setAdapter(adapter);
 
@@ -374,4 +377,11 @@ public class ProductDetailsFragment extends Fragment {
         }
     }
 
+    @Override
+    public void onCartUpdated() {
+
+        if (getActivity() instanceof HomeActivity) {
+            ((HomeActivity) getActivity()).onCartUpdated();
+        }
+    }
 }

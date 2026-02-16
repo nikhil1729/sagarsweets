@@ -40,12 +40,14 @@ import com.google.android.material.badge.ExperimentalBadgeUtils;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.navigation.NavigationView;
 import com.google.android.material.textfield.MaterialAutoCompleteTextView;
+import com.sagarsweets.in.Adapters.PopularProductAdapter;
 import com.sagarsweets.in.Adapters.SearchSuggestionAdapter;
 import com.sagarsweets.in.ApiControllers.LoginRetrofitClient;
 import com.sagarsweets.in.ApiInterface.ApiService;
 import com.sagarsweets.in.ApiModel.PincodeData;
 import com.sagarsweets.in.ApiModel.PincodeRequest;
 import com.sagarsweets.in.ApiModel.PincodeResponse;
+import com.sagarsweets.in.RoomDatabase.AppDatabase;
 import com.sagarsweets.in.Session.LoginSession;
 import com.sagarsweets.in.Session.PincodeSession;
 import com.sagarsweets.in.utils.ButtonLoaderUtil;
@@ -58,7 +60,8 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class HomeActivity extends AppCompatActivity {
+public class HomeActivity extends AppCompatActivity
+        implements PopularProductAdapter.CartUpdateListener{
 
     TextView tvLocation;
     TextView drawName, drawEmail;
@@ -108,11 +111,31 @@ public class HomeActivity extends AppCompatActivity {
         showHideElementDrawer();
         updateSessionName();
         setLocationSession();
-        myCartSet(10);
+        //myCartSet(10);
 
-        topAppBar.post(() -> BadgeUtils.attachBadgeDrawable(badge, topAppBar, R.id.action_cart));
+        //topAppBar.post(() ->
+          //      BadgeUtils.attachBadgeDrawable(badge, topAppBar, R.id.action_cart));
 
-        topAppBar.setNavigationOnClickListener(v -> drawerLayout.openDrawer(GravityCompat.START));
+        topAppBar.post(() -> {
+
+            badge = BadgeDrawable.create(this);
+
+            badge.setBackgroundColor(getResources().getColor(R.color.red));
+            badge.setBadgeTextColor(getResources().getColor(android.R.color.white));
+
+            BadgeUtils.attachBadgeDrawable(
+                    badge,
+                    topAppBar,
+                    R.id.action_cart
+            );
+
+            updateCartBadge(); // call AFTER badge created
+        });
+
+
+
+        topAppBar.setNavigationOnClickListener(v ->
+                drawerLayout.openDrawer(GravityCompat.START));
 
         topAppBar.setOnMenuItemClickListener(item -> {
             if (item.getItemId() == R.id.action_cart) {
@@ -442,4 +465,46 @@ public class HomeActivity extends AppCompatActivity {
             finishAffinity();
         } else super.onBackPressed();
     }
+
+    @Override
+    public void onCartUpdated() {
+        updateCartBadge();
+    }
+
+    private void updateCartBadge() {
+
+        int userId = loginSession.isLoggedIn()
+                ? Integer.parseInt(loginSession.getUserId())
+                : 0;
+
+        AppDatabase.getInstance(this)
+                .cartDao()
+                .getCartCount(userId)
+                .observe(this, count -> {
+
+                    if (count == null || count == 0) {
+                        badge.clearNumber();
+                        badge.setVisible(false);
+                    } else {
+                        badge.setNumber(count);
+                        badge.setVisible(true);
+                        topAppBar.animate()
+                                .scaleX(1.1f)
+                                .scaleY(1.1f)
+                                .setDuration(150)
+                                .withEndAction(() -> {
+                                    topAppBar.animate()
+                                            .scaleX(1f)
+                                            .scaleY(1f)
+                                            .setDuration(150)
+                                            .start();
+                                })
+                                .start();
+
+                    }
+                });
+    }
+
+
+
 }

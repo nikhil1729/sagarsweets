@@ -47,7 +47,8 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 
-public class HomeFragment extends Fragment {
+public class HomeFragment extends Fragment
+        implements PopularProductAdapter.CartUpdateListener{
 
     private ViewPager2 viewPagerSlider;
 
@@ -155,7 +156,8 @@ public class HomeFragment extends Fragment {
                     categoryWiseAdapter =
                             new CategoryWiseAdapter(
                                     requireContext(),
-                                    topCategoryDataModels
+                                    topCategoryDataModels,
+                                    HomeFragment.this
                             );
 
                     rvCategoryWiseProducts.setAdapter(categoryWiseAdapter);
@@ -189,7 +191,8 @@ public class HomeFragment extends Fragment {
                             new GridLayoutManager(getContext(), 2)
                     );
                     PopularProductAdapter adapter =
-                            new PopularProductAdapter(getContext(), productList,false);
+                            new PopularProductAdapter(getContext(),
+                                    productList,false,HomeFragment.this);
                     rvProducts.setAdapter(adapter);
                 }else{
                     Log.d("here","elseeeeee");
@@ -292,6 +295,14 @@ public class HomeFragment extends Fragment {
         };
 
         sliderHandler.postDelayed(sliderRunnable, 3000);
+    }
+
+    @Override
+    public void onCartUpdated() {
+
+        if (getActivity() instanceof HomeActivity) {
+            ((HomeActivity) getActivity()).onCartUpdated();
+        }
     }
 
 }

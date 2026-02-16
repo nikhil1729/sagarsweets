@@ -23,10 +23,12 @@ public class CategoryWiseAdapter
 
     Context context;
     List<TopCategoryDataModel> list;
-
-    public CategoryWiseAdapter(Context context, List<TopCategoryDataModel> list) {
+    private PopularProductAdapter.CartUpdateListener cartUpdateListener;
+    public CategoryWiseAdapter(Context context, List<TopCategoryDataModel> list,
+                               PopularProductAdapter.CartUpdateListener listener) {
         this.context = context;
         this.list = list;
+        this.cartUpdateListener = listener;
     }
 
     @NonNull
@@ -78,7 +80,8 @@ public class CategoryWiseAdapter
                 new PopularProductAdapter(
                         context,
                         category.getProduct(),
-                        true
+                        true,
+                        this.cartUpdateListener
                 )
         );
     }

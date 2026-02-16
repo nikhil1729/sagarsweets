@@ -5,15 +5,21 @@ import androidx.room.Room;
 import androidx.room.RoomDatabase;
 import android.content.Context;
 
+import com.sagarsweets.in.Dao.CartDao;
 import com.sagarsweets.in.Dao.WishlistDao;
+import com.sagarsweets.in.Session.CartItem;
 import com.sagarsweets.in.Session.WishlistItem;
 
-@Database(entities = {WishlistItem.class}, version = 1)
+@Database(entities = {
+        WishlistItem.class,
+        CartItem.class
+}, version = 3)
 public abstract class AppDatabase extends RoomDatabase {
 
     private static AppDatabase instance;
 
     public abstract WishlistDao wishlistDao();
+    public abstract CartDao cartDao();
 
     public static synchronized AppDatabase getInstance(Context context) {
         if (instance == null) {
@@ -21,10 +27,10 @@ public abstract class AppDatabase extends RoomDatabase {
                             context.getApplicationContext(),
                             AppDatabase.class,
                             "sagar_database"
-                    ).fallbackToDestructiveMigration()
+                    )
+                    .fallbackToDestructiveMigration()
                     .build();
         }
         return instance;
     }
 }
-

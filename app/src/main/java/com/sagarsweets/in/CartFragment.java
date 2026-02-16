@@ -8,6 +8,11 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.sagarsweets.in.RoomDatabase.AppDatabase;
+import com.sagarsweets.in.Session.LoginSession;
+
+import java.util.concurrent.Executors;
+
 /**
  * A simple {@link Fragment} subclass.
  * Use the {@link CartFragment#newInstance} factory method to
@@ -58,7 +63,24 @@ public class CartFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+
+        clearCartAllItem();
         // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_cart, container, false);
     }
+
+    private void clearCartAllItem() {
+        LoginSession loginSession = new LoginSession(getContext());
+        int userId = loginSession.isLoggedIn()
+                ? Integer.parseInt(loginSession.getUserId())
+                : 0;
+
+        Executors.newSingleThreadExecutor().execute(() -> {
+            AppDatabase.getInstance(getContext())
+                    .cartDao()
+                    .clearAllCartByUser(userId);
+        });
+    }
+
+
 }

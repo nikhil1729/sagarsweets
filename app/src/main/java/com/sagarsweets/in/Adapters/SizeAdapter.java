@@ -20,7 +20,7 @@ public class SizeAdapter extends RecyclerView.Adapter<SizeAdapter.SizeVH> {
     private final OnSizeClickListener listener;
 
     private int selectedPosition = RecyclerView.NO_POSITION;
-
+    private int selectedSizeId = -1;
     public interface OnSizeClickListener {
         void onSizeClick(SizeModel size);
     }
@@ -39,6 +39,10 @@ public class SizeAdapter extends RecyclerView.Adapter<SizeAdapter.SizeVH> {
         this.listener = listener;
     }
 
+    public void setSelectedSize(int sizeId) {
+        this.selectedSizeId = sizeId;
+        notifyDataSetChanged();
+    }
     @NonNull
     @Override
     public SizeVH onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -50,6 +54,21 @@ public class SizeAdapter extends RecyclerView.Adapter<SizeAdapter.SizeVH> {
 
         return new SizeVH(view);
     }
+    public void setSelectedSizeById(int sizeId) {
+        for (int i = 0; i < sizeList.size(); i++) {
+            if (sizeList.get(i).getId() == sizeId) {
+                int previousPos = selectedPosition;
+                selectedPosition = i;
+
+                if (previousPos != RecyclerView.NO_POSITION) {
+                    notifyItemChanged(previousPos);
+                }
+                notifyItemChanged(selectedPosition);
+                break;
+            }
+        }
+    }
+
 
     @Override
     public void onBindViewHolder(@NonNull SizeVH holder, int position) {
@@ -67,6 +86,12 @@ public class SizeAdapter extends RecyclerView.Adapter<SizeAdapter.SizeVH> {
         } else {
             holder.itemView.setAlpha(1f);
             holder.itemView.setEnabled(true);
+        }
+        // if cart selected
+        if (size.getId() == selectedSizeId) {
+            holder.itemView.setBackgroundResource(R.drawable.bg_size_selected);
+        } else {
+            holder.itemView.setBackgroundResource(R.drawable.bg_size_unselected);
         }
 
         // SELECTION UI

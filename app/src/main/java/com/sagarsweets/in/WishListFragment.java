@@ -43,7 +43,8 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class WishListFragment extends Fragment {
+public class WishListFragment extends Fragment
+        implements PopularProductAdapter.CartUpdateListener{
     RecyclerView rvWishlist;
     LoginSession loginSession;
     PincodeSession pincodeSession;
@@ -95,13 +96,19 @@ public class WishListFragment extends Fragment {
                 if (response.body() != null && response.body().isStatus()) {
                     shimmer.stopShimmer();
                     shimmer.setVisibility(View.GONE);
-                    rvWishlist.setVisibility(View.VISIBLE);
+
                     List<ProductModel> productList = response.body().getResult();
+                    if(productList.isEmpty()){
+                         layoutEmpty.setVisibility(View.VISIBLE);
+                         return;
+                    }
+                    rvWishlist.setVisibility(View.VISIBLE);
                     rvWishlist.setLayoutManager(
                             new GridLayoutManager(getContext(), 2)
                     );
                     PopularProductAdapter adapter =
-                            new PopularProductAdapter(getContext(), productList, false);
+                            new PopularProductAdapter(getContext(), productList,
+                                    false,WishListFragment.this);
                     rvWishlist.setAdapter(adapter);
                 }else{
                     shimmer.stopShimmer();
@@ -158,14 +165,14 @@ public class WishListFragment extends Fragment {
             // Switch back to MAIN thread for UI updates
             if (isAdded()) {
                 requireActivity().runOnUiThread(() -> {
-
+                    Log.d("WISHLISTITEM", String.valueOf(wishlistItem.isEmpty()));
                     if (wishlistItem == null || wishlistItem.isEmpty()) {
 
                         shimmer.stopShimmer();
                         shimmer.setVisibility(View.GONE);
                         layoutEmpty.setVisibility(View.VISIBLE);
                         rvWishlist.setVisibility(View.GONE);
-
+                        Log.d("WISHLISTITEM","hi");
                     } else {
 
                         fetchDataFromApi(); // safe (Retrofit callback runs on main thread)
@@ -222,13 +229,19 @@ public class WishListFragment extends Fragment {
                 if (response.body() != null && response.body().isStatus()) {
                     shimmer.stopShimmer();
                     shimmer.setVisibility(View.GONE);
-                    rvWishlist.setVisibility(View.VISIBLE);
+
                     List<ProductModel> productList = response.body().getResult();
+                    if(productList.isEmpty()){
+                        layoutEmpty.setVisibility(View.VISIBLE);
+                        return;
+                    }
+                    rvWishlist.setVisibility(View.VISIBLE);
                     rvWishlist.setLayoutManager(
                             new GridLayoutManager(getContext(), 2)
                     );
                     PopularProductAdapter adapter =
-                            new PopularProductAdapter(getContext(), productList, false);
+                            new PopularProductAdapter(getContext(), productList,
+                                    false,WishListFragment.this);
                     rvWishlist.setAdapter(adapter);
                 }else{
                     Toast.makeText(getContext(),"Response body is null or false",Toast.LENGTH_LONG).show();
@@ -285,7 +298,13 @@ public class WishListFragment extends Fragment {
         }
     }
 
+    @Override
+    public void onCartUpdated() {
 
+        if (getActivity() instanceof HomeActivity) {
+            ((HomeActivity) getActivity()).onCartUpdated();
+        }
+    }
 
 
 }

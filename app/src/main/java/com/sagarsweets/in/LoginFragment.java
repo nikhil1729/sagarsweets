@@ -366,9 +366,9 @@ public class LoginFragment extends Fragment {
             public void onFailure(Call<LoginResponse> call, Throwable t) {
                 ButtonLoaderUtil.hideLoading(btnLogin, progressLogin, "Login");
                 if (t instanceof IOException) {
-                    showErrorDialog("No internet connection");
+                    showErrorDialog("No internet connection."+t.getMessage());
                 } else {
-                    showErrorDialog("Something went wrong");
+                    showErrorDialog("Something went wrong."+t.getMessage());
                 }
             }
         });
@@ -412,7 +412,8 @@ public class LoginFragment extends Fragment {
 
             String user_id = loginSession.getUserId();
             String device = DeviceInfo.getDeviceString(getContext());
-            WishListSyncronizeRequest wishListSyncronizeRequest = new WishListSyncronizeRequest(user_id,device,localItems);
+            WishListSyncronizeRequest wishListSyncronizeRequest =
+                    new WishListSyncronizeRequest(user_id,device,localItems);
             Call<WishListSyncronizeResponse> call =
                     apiService.syncWishlist(wishListSyncronizeRequest);
 
@@ -420,16 +421,17 @@ public class LoginFragment extends Fragment {
                 @Override
                 public void onResponse(Call<WishListSyncronizeResponse> call,
                                        Response<WishListSyncronizeResponse> response) {
-
-                    if (response.body() != null && response.body().getStatus()) {
-                        Log.d("WISH_DEBUG",response.body().getMessage());
+                    WishListSyncronizeResponse wishListSyncronizeResponse =
+                            response.body();
+                    if (wishListSyncronizeResponse != null && wishListSyncronizeResponse.getStatus()) {
+                        Log.d("WISH_DEBUG",wishListSyncronizeResponse.getMessage());
                         // Clear local DB after successful sync
                         Executors.newSingleThreadExecutor().execute(() -> {
                             db.wishlistDao().deleteAll();
                         });
 
                     }else{
-                        Log.d("WISH_DEBUG",response.body().getMessage());
+                        Log.d("WISH_DEBUG",wishListSyncronizeResponse.getMessage());
                     }
                 }
 

@@ -156,8 +156,61 @@
             android:orientation="horizontal"
             android:gravity="end">
 
+
+            <FrameLayout
+                android:layout_width="wrap_content"
+                android:layout_height="32dp"
+                android:background="@drawable/bg_spinner">
+                <LinearLayout
+                    android:id="@+id/layoutCartSection"
+                    android:layout_width="wrap_content"
+                    android:layout_height="32dp"
+                    android:orientation="horizontal"
+                    android:visibility="gone"
+                    android:gravity="center_vertical">
+
+                    <!-- Quantity Layout -->
+                    <LinearLayout
+                        android:id="@+id/layoutCartControl"
+                        android:layout_width="wrap_content"
+                        android:layout_height="32dp"
+                        android:orientation="horizontal"
+                        android:gravity="center"
+                        android:background="@drawable/bg_spinner"
+                        android:paddingHorizontal="6dp">
+
+                        <ImageView
+                            android:id="@+id/btnMinus"
+                            android:layout_width="20dp"
+                            android:layout_height="20dp"
+                            android:src="@drawable/ic_minus" />
+
+                        <TextView
+                            android:id="@+id/tvQuantity"
+                            android:layout_width="28dp"
+                            android:layout_height="wrap_content"
+                            android:gravity="center"
+                            android:text="0"
+                            android:textStyle="bold"
+                            android:textSize="13sp" />
+
+                        <ImageView
+                            android:id="@+id/btnPlus"
+                            android:layout_width="20dp"
+                            android:layout_height="20dp"
+                            android:src="@drawable/ic_plus" />
+
+                    </LinearLayout>
+
+                </LinearLayout>
+
+            </FrameLayout>
+            <Space
+                android:layout_width="6dp"
+                android:layout_height="wrap_content"/>
             <!-- Add to Cart -->
             <FrameLayout
+                android:id="@+id/frIvCart"
                 android:layout_width="32dp"
                 android:layout_height="32dp"
                 android:background="@drawable/bg_cart_orange">
@@ -179,7 +232,10 @@
                     app:tint="#FFFFFF" />
             </FrameLayout>
 
-
+            <!-- Space -->
+            <Space
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"/>
             <!-- Buy Now -->
             <ImageView
                 android:id="@+id/ivBuyNow"
@@ -190,6 +246,7 @@
                 android:background="@drawable/bg_circle_green"
                 android:src="@drawable/ic_flash"
                 android:contentDescription="Buy Now"
+                android:visibility="visible"
                 app:tint="#FFFFFF" />
         </LinearLayout>
 

@@ -42,7 +42,8 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class SearchFragment extends Fragment {
+public class SearchFragment extends Fragment
+        implements PopularProductAdapter.CartUpdateListener{
 
     private String searchQuery = "";
     private String pincode = "";
@@ -97,7 +98,8 @@ public class SearchFragment extends Fragment {
         GridLayoutManager manager = new GridLayoutManager(requireContext(), 2);
         rvProducts.setLayoutManager(manager);
 
-        adapter = new PopularProductAdapter(requireContext(), productList, false);
+        adapter = new PopularProductAdapter(requireContext(), productList,
+                false,SearchFragment.this);
         rvProducts.setAdapter(adapter);
 
         loadSearch();
@@ -364,5 +366,12 @@ public class SearchFragment extends Fragment {
 
         dialog.setContentView(view);
         dialog.show();
+    }
+    @Override
+    public void onCartUpdated() {
+
+        if (getActivity() instanceof HomeActivity) {
+            ((HomeActivity) getActivity()).onCartUpdated();
+        }
     }
 }

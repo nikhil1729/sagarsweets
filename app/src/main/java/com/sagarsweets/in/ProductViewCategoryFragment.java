@@ -46,7 +46,8 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 
-public class ProductViewCategoryFragment extends Fragment {
+public class ProductViewCategoryFragment extends Fragment
+        implements PopularProductAdapter.CartUpdateListener{
 
     String categoryId,categoryName ;
     TextView tvCategoryName;
@@ -127,7 +128,8 @@ public class ProductViewCategoryFragment extends Fragment {
         });
         GridLayoutManager gridLayoutManager = new GridLayoutManager(getContext(), 2);
         rvProducts.setLayoutManager(gridLayoutManager);
-        adapter = new PopularProductAdapter(getContext(), productList,false);
+        adapter = new PopularProductAdapter(getContext(), productList,
+                false,ProductViewCategoryFragment.this);
         rvProducts.setAdapter(adapter);
         loadProduct();
         rvProducts.addOnScrollListener(new RecyclerView.OnScrollListener() {
@@ -441,5 +443,11 @@ public class ProductViewCategoryFragment extends Fragment {
         rvProducts.setVisibility(View.VISIBLE);
     }
 
+    @Override
+    public void onCartUpdated() {
 
+        if (getActivity() instanceof HomeActivity) {
+            ((HomeActivity) getActivity()).onCartUpdated();
+        }
+    }
 }

@@ -34,4 +34,8 @@ public class SizeModel {
     public int getStock() {
         return stock;
     }
+
+    public int getId() {
+        return id;
+    }
 }
