@@ -1,98 +1,220 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.google.android.material.card.MaterialCardView
+<LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_gravity="bottom"
-    app:cardCornerRadius="20dp"
-    app:cardElevation="8dp">
+    android:orientation="vertical">
 
+    <!-- PRICE DETAILS CARD -->
     <LinearLayout
-        android:padding="16dp"
-        android:orientation="vertical"
-        android:layout_height="wrap_content"
         android:layout_width="match_parent"
-        >
-
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:background="@drawable/bg_price_card"
+        android:padding="16dp">
+        <!-- COUPON SECTION -->
         <LinearLayout
-            android:layout_height="wrap_content"
+            android:id="@+id/layoutCoupon"
             android:layout_width="match_parent"
-            android:orientation="horizontal"
-            android:gravity="center">
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_marginBottom="12dp">
+
+            <!-- Coupon Input Box -->
+            <LinearLayout
+                android:id="@+id/layoutCouponInput"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:orientation="horizontal"
+                android:background="@drawable/bg_coupon_box"
+                android:gravity="center_vertical"
+                android:paddingHorizontal="12dp">
+
+                <EditText
+                    android:id="@+id/etCoupon"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:background="@null"
+                    android:hint="Enter coupon code"
+                    android:textSize="14sp"
+                    android:textAllCaps="true"
+                    android:maxLines="1"
+                    android:inputType="text"/>
+
+                <TextView
+                    android:id="@+id/btnApplyCoupon"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="APPLY"
+                    android:textStyle="bold"
+                    android:textColor="#FF8F00"
+                    android:textSize="14sp"/>
+            </LinearLayout>
+
+            <!-- Error Text -->
             <TextView
-                android:layout_height="wrap_content"
+                android:id="@+id/txtCouponError"
                 android:layout_width="wrap_content"
-                android:text="Item Total"/>
-            <TextView
                 android:layout_height="wrap_content"
-                android:layout_width="wrap_content"
-                android:id="@+id/tvItemTotal" android:text="₹900"/>
+                android:text="Invalid coupon code"
+                android:textSize="12sp"
+                android:textColor="#F44336"
+                android:layout_marginTop="6dp"
+                android:visibility="gone"/>
+
+            <!-- Applied Coupon Layout -->
+            <LinearLayout
+                android:id="@+id/layoutCouponApplied"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:background="@drawable/bg_coupon_applied"
+                android:padding="10dp"
+                android:gravity="center_vertical"
+                android:layout_marginTop="8dp"
+                android:visibility="gone">
+
+                <TextView
+                    android:id="@+id/txtAppliedCoupon"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="SWEET20 applied"
+                    android:textColor="#2E7D32"
+                    android:textStyle="bold"
+                    android:textSize="14sp"/>
+
+                <TextView
+                    android:id="@+id/btnRemoveCoupon"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="REMOVE"
+                    android:textColor="#F44336"
+                    android:textStyle="bold"
+                    android:textSize="12sp"/>
+            </LinearLayout>
+
         </LinearLayout>
 
+        <!-- Subtotal -->
         <LinearLayout
-            android:layout_height="wrap_content"
             android:layout_width="match_parent"
-            android:orientation="horizontal"
-            android:gravity="center">
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
             <TextView
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_width="wrap_content"
-                android:text="Delivery"/>
+                android:layout_weight="1"
+                android:text="Subtotal"
+                android:textSize="14sp"
+                android:textColor="#666"/>
+
             <TextView
-                android:layout_height="wrap_content"
+                android:id="@+id/txtSubtotal"
                 android:layout_width="wrap_content"
-                android:text="₹40"/>
+                android:layout_height="wrap_content"
+                android:text="₹0"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:textColor="#000"/>
         </LinearLayout>
 
+        <!-- Delivery -->
         <LinearLayout
-            android:layout_height="wrap_content"
             android:layout_width="match_parent"
+            android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:gravity="center">
+            android:layout_marginTop="8dp">
+
             <TextView
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_width="wrap_content"
-                android:text="Discount"/>
+                android:layout_weight="1"
+                android:text="Delivery Charges"
+                android:textSize="14sp"
+                android:textColor="#666"/>
+
             <TextView
-                android:layout_height="wrap_content"
+                android:id="@+id/txtDelivery"
                 android:layout_width="wrap_content"
-                android:text="-₹100" android:textColor="@color/md_theme_primary"/>
+                android:layout_height="wrap_content"
+                android:text="₹40"
+                android:textSize="14sp"
+                android:textColor="#000"/>
         </LinearLayout>
 
+        <!-- Discount -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="8dp">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Discount"
+                android:textSize="14sp"
+                android:textColor="#4CAF50"/>
+
+            <TextView
+                android:id="@+id/txtDiscount"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="- ₹0"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:textColor="#4CAF50"/>
+        </LinearLayout>
+
+        <!-- Divider -->
         <View
             android:layout_width="match_parent"
             android:layout_height="1dp"
-            android:background="#DDDDDD"
-            android:layout_marginVertical="8dp"/>
+            android:background="#E0E0E0"
+            android:layout_marginVertical="12dp"/>
 
+        <!-- Grand Total -->
         <LinearLayout
-            android:layout_height="wrap_content"
             android:layout_width="match_parent"
-            android:orientation="horizontal"
-            android:gravity="center">
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
             <TextView
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_width="wrap_content"
-                android:text="Grand Total"
+                android:layout_weight="1"
+                android:text="Total"
+                android:textSize="16sp"
                 android:textStyle="bold"
-                android:textSize="16sp"/>
+                android:textColor="#000"/>
+
             <TextView
-                android:layout_height="wrap_content"
+                android:id="@+id/txtGrandTotal"
                 android:layout_width="wrap_content"
-                android:id="@+id/tvGrandTotal"
-                android:text="₹840"
+                android:layout_height="wrap_content"
+                android:text="₹0"
+                android:textSize="18sp"
                 android:textStyle="bold"
-                android:textSize="16sp"/>
+                android:textColor="#E65100"/>
         </LinearLayout>
 
-        <Button
-            android:id="@+id/btnCheckout"
-            android:layout_width="match_parent"
-            android:layout_height="60dp"
-            android:backgroundTint="@color/sagar_button"
-            android:text="Proceed to Checkout"
-            android:layout_marginTop="12dp"/>
-
     </LinearLayout>
-</com.google.android.material.card.MaterialCardView>
+
+    <!-- CHECKOUT BUTTON -->
+    <Button
+        android:id="@+id/btnCheckout"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:layout_marginTop="16dp"
+        android:text="Proceed to Checkout"
+        android:textAllCaps="false"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:textColor="#FFFFFF"
+        android:background="@drawable/bg_checkout_button"/>
+
+</LinearLayout>

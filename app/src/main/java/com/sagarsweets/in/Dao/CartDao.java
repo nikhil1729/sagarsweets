@@ -2,6 +2,7 @@ package com.sagarsweets.in.Dao;
 
 import androidx.lifecycle.LiveData;
 import androidx.room.Dao;
+import androidx.room.Delete;
 import androidx.room.Insert;
 import androidx.room.Query;
 import androidx.room.Update;
@@ -18,12 +19,16 @@ public interface CartDao {
 
     @Update
     void update(CartItem cartItem);
-
+    @Delete
+    void deleteCart(CartItem item);
     @Query("DELETE FROM cart_table WHERE productId = :productId AND userId = :userId")
     void deleteItem(int productId, int userId);
 
     @Query("SELECT * FROM cart_table WHERE userId = :userId")
     LiveData<List<CartItem>> getCartItems(int userId);
+
+    @Query("SELECT * FROM cart_table WHERE userId = :userId")
+    List<CartItem> getCartItemsList(int userId);
 
     @Query("DELETE FROM cart_table WHERE userId = :userId AND productId = :productId")
     void deleteCartByProductId(int userId,int productId);

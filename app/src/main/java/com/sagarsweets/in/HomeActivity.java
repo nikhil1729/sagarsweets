@@ -25,6 +25,7 @@ import androidx.activity.EdgeToEdge;
 import androidx.annotation.OptIn;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.content.ContextCompat;
 import androidx.core.graphics.Insets;
 import androidx.core.view.GravityCompat;
 import androidx.core.view.ViewCompat;
@@ -32,6 +33,7 @@ import androidx.core.view.WindowInsetsCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
+import androidx.lifecycle.LiveData;
 
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.badge.BadgeDrawable;
@@ -71,6 +73,7 @@ public class HomeActivity extends AppCompatActivity
     BadgeDrawable badge;
     LoginSession loginSession;
     View headerView;
+    private LiveData<Integer> cartCountLiveData;
 
     MaterialAutoCompleteTextView searchAuto;
     List<String> suggestions;
@@ -111,16 +114,13 @@ public class HomeActivity extends AppCompatActivity
         showHideElementDrawer();
         updateSessionName();
         setLocationSession();
-        //myCartSet(10);
-
-        //topAppBar.post(() ->
-          //      BadgeUtils.attachBadgeDrawable(badge, topAppBar, R.id.action_cart));
 
         topAppBar.post(() -> {
 
             badge = BadgeDrawable.create(this);
 
-            badge.setBackgroundColor(getResources().getColor(R.color.red));
+            //badge.setBackgroundColor(getResources().getColor(R.color.red));
+            badge.setBackgroundColor(ContextCompat.getColor(this, R.color.red));
             badge.setBadgeTextColor(getResources().getColor(android.R.color.white));
 
             BadgeUtils.attachBadgeDrawable(
@@ -128,7 +128,13 @@ public class HomeActivity extends AppCompatActivity
                     topAppBar,
                     R.id.action_cart
             );
+            int userId = loginSession.isLoggedIn()
+                    ? Integer.parseInt(loginSession.getUserId())
+                    : 0;
 
+            cartCountLiveData = AppDatabase.getInstance(this)
+                    .cartDao()
+                    .getCartCount(userId);
             updateCartBadge(); // call AFTER badge created
         });
 
@@ -222,6 +228,8 @@ public class HomeActivity extends AppCompatActivity
 
                 if (!query.isEmpty()) {
                     openSearchFragment(query);
+                    adapter.clear();
+                    searchAuto.dismissDropDown();
                     InputMethodManager imm =
                             (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
                     imm.hideSoftInputFromWindow(searchAuto.getWindowToken(), 0);
@@ -259,33 +267,22 @@ public class HomeActivity extends AppCompatActivity
             public void onResponse(Call<List<String>> call, Response<List<String>> response) {
 
                 if (!response.isSuccessful() || response.body() == null) return;
-
-                runOnUiThread(() -> {
-
                     List<String> data = response.body();
-
                     if (data == null || data.isEmpty()) {
                         adapter.clear();
                         searchAuto.dismissDropDown();
                         return;
                     }
-
                     adapter.clear();
                     adapter.addAll(data);
                     adapter.notifyDataSetChanged();
-
                     // ✅ SAFE LOG
                     Log.d("responseNikhil", "Count = " + adapter.getCount());
-
                     searchAuto.post(() -> {
                         if (searchAuto.hasFocus() && adapter.getCount() > 0) {
                             searchAuto.showDropDown();
                         }
                     });
-                });
-
-
-
             }
 
             @Override
@@ -426,6 +423,7 @@ public class HomeActivity extends AppCompatActivity
             drawEmail.setText("");
         } else {
             drawName.setText(R.string.hi_guest);
+            drawEmail.setText("");
         }
     }
 
@@ -436,19 +434,7 @@ public class HomeActivity extends AppCompatActivity
         } else tvLocation.setText("Please change location");
     }
 
-    private void myCartSet(int cartCount) {
-        badge = BadgeDrawable.create(this);
-        badge.setBackgroundColor(getResources().getColor(R.color.red));
-        badge.setBadgeTextColor(getResources().getColor(android.R.color.white));
 
-        if(cartCount>0){
-            badge.setNumber(cartCount);
-            badge.setVisible(true);
-        } else {
-            badge.clearNumber();
-            badge.setVisible(false);
-        }
-    }
 
     @Override
     public void onBackPressed() {
@@ -473,19 +459,15 @@ public class HomeActivity extends AppCompatActivity
 
     private void updateCartBadge() {
 
-        int userId = loginSession.isLoggedIn()
-                ? Integer.parseInt(loginSession.getUserId())
-                : 0;
 
-        AppDatabase.getInstance(this)
-                .cartDao()
-                .getCartCount(userId)
-                .observe(this, count -> {
+
+        cartCountLiveData.observe(this, count -> {
 
                     if (count == null || count == 0) {
                         badge.clearNumber();
                         badge.setVisible(false);
                     } else {
+                        Log.d("CARTCOUNT",String.valueOf(count));
                         badge.setNumber(count);
                         badge.setVisible(true);
                         topAppBar.animate()

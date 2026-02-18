@@ -2,71 +2,197 @@ package com.sagarsweets.in;
 
 import android.os.Bundle;
 
+import androidx.cardview.widget.CardView;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 
+import com.sagarsweets.in.Adapters.CartAdapter;
+import com.sagarsweets.in.ApiControllers.LoginRetrofitClient;
+import com.sagarsweets.in.ApiInterface.ApiService;
+import com.sagarsweets.in.ApiModel.RemoveCartRequest;
+import com.sagarsweets.in.ApiModel.UpdateCartRequest;
 import com.sagarsweets.in.RoomDatabase.AppDatabase;
+import com.sagarsweets.in.Session.CartItem;
 import com.sagarsweets.in.Session.LoginSession;
+import com.sagarsweets.in.utils.CartSaveOnServer;
+import com.sagarsweets.in.utils.DeviceInfo;
 
+import java.util.List;
+import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
-/**
- * A simple {@link Fragment} subclass.
- * Use the {@link CartFragment#newInstance} factory method to
- * create an instance of this fragment.
- */
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+
+
 public class CartFragment extends Fragment {
 
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
+    RecyclerView rvCart;
+    LinearLayout layoutEmpty;
+    EditText etCoupon;
+    TextView txtCouponError,txtAppliedCoupon;
+    LinearLayout layoutCouponApplied;
+    TextView txtSubtotal,txtDelivery,txtDiscount,txtGrandTotal;
+    Button btnCheckout;
+    TextView btnApplyCoupon,btnRemoveCoupon,tvItemCount;
+    CardView cardItemCount;
 
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
-
+    CartAdapter adapter;
+    AppDatabase db;
+    private final Executor executor = Executors.newSingleThreadExecutor();
+    LoginSession loginSession;
+    String device;
     public CartFragment() {
         // Required empty public constructor
     }
 
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment CartFragment.
-     */
-    // TODO: Rename and change types and number of parameters
-    public static CartFragment newInstance(String param1, String param2) {
-        CartFragment fragment = new CartFragment();
-        Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
-        fragment.setArguments(args);
-        return fragment;
-    }
 
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
-        }
-    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
-        clearCartAllItem();
+        View view = inflater.inflate(R.layout.fragment_cart, container, false);
+        initViews(view);
+        //getCartProductDetailsApi();
+        setCart();
+        syncronizeCart();
+        //clearCartAllItem();
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_cart, container, false);
+        return view;
+    }
+
+    private void syncronizeCart() {
+        if(loginSession.isLoggedIn()){
+
+        }
+    }
+
+
+    private void setCart() {
+
+
+        int userId = loginSession.isLoggedIn()
+                ? Integer.parseInt(loginSession.getUserId())
+                : 0;
+
+        adapter = new CartAdapter(getContext(), new CartAdapter.CartItemListener() {
+
+            @Override
+            public void onQuantityChanged(CartItem model, View v) {
+
+                executor.execute(() -> {
+
+                    db.cartDao().update(model);
+                });
+                // 🔥 If logged in → update server
+                if (loginSession.isLoggedIn()) {
+                    updateCartOnServer(model,v);
+                }
+            }
+
+            @Override
+            public void onItemRemoved(CartItem model, View v) {
+
+                executor.execute(() -> {
+                    db.cartDao().deleteCart(model);
+                });
+                if (loginSession.isLoggedIn()) {
+                    removeCartFromServer(model,v);
+                }
+            }
+        });
+
+        rvCart.setLayoutManager(new LinearLayoutManager(getContext()));
+        rvCart.setAdapter(adapter);
+
+        // 🔥 Observe LiveData
+        db.cartDao().getCartItems(userId)
+                .observe(getViewLifecycleOwner(), cartList -> {
+
+                    if (cartList != null && !cartList.isEmpty()) {
+
+                        adapter.setList(cartList);
+
+                        layoutEmpty.setVisibility(View.GONE);
+                        rvCart.setVisibility(View.VISIBLE);
+
+                        tvItemCount.setText(cartList.size() + " Items in Cart");
+
+                        cardItemCount.setVisibility(View.VISIBLE);
+                        calculateTotal(cartList);
+
+                    } else {
+
+                        layoutEmpty.setVisibility(View.VISIBLE);
+                        rvCart.setVisibility(View.GONE);
+
+                        txtSubtotal.setText("₹0");
+                        txtGrandTotal.setText("₹0");
+                        cardItemCount.setVisibility(View.GONE);
+                    }
+                });
+    }
+
+    private void removeCartFromServer(CartItem model, View v) {
+        // util static function for remove product in cart
+        CartSaveOnServer.cartRemoveFromServer(model,v,loginSession,device);
+    }
+
+    private void updateCartOnServer(CartItem model, View v) {
+        // util static function for saving product in cart
+        CartSaveOnServer.saveCartOnServer(model,v,loginSession,device);
+    }
+
+    private void calculateTotal(List<CartItem> cartList) {
+        double subtotal = 0;
+
+        for (CartItem item : cartList) {
+            subtotal += item.getPrice() * item.getQuantity();
+        }
+
+        double delivery = subtotal > 500 ? 0 : 40;   // Free delivery above 500
+        double discount = 0; // Later connect coupon
+
+        double grandTotal = subtotal + delivery - discount;
+
+        txtSubtotal.setText("₹" + subtotal);
+        txtDelivery.setText("₹" + delivery);
+        txtDiscount.setText("- ₹" + discount);
+        txtGrandTotal.setText("₹" + grandTotal);
+    }
+
+
+    private void initViews(View view) {
+        rvCart = view.findViewById(R.id.rvCart);
+        layoutEmpty = view.findViewById(R.id.layoutEmpty);
+        etCoupon = view.findViewById(R.id.etCoupon);
+        txtCouponError = view.findViewById(R.id.txtCouponError);
+        txtAppliedCoupon = view.findViewById(R.id.txtAppliedCoupon);
+        layoutCouponApplied = view.findViewById(R.id.layoutCouponApplied);
+        txtSubtotal = view.findViewById(R.id.txtSubtotal);
+        txtDelivery = view.findViewById(R.id.txtDelivery);
+        txtDiscount = view.findViewById(R.id.txtDiscount);
+        txtGrandTotal = view.findViewById(R.id.txtGrandTotal);
+        btnCheckout = view.findViewById(R.id.btnCheckout);
+        btnApplyCoupon = view.findViewById(R.id.btnApplyCoupon);
+        btnRemoveCoupon = view.findViewById(R.id.btnRemoveCoupon);
+        cardItemCount = view.findViewById(R.id.cardItemCount);
+        tvItemCount = view.findViewById(R.id.tvItemCount);
+        db = AppDatabase.getInstance(getContext());
+        loginSession = new LoginSession(getContext());
+        device = DeviceInfo.getDeviceString(getContext());
     }
 
     private void clearCartAllItem() {

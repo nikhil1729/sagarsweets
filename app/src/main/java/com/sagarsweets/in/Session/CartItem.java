@@ -16,11 +16,12 @@ public class CartItem {
     private int quantity;
     private int sizeId;
     private int userId;   // important if login system exists
+    private String sizeSelectedName;
 
-    public CartItem( int productId, String productName,
+    public CartItem(int productId, String productName,
                     String productImage, double price, int quantity,
-                    int sizeId, int userId) {
-        //this.id = id;
+                    int sizeId, int userId, String sizeSelectedName) {
+        this.id = id;
         this.productId = productId;
         this.productName = productName;
         this.productImage = productImage;
@@ -28,11 +29,22 @@ public class CartItem {
         this.quantity = quantity;
         this.sizeId = sizeId;
         this.userId = userId;
+        this.sizeSelectedName = sizeSelectedName;
     }
 
 
 
+
     // Getters & Setters
+
+
+    public String getSizeSelectedName() {
+        return sizeSelectedName;
+    }
+
+    public void setSizeSelectedName(String sizeSelectedName) {
+        this.sizeSelectedName = sizeSelectedName;
+    }
 
     public int getId() {
         return id;

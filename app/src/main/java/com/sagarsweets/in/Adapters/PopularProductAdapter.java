@@ -15,9 +15,7 @@ import android.widget.RatingBar;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.core.content.ContextCompat;
 import androidx.fragment.app.FragmentActivity;
-import androidx.lifecycle.LiveData;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -32,6 +30,8 @@ import com.sagarsweets.in.R;
 import com.sagarsweets.in.RoomDatabase.AppDatabase;
 import com.sagarsweets.in.Session.CartItem;
 import com.sagarsweets.in.Session.LoginSession;
+import com.sagarsweets.in.utils.CartSaveOnServer;
+import com.sagarsweets.in.utils.DeviceInfo;
 import com.sagarsweets.in.utils.WishListClicked;
 
 import java.util.List;
@@ -116,6 +116,7 @@ public class PopularProductAdapter
         vh.quantity = 0;
         vh.sizeSelected = false;
         vh.selectedSizeId = 0;
+        vh.sizeSelectedName = "NA";
 
         // ---------- WIDTH (CATEGORY WISE) ----------
         if (categoryWise) {
@@ -136,7 +137,7 @@ public class PopularProductAdapter
         }
 
         // ---------- IMAGE ----------
-        Glide.with(context)
+        Glide.with(vh.itemView)
                 .load(SuperController.base_url_images + product.getImagePath())
                 .placeholder(R.drawable.category_placeholder)
                 .error(R.drawable.category_error)
@@ -149,22 +150,59 @@ public class PopularProductAdapter
         vh.tvPrice.setText("₹" + product.getMrp());
         vh.ratingBar.setRating(product.getRating());
         vh.tvRatingCount.setText("(" + product.getRatingCount() + ")");
-
+        List<SizeModel> sizes = product.getSizeList();
         // ---------- STOCK ----------
-        if (product.getStock() != null && product.getStock() == 0) {
-            vh.tvStockStatus.setText("OUT OF STOCK");
-            vh.tvStockStatus.setBackgroundResource(R.drawable.bg_stock_out);
-            vh.ivAddToCart.setEnabled(false);
-            vh.itemView.setAlpha(0.6f);
-        } else {
-            vh.tvStockStatus.setText("IN STOCK");
-            vh.tvStockStatus.setBackgroundResource(R.drawable.bg_stock_in);
-            vh.ivAddToCart.setEnabled(true);
-            vh.itemView.setAlpha(1f);
+        /*algorithm for stock start*/
+        // first check size is available or not
+            // if available then
+                // stock will get from here
+            // if size is not available
+                // stock directly must be available
+
+        if(!sizes.isEmpty() && sizes.size() > 0){
+            // here size is available
+            int totalStock = 0;
+            for (SizeModel size : sizes) {
+                int stock = size.getStock();
+                Log.d("ProductstockLL",product.getProductName()+"-"+String.valueOf(stock));
+                totalStock += stock;
+            }
+            if(totalStock > 0){
+                // product is in stock
+                vh.tvStockStatus.setText("IN STOCK");
+                vh.tvStockStatus.setBackgroundResource(R.drawable.bg_stock_in);
+                vh.ivAddToCart.setEnabled(true);
+                vh.itemView.setAlpha(1f);
+            }else{
+                // product is out of stock
+                vh.tvStockStatus.setText("OUT OF STOCK");
+                vh.tvStockStatus.setBackgroundResource(R.drawable.bg_stock_out);
+                vh.ivAddToCart.setEnabled(false);
+                vh.itemView.setAlpha(0.6f);
+            }
+            Log.d("PRODUCTSTOCKDEBUG","if-"+product.getProductName()+"-size-"+sizes.size()+",Totalstock-"+totalStock);
+        }else{
+            // here size is not available
+            if (product.getStock() == null || product.getStock() == 0) {
+                // stock not  available
+                vh.tvStockStatus.setText("OUT OF STOCK");
+                vh.tvStockStatus.setBackgroundResource(R.drawable.bg_stock_out);
+                vh.ivAddToCart.setEnabled(false);
+                vh.itemView.setAlpha(0.6f);
+                Log.d("PRODUCTSTOCKDEBUG","ifstock -"+product.getProductName()+"-stock-"+product.getStock());
+            }else{
+                // stock available
+                vh.tvStockStatus.setText("IN STOCK");
+                vh.tvStockStatus.setBackgroundResource(R.drawable.bg_stock_in);
+                vh.ivAddToCart.setEnabled(true);
+                vh.itemView.setAlpha(1f);
+                Log.d("PRODUCTSTOCKDEBUG","elsestock -"+product.getProductName()+"-stock-"+product.getStock());
+            }
+
         }
+        /*algorithm end*/
 
         // ---------- SIZE LIST ----------
-        List<SizeModel> sizes = product.getSizeList();
 
         if (sizes != null && !sizes.isEmpty()) {
 
@@ -236,7 +274,7 @@ public class PopularProductAdapter
                     vh.quantity--;
                     vh.tvQuantity.setText(String.valueOf(vh.quantity));
 
-                    addedToCart(product,vh.selectedSizeId,vh.quantity);
+                    addedToCart(product,vh.selectedSizeId,vh.quantity,vh.sizeSelectedName,vh,v);
 
                 } else {
 
@@ -244,8 +282,8 @@ public class PopularProductAdapter
 
                     vh.layoutCartSection.setVisibility(View.GONE);
                     vh.frIvCart.setVisibility(View.VISIBLE);
-                    addedToCart(product,vh.selectedSizeId,vh.quantity);
-                    removeFromCart(product);
+                    //addedToCart(product,vh.selectedSizeId,vh.quantity);
+                    removeFromCart(product,v);
                 }
             }
         });
@@ -255,7 +293,7 @@ public class PopularProductAdapter
                 vh.quantity++;
                 vh.tvQuantity.setText(String.valueOf(vh.quantity));
 
-                addedToCart(product, vh.selectedSizeId,vh.quantity);
+                addedToCart(product, vh.selectedSizeId,vh.quantity, vh.sizeSelectedName, vh, v);
                 animateAddToCart(vh.imgProduct);
             }
         });
@@ -274,13 +312,11 @@ public class PopularProductAdapter
                         showSizeSelected(vh);
                         return;
                     }
-                    cartControlVisible(vh,product,vh.selectedSizeId);
-                    //addedToCart(product,vh.selectedSizeId);
+                    cartControlVisible(vh,product,vh.selectedSizeId,v);
                 }else{
                     // size is not available
                     Log.d("DEBUG_CART","cart clicked-size is not available");
-                    cartControlVisible(vh,product,0);
-                    //addedToCart(product,0);
+                    cartControlVisible(vh,product,0,v);
                 }
                 //animateAddToCart(vh.imgProduct);
             }
@@ -325,20 +361,25 @@ public class PopularProductAdapter
     }
 
 
-    private void removeFromCart(ProductModel product) {
+    private void removeFromCart(ProductModel product, View v) {
         executor.execute(() -> {
             int productId = product.getId();
             int userId = loginSession.isLoggedIn() ? Integer.parseInt(loginSession.getUserId()) : 0;
+
+            CartItem existingItem = db.cartDao().checkItem(productId, userId);
+            CartSaveOnServer.cartRemoveFromServer(existingItem,v,
+                    loginSession,DeviceInfo.getDeviceString(context));
             db.cartDao().deleteItem(productId,userId);
         });
     }
 
-    private void cartControlVisible(ProductVH vh, ProductModel product, int selectedSizeId) {
+    private void cartControlVisible(ProductVH vh, ProductModel product,
+                                    int selectedSizeId, View v) {
         vh.layoutCartSection.setVisibility(View.VISIBLE);
         vh.frIvCart.setVisibility(View.GONE);
         vh.quantity = 1;
         vh.tvQuantity.setText("1");
-        addedToCart(product, selectedSizeId, vh.quantity);
+        addedToCart(product, selectedSizeId, vh.quantity, vh.sizeSelectedName, vh, v);
         animateAddToCart(vh.imgProduct);
     }
 
@@ -405,7 +446,8 @@ public class PopularProductAdapter
     }
 
 
-    private void addedToCart(ProductModel product,int selectedSizeId,int quantity) {
+    private void addedToCart(ProductModel product, int selectedSizeId,
+                             int quantity, String sizeSelectedName, ProductVH vh, View v) {
         executor.execute(() -> {
             int productId = product.getId();
             int userId = loginSession.isLoggedIn() ? Integer.parseInt(loginSession.getUserId()) : 0;
@@ -419,14 +461,18 @@ public class PopularProductAdapter
             if (existingItem != null) {
                 existingItem.setQuantity(quantity);
                 db.cartDao().update(existingItem);
+                CartSaveOnServer.saveCartOnServer(existingItem,v,
+                        loginSession, DeviceInfo.getDeviceString(context));
                 Log.d("DEBUG_CART","Updated insert");
             } else {
                 CartItem newItem = new CartItem(productId,pName,
-                        pImage,price,quantity,sizeId,userId);
+                        pImage,price,quantity,sizeId,userId,sizeSelectedName);
                 db.cartDao().insert(newItem);
-                
+                CartSaveOnServer.saveCartOnServer(newItem,v,
+                        loginSession, DeviceInfo.getDeviceString(context));
                 Log.d("DEBUG_CART","new inserted");
             }
+
             if (cartUpdateListener != null) {
                 ((FragmentActivity) context).runOnUiThread(() -> {
                     cartUpdateListener.onCartUpdated();
@@ -480,18 +526,7 @@ public class PopularProductAdapter
     // HELPERS
     // --------------------------------------------------
 
-    public void addLoader() {
-        productList.add(null);
-        notifyItemInserted(productList.size() - 1);
-    }
 
-    public void removeLoader() {
-        int pos = productList.size() - 1;
-        if (pos >= 0 && productList.get(pos) == null) {
-            productList.remove(pos);
-            notifyItemRemoved(pos);
-        }
-    }
 
     public void setShowEndMessage(boolean show) {
         showEndMessage = show;
@@ -504,14 +539,23 @@ public class PopularProductAdapter
         vh.tvPrice.setText("₹" + size.getMrp());
         vh.sizeSelected = true;
         vh.selectedSizeId = size.getId();
+        vh.sizeSelectedName = size.getTitle();
+
 
         int productId = vh.vhProductId;
         int userId = loginSession.isLoggedIn()
                 ? Integer.parseInt(loginSession.getUserId())
                 : 0;
 
-        // ✅ Database work in background
+        // ✅ Database work in background if any size will select
         executor.execute(() -> {
+
+            CartItem existingItem = db.cartDao().checkItem(productId, userId);
+            if(existingItem != null){
+                CartSaveOnServer.cartRemoveFromServer(existingItem,null,
+                        loginSession,DeviceInfo.getDeviceString(context));
+            }
+
             db.cartDao().deleteCartByProductId(userId, productId);
         });
 
@@ -521,17 +565,7 @@ public class PopularProductAdapter
         vh.quantity = 0;
         vh.tvQuantity.setText("0");
 
-        if (size.getStock() > 0) {
-            vh.tvStockStatus.setText("IN STOCK");
-            vh.tvStockStatus.setBackgroundResource(R.drawable.bg_stock_in);
-            vh.ivAddToCart.setEnabled(true);
-            vh.itemView.setAlpha(1f);
-        } else {
-            vh.tvStockStatus.setText("OUT OF STOCK");
-            vh.tvStockStatus.setBackgroundResource(R.drawable.bg_stock_out);
-            vh.ivAddToCart.setEnabled(false);
-            vh.itemView.setAlpha(0.6f);
-        }
+
     }
 
 
@@ -571,6 +605,7 @@ public class PopularProductAdapter
         RecyclerView rvSizes;
         Boolean sizeSelected = false;
         int selectedSizeId ;
+        String sizeSelectedName;
         LinearLayout layoutCartSection;
         ImageView btnMinus,btnPlus;
         TextView tvQuantity;

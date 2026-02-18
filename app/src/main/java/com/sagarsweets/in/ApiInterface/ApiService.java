@@ -21,15 +21,19 @@ import com.sagarsweets.in.ApiModel.PincodeResponse;
 import com.sagarsweets.in.ApiModel.PolicyResponse;
 import com.sagarsweets.in.ApiModel.PopularProductResponse;
 import com.sagarsweets.in.ApiModel.ProductDetailsModel;
+import com.sagarsweets.in.ApiModel.ProductDetailsOfCartRequest;
+import com.sagarsweets.in.ApiModel.ProductDetailsOfCartResponse;
 import com.sagarsweets.in.ApiModel.ProductDetailsRequest;
 import com.sagarsweets.in.ApiModel.ProductReviewRequest;
 import com.sagarsweets.in.ApiModel.RegisterUserRequest;
+import com.sagarsweets.in.ApiModel.RemoveCartRequest;
 import com.sagarsweets.in.ApiModel.ReviewResponse;
 import com.sagarsweets.in.ApiModel.SearchProductRequest;
 import com.sagarsweets.in.ApiModel.SearchResponse;
 import com.sagarsweets.in.ApiModel.SliderResponse;
 import com.sagarsweets.in.ApiModel.TopCategoryRequest;
 import com.sagarsweets.in.ApiModel.TopCategoryResponse;
+import com.sagarsweets.in.ApiModel.UpdateCartRequest;
 import com.sagarsweets.in.ApiModel.WishListByLoggedInUserRequest;
 import com.sagarsweets.in.ApiModel.WishListByLoggedInUserResponse;
 import com.sagarsweets.in.ApiModel.WishListProductResponse;
@@ -130,7 +134,16 @@ public interface ApiService {
     @POST("rest/default/getpincodebypin")
     Call<PincodeResponse> getPincodeStatus(@Body PincodeRequest pincodeRequest);
 
+    @POST("rest/user/getproductdetailsofcart")
+    Call<ProductDetailsOfCartResponse> getProductDetailsOfCart(
+            @Body ProductDetailsOfCartRequest productDetailsOfCartRequest);
     @GET("rest/default/searchsuggestions")
     Call<List<String>> getSuggestions(@Query("query") String query);
 
+    @POST("rest/user/cartupdate")
+    Call<Void> updateCart(@Body UpdateCartRequest updateCartRequest);
+
+    @POST("rest/user/cartremove")
+    Call<Void> removeCart(@Body RemoveCartRequest removeCartRequest);
+    /*Call<Void> updateCart(String user_id, int productId, int quantity, int sizeId, String device);*/
 }
