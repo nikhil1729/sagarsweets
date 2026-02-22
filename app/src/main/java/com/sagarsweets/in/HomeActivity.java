@@ -115,30 +115,6 @@ public class HomeActivity extends AppCompatActivity
         updateSessionName();
         setLocationSession();
 
-        topAppBar.post(() -> {
-
-            badge = BadgeDrawable.create(this);
-
-            //badge.setBackgroundColor(getResources().getColor(R.color.red));
-            badge.setBackgroundColor(ContextCompat.getColor(this, R.color.red));
-            badge.setBadgeTextColor(getResources().getColor(android.R.color.white));
-
-            BadgeUtils.attachBadgeDrawable(
-                    badge,
-                    topAppBar,
-                    R.id.action_cart
-            );
-            int userId = loginSession.isLoggedIn()
-                    ? Integer.parseInt(loginSession.getUserId())
-                    : 0;
-
-            cartCountLiveData = AppDatabase.getInstance(this)
-                    .cartDao()
-                    .getCartCount(userId);
-            updateCartBadge(); // call AFTER badge created
-        });
-
-
 
         topAppBar.setNavigationOnClickListener(v ->
                 drawerLayout.openDrawer(GravityCompat.START));
@@ -150,6 +126,8 @@ public class HomeActivity extends AppCompatActivity
             }
             return false;
         });
+
+        topAppBar.post(this::setupCartBadge);
 
         navigationView.setNavigationItemSelectedListener(item -> {
             openDrawerItem(item.getItemId());
@@ -166,6 +144,62 @@ public class HomeActivity extends AppCompatActivity
                 navigationView.setCheckedItem(R.id.draw_login);
             }
         }
+    }
+
+    @OptIn(markerClass = ExperimentalBadgeUtils.class)
+    private void setupCartBadge() {
+
+        badge = BadgeDrawable.create(this);
+        badge.setBackgroundColor(ContextCompat.getColor(this, R.color.red));
+        badge.setBadgeTextColor(ContextCompat.getColor(this, android.R.color.white));
+        badge.setMaxCharacterCount(3); // shows 99+
+
+        BadgeUtils.attachBadgeDrawable(
+                badge,
+                topAppBar,
+                R.id.action_cart
+        );
+
+        int userId = loginSession.isLoggedIn()
+                ? Integer.parseInt(loginSession.getUserId())
+                : 0;
+
+        cartCountLiveData = AppDatabase.getInstance(this)
+                .cartDao()
+                .getCartCount(userId);
+
+        observeCartCount();
+    }
+    private void observeCartCount() {
+
+        if (cartCountLiveData == null) {
+            Log.e("BADGE", "LiveData is NULL");
+            return;
+        }
+
+        cartCountLiveData.observe(this, count -> {
+
+            if (badge == null) return;
+
+            if (count == null || count <= 0) {
+                badge.setVisible(false);
+            } else {
+                badge.setNumber(count);
+                badge.setVisible(true);
+
+                topAppBar.animate()
+                        .scaleX(1.1f)
+                        .scaleY(1.1f)
+                        .setDuration(150)
+                        .withEndAction(() ->
+                                topAppBar.animate()
+                                        .scaleX(1f)
+                                        .scaleY(1f)
+                                        .setDuration(150)
+                                        .start())
+                        .start();
+            }
+        });
     }
 
     /** -------------------- AUTOCOMPLETE -------------------- **/
@@ -454,37 +488,20 @@ public class HomeActivity extends AppCompatActivity
 
     @Override
     public void onCartUpdated() {
-        updateCartBadge();
+        // do nothing — LiveData will auto update
+        //updateCartBadge();
     }
+    public int[] getCartIconLocation() {
 
-    private void updateCartBadge() {
+        int[] location = new int[2];
 
+        View cartView = topAppBar.findViewById(R.id.action_cart);
 
+        if (cartView != null) {
+            cartView.getLocationOnScreen(location);
+        }
 
-        cartCountLiveData.observe(this, count -> {
-
-                    if (count == null || count == 0) {
-                        badge.clearNumber();
-                        badge.setVisible(false);
-                    } else {
-                        Log.d("CARTCOUNT",String.valueOf(count));
-                        badge.setNumber(count);
-                        badge.setVisible(true);
-                        topAppBar.animate()
-                                .scaleX(1.1f)
-                                .scaleY(1.1f)
-                                .setDuration(150)
-                                .withEndAction(() -> {
-                                    topAppBar.animate()
-                                            .scaleX(1f)
-                                            .scaleY(1f)
-                                            .setDuration(150)
-                                            .start();
-                                })
-                                .start();
-
-                    }
-                });
+        return location;
     }
 
 

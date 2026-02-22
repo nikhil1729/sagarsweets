@@ -34,9 +34,11 @@ import com.sagarsweets.in.ApiModel.User;
 import com.sagarsweets.in.ApiModel.WishListSyncronizeRequest;
 import com.sagarsweets.in.ApiModel.WishListSyncronizeResponse;
 import com.sagarsweets.in.RoomDatabase.AppDatabase;
+import com.sagarsweets.in.Session.CartItem;
 import com.sagarsweets.in.Session.LoginSession;
 import com.sagarsweets.in.Session.WishlistItem;
 import com.sagarsweets.in.utils.ButtonLoaderUtil;
+import com.sagarsweets.in.utils.CartSaveOnServer;
 import com.sagarsweets.in.utils.DeviceInfo;
 
 import java.io.IOException;
@@ -381,6 +383,7 @@ public class LoginFragment extends Fragment {
             if ( loginResponse.isStatus() ) {
 
                 // SAVE TOKEN
+
                 saveSession(loginResponse);
             }else{
                 ButtonLoaderUtil.hideLoading(btnLogin, progressLogin, "Login");
@@ -391,6 +394,25 @@ public class LoginFragment extends Fragment {
             showErrorDialog("Invalid response from server.");
 
         }
+    }
+
+    private void syncronizeCart() {
+            Executors.newSingleThreadExecutor().execute(() -> {
+
+                int userId = Integer.parseInt(loginSession.getUserId());
+
+                List<CartItem> localCart = db.cartDao().getCartItemsList(0);
+
+                CartSaveOnServer.syncFullCart(
+                        localCart,
+                        loginSession,
+                        DeviceInfo.getDeviceString(getContext()),
+                        getContext()
+                );
+
+            });
+            //CartSaveOnServer.syncFullCart();
+
     }
 
     private void synchronize() {
@@ -460,6 +482,7 @@ public class LoginFragment extends Fragment {
 
         // synchronize function for wish list and cart
         synchronize(); // this is for wishlist
+        syncronizeCart();// cart sync
         ButtonLoaderUtil.hideLoading(btnLogin, progressLogin, "Login");
         startActivity(new Intent(getContext(), HomeActivity.class));
     }

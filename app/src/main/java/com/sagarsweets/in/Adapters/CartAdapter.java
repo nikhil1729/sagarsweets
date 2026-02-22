@@ -125,12 +125,10 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
 
         root.addView(animView);
 
-        // Get cart position
-        int[] cartLocation = new int[2];
-        activity.findViewById(R.id.action_cart)
-                .getLocationOnScreen(cartLocation);
+        // ✅ SAFE cart position
+        int[] cartLocation = activity.getCartIconLocation();
 
-        float endX = cartLocation[0]-150; // adjust if needed
+        float endX = cartLocation[0];
         float endY = cartLocation[1];
 
         animView.animate()

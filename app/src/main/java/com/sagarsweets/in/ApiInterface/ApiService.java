@@ -4,6 +4,8 @@ package com.sagarsweets.in.ApiInterface;
 
 import com.sagarsweets.in.ApiModel.AboutResponse;
 import com.sagarsweets.in.ApiModel.AllCategoryResponse;
+import com.sagarsweets.in.ApiModel.CartSyncRequest;
+import com.sagarsweets.in.ApiModel.CartSyncResponse;
 import com.sagarsweets.in.ApiModel.CategoryProductRequest;
 import com.sagarsweets.in.ApiModel.CategoryProductResponse;
 import com.sagarsweets.in.ApiModel.CategoryResponse;
@@ -31,6 +33,8 @@ import com.sagarsweets.in.ApiModel.ReviewResponse;
 import com.sagarsweets.in.ApiModel.SearchProductRequest;
 import com.sagarsweets.in.ApiModel.SearchResponse;
 import com.sagarsweets.in.ApiModel.SliderResponse;
+import com.sagarsweets.in.ApiModel.StockRequest;
+import com.sagarsweets.in.ApiModel.StockResponse;
 import com.sagarsweets.in.ApiModel.TopCategoryRequest;
 import com.sagarsweets.in.ApiModel.TopCategoryResponse;
 import com.sagarsweets.in.ApiModel.UpdateCartRequest;
@@ -145,5 +149,11 @@ public interface ApiService {
 
     @POST("rest/user/cartremove")
     Call<Void> removeCart(@Body RemoveCartRequest removeCartRequest);
+
+    @POST("rest/user/syncfull")
+    Call<CartSyncResponse> syncFullCart(@Body CartSyncRequest cartSyncRequest);
     /*Call<Void> updateCart(String user_id, int productId, int quantity, int sizeId, String device);*/
+
+    @POST("rest/user/checkstock")
+    Call<StockResponse> checkStock(@Body StockRequest request);
 }

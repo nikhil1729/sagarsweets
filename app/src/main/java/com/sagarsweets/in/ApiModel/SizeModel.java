@@ -5,7 +5,7 @@ import com.google.gson.annotations.SerializedName;
 public class SizeModel {
 
     @SerializedName("id")
-    private int id;
+    private Integer id;
 
     @SerializedName("title")
     private String title;
@@ -35,7 +35,7 @@ public class SizeModel {
         return stock;
     }
 
-    public int getId() {
+    public Integer getId() {
         return id;
     }
 }

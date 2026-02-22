@@ -21,6 +21,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.facebook.shimmer.ShimmerFrameLayout;
+import com.google.android.material.card.MaterialCardView;
 import com.sagarsweets.in.Adapters.ImageAdapter;
 import com.sagarsweets.in.Adapters.PopularProductAdapter;
 import com.sagarsweets.in.Adapters.SizeAdapter;
@@ -34,12 +35,18 @@ import com.sagarsweets.in.ApiModel.ProductReviewRequest;
 import com.sagarsweets.in.ApiModel.ReviewModel;
 import com.sagarsweets.in.ApiModel.ReviewResponse;
 import com.sagarsweets.in.ApiModel.SizeModel;
+import com.sagarsweets.in.RoomDatabase.AppDatabase;
+import com.sagarsweets.in.Session.CartItem;
 import com.sagarsweets.in.Session.LoginSession;
 import com.sagarsweets.in.Session.PincodeSession;
+import com.sagarsweets.in.utils.CartSaveOnServer;
+import com.sagarsweets.in.utils.DeviceInfo;
 import com.sagarsweets.in.utils.WishListClicked;
 
 import java.io.Serializable;
 import java.util.List;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -51,7 +58,7 @@ public class ProductDetailsFragment extends Fragment
 
     Integer productId;
     String pincode;
-    String userId;
+    int userId;
     TextView txtBrand,
             txtTitle,
             txtSellingPrice,
@@ -73,13 +80,23 @@ public class ProductDetailsFragment extends Fragment
     ImageView imgWishlist;
     LoginSession loginSession;
     PincodeSession pincodeSession;
+    List<SizeModel> sizes;
+    int selectedSizeId;
+    String selectedSizeName;
+    Double selectedSizePrice;
+    private boolean sizeSelected;
+    ProductDetailsModel product;
+    private final Executor executor = Executors.newSingleThreadExecutor();
+    private PopularProductAdapter.CartUpdateListener cartUpdateListener;
+    AppDatabase db;
+    MaterialCardView layoutStickyCart;
+    ImageView btnPlus, btnMinus;
+    TextView txtQuantity;
+    int currentQuantity = 1;
+    SizeAdapter sizeAdapter;
     public ProductDetailsFragment() {
         // Required empty public constructor
         //this.productId = "12";
-
-
-
-
     }
 
     @Override
@@ -102,9 +119,9 @@ public class ProductDetailsFragment extends Fragment
         initViews(view);
         loginSession = new LoginSession(getContext());
         if(loginSession.isLoggedIn()){
-            this.userId = loginSession.getUserId();
+            this.userId = Integer.parseInt(loginSession.getUserId());
         }else{
-            this.userId = "";
+            this.userId = 0;
         }
         pincodeSession = new PincodeSession(getContext());
         if(pincodeSession.hasPincode()){
@@ -112,25 +129,148 @@ public class ProductDetailsFragment extends Fragment
         }else{
             this.pincode = "";
         }
+
         setPincodeAndUserId();
         loadProductDetails(productId,view);
         getReviewBottomSheet();
+        clickedFunction();
         return view;
     }
 
+    private void clickedFunction() {
+        btnAddToCart.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                double sellingPrice = product.getSellingPrice();
+                int quantity = 1;
+                int selecteSize = 0;
+                String sizeName = "NA";
+                Long updatedAt = System.currentTimeMillis();
+                Boolean isSync = false;
+                if (sizes != null && !sizes.isEmpty()) {
+                    // size is available
+                    Log.d("DEBUG_CART","Selected Size ID-"+selectedSizeId);
+
+                    Log.d("DEBUG_CART","cart clicked-size is available");
+                    if (!sizeSelected) {
+                        showSizeSelected();
+                        return;
+                    }
+                    sellingPrice = selectedSizePrice;
+                    selecteSize = selectedSizeId;
+                    sizeName = selectedSizeName;
+                    addedToCart(product,selecteSize,quantity,sizeName,v);
+                }else{
+
+                    Log.d("DEBUG_CART","cart clicked-size is not available");
+                    addedToCart(product,0,1,"NA",v);
+                }
+                //addedToCart(product,selecteSize,quantity,sizeName,v); // ✅ MAIN CALL
+            }
+        });
+    }
+
+    private void addedToCart(ProductDetailsModel product,
+                             int selectedSizeId,
+                             int quantity,
+                             String sizeSelectedName,
+                             View v) {
+
+        executor.execute(() -> {
+
+            int productId = product.getId();
+            int userId = loginSession.isLoggedIn()
+                    ? Integer.parseInt(loginSession.getUserId())
+                    : 0;
+
+            CartItem existingItem =
+                    db.cartDao().checkItem(productId, userId);
+
+            CartItem itemToSync;
+
+            if (existingItem != null) {
+
+                existingItem.setQuantity(existingItem.getQuantity() + quantity);
+                existingItem.setUpdatedAt(System.currentTimeMillis());
+                existingItem.setSynced(false);
+
+                db.cartDao().update(existingItem);
+                itemToSync = existingItem;
+
+            } else {
+
+                CartItem newItem = new CartItem(
+                        productId,
+                        product.getProductTitle(),
+                        product.getDefaultImage(),
+                        product.getSellingPrice(),
+                        product.getMrp(),
+                        quantity,
+                        selectedSizeId,
+                        userId,
+                        sizeSelectedName,
+                        System.currentTimeMillis(),
+                        false
+                );
+
+                db.cartDao().insert(newItem);
+                itemToSync = newItem;
+            }
+
+            // 🔥 Switch to Main Thread for UI + API call
+            requireActivity().runOnUiThread(() -> {
+
+                // show stepper
+                txtQuantity.setText(String.valueOf(itemToSync.getQuantity()));
+
+                btnAddToCart.setVisibility(View.GONE);
+                layoutStickyCart.setVisibility(View.VISIBLE);
+
+                // now call API
+                CartSaveOnServer.saveCartOnServer(
+                        itemToSync,
+                        v,
+                        loginSession,
+                        DeviceInfo.getDeviceString(getContext())
+                );
+            });
+        });
+    }
+
+
+
+    private void showSizeSelected() {
+        rvSizes.animate()
+                .translationX(20)
+                .setDuration(50)
+                .withEndAction(() ->
+                        rvSizes.animate()
+                                .translationX(-20)
+                                .setDuration(50)
+                                .withEndAction(() ->
+                                        rvSizes.animate()
+                                                .translationX(0)
+                                                .setDuration(50)
+                                )
+                );
+    }
+
+
     private void setPincodeAndUserId() {
         loginSession = new LoginSession(getContext());
-        this.userId = "";
+        this.userId = 0;
         if(loginSession.isLoggedIn()){
-            this.userId = loginSession.getUserId();
+            this.userId = Integer.parseInt(loginSession.getUserId());
         }
 
-        pincode = "274204";
+        pincode = pincodeSession.getPincode();
     }
 
     private void getReviewBottomSheet() {
         txtReviewCount.setOnClickListener(v -> {
-            ProductReviewRequest productReviewRequest = new ProductReviewRequest(productId,userId,getContext());
+            ProductReviewRequest productReviewRequest = new ProductReviewRequest(productId,
+                    String.valueOf(userId),
+                    getContext());
             ApiService apiService  = LoginRetrofitClient
                     .getClient()
                     .create(ApiService.class);
@@ -190,6 +330,12 @@ public class ProductDetailsFragment extends Fragment
         txtStockStatus = view.findViewById(R.id.txtStockStatus);
         txtReviewCount = view.findViewById(R.id.txtReviewCount);
         imgWishlist = view.findViewById(R.id.imgWishlist);
+        layoutStickyCart = view.findViewById(R.id.layoutStickyCart);
+        btnPlus = view.findViewById(R.id.btnPlus);
+        btnMinus = view.findViewById(R.id.btnMinus);
+        txtQuantity = view.findViewById(R.id.txtQuantity);
+        db = AppDatabase.getInstance(getContext());
+
     }
 
 
@@ -198,7 +344,7 @@ public class ProductDetailsFragment extends Fragment
         shimmerLayout.setVisibility(View.VISIBLE);
         contentLayout.setVisibility(View.GONE);
         ProductDetailsRequest productDetailsRequest =
-                new ProductDetailsRequest(productId,pincode,userId,getContext());
+                new ProductDetailsRequest(productId,pincode,String.valueOf(userId),getContext());
         //ApiService apiService = ApiClient.getClient().create(ApiService.class);
         ApiService apiService  = LoginRetrofitClient
                 .getClient()
@@ -211,7 +357,7 @@ public class ProductDetailsFragment extends Fragment
                     shimmerLayout.setVisibility(View.GONE);
                     contentLayout.setVisibility(View.VISIBLE);
                     btnAddToCart.setVisibility(View.VISIBLE);
-                    ProductDetailsModel product = response.body();
+                    product = response.body();
                     // -------- BASIC DATA --------
                     String brand = product.getBrandName();
 
@@ -220,7 +366,7 @@ public class ProductDetailsFragment extends Fragment
 
                     // stock checking
                     Integer stock = product.getStock();
-                    if (stock > 0) {
+                    if (stock != null && stock > 0) {
                         txtStockStatus.setText("IN STOCK");
                         txtStockStatus.setBackgroundResource(R.drawable.bg_stock_in);
                         btnAddToCart.setEnabled(true);
@@ -232,16 +378,21 @@ public class ProductDetailsFragment extends Fragment
                         //itemView.setAlpha(0.6f);
                     }
                     // rating bar
-                    ratingBar.setRating(product.getRating());
-                    txtReviewCount.setText("("+ product.getRatingCount()+" reviews)");
-                    txtSellingPrice.setText("₹" + product.getSellingPrice());
-                    txtMrp.setText("₹" + product.getMrp());
-                    txtDiscount.setText(Math.round(product.getDiscountPercentage()) + "% OFF");
-
+                    Float rating = product.getRating();
+                    ratingBar.setRating(rating != null ? rating : 0f);
+                    Integer reviewCount = product.getRatingCount();
+                    txtReviewCount.setText("(" + (reviewCount != null ? reviewCount : 0) + " reviews)");
+                    Double selling = Double.valueOf(product.getSellingPrice());
+                    txtSellingPrice.setText("₹" + (selling != null ? selling : 0));
+                    Double mrp = Double.valueOf(product.getMrp());
+                    txtMrp.setText("₹" + (mrp != null ? mrp : 0));
+                    Double discount = product.getDiscountPercentage();
+                    int dis = discount != null ? (int) Math.round(discount) : 0;
+                    txtDiscount.setText(dis + "% OFF");
                     // HTML DELIVERY TEXT
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
                         txtDelivery.setText(
-                                Html.fromHtml(product.getExpectedDay(), Html.FROM_HTML_MODE_LEGACY)
+                            Html.fromHtml(product.getExpectedDay(), Html.FROM_HTML_MODE_LEGACY)
                         );
                     }
 
@@ -258,7 +409,7 @@ public class ProductDetailsFragment extends Fragment
                     rvImages.setAdapter(imageAdapter);
 
                     // -------- SIZE SELECTION --------
-                    List<SizeModel> sizes = product.getSizeList();
+                    sizes = product.getSizeList();
                     if (sizes != null && !sizes.isEmpty()) {
 
                         rvSizes.setVisibility(View.VISIBLE);
@@ -271,9 +422,38 @@ public class ProductDetailsFragment extends Fragment
                                 )
                         );
 
-                        SizeAdapter sizeAdapter = new SizeAdapter(sizes, size -> {
-                           updatePriceAndStock(size);
+                        sizeAdapter = new SizeAdapter(sizes, size -> {
+                           updatePriceAndStock(product,size);
                         });
+                        /*CHECK PRODUCT SIZE IS IN CART*/
+                        executor.execute(() -> {
+
+                            int productId = product.getId();
+                            int userId = loginSession.isLoggedIn()
+                                    ? Integer.parseInt(loginSession.getUserId())
+                                    : 0;
+
+                            CartItem existingItem =
+                                    db.cartDao().checkItem(productId, userId);
+
+                            if (existingItem != null) {
+
+                                int sizeId = existingItem.getSizeId();   // ✅ SAFE NOW
+
+                                requireActivity().runOnUiThread(() -> {
+
+                                    txtQuantity.setText(String.valueOf(existingItem.getQuantity()));
+
+                                    btnAddToCart.setVisibility(View.GONE);
+                                    layoutStickyCart.setVisibility(View.VISIBLE);
+
+                                    if (sizeId != 0 && sizeAdapter != null) {
+                                        sizeAdapter.setSelectedSizeById(sizeId);
+                                    }
+                                });
+                            }
+                        });
+                        /*CHECK CART IS END*/
                         rvSizes.setAdapter(sizeAdapter);
 
                     } else {
@@ -294,7 +474,7 @@ public class ProductDetailsFragment extends Fragment
                         Log.e("SPEC_DEBUG", "Specification is NULL");
                     }
                     Log.e("WISHLIST_DEBUG", "Wish list is "+String.valueOf(product.getWishListedMain()));
-                    if(product.getWishListedMain()){
+                    if (Boolean.TRUE.equals(product.getWishListedMain())) {
                         imgWishlist.setImageResource(R.drawable.ic_heart_filled);
                     }else{
                         imgWishlist.setImageResource(R.drawable.ic_heart_outline);
@@ -350,33 +530,78 @@ public class ProductDetailsFragment extends Fragment
         }
     }
 
-    private void updatePriceAndStock(SizeModel size) {
-        txtSellingPrice.setText("₹" + size.getSellingPrice());
-        txtMrp.setText("₹" + size.getMrp());
+    private void updatePriceAndStock(ProductDetailsModel product, SizeModel size) {
 
-        double mrp = Double.parseDouble(size.getMrp());
-        double sellingPrice = Double.parseDouble(size.getSellingPrice());
+        if (size == null) return;
 
-        double discountPercent = ((mrp - sellingPrice) / mrp) * 100;
-        int discount = (int) Math.round(discountPercent);
+        String selling = size.getSellingPrice();
+        String mrpStr = size.getMrp();
 
+        double sellingPrice = 0;
+        double mrp = 0;
 
-        txtDiscount.setText(discount+"% OFF");
-        Log.d("stock_change", String.valueOf(size.getStock()));
-        if (size.getStock() > 0) {
+        try {
+            sellingPrice = selling != null ? Double.parseDouble(selling) : 0;
+            mrp = mrpStr != null ? Double.parseDouble(mrpStr) : 0;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        txtSellingPrice.setText("₹" + sellingPrice);
+        txtMrp.setText("₹" + mrp);
+
+        sizeSelected = true;
+        selectedSizeId = size.getId() != null ? size.getId() : 0;
+        selectedSizeName = size.getTitle() != null ? size.getTitle() : "NA";
+        selectedSizePrice = sellingPrice;
+
+        int discount = 0;
+        if (mrp > 0) {
+            discount = (int) Math.round(((mrp - sellingPrice) / mrp) * 100);
+        }
+
+        txtDiscount.setText(discount + "% OFF");
+
+        Integer stockObj = size.getStock();
+        int stock = stockObj != null ? stockObj : 0;
+
+        if (stock > 0) {
             txtStockStatus.setText("IN STOCK");
             txtStockStatus.setBackgroundResource(R.drawable.bg_stock_in);
             btnAddToCart.setEnabled(true);
-
-            //itemView.setAlpha(1f);
         } else {
             txtStockStatus.setText("OUT OF STOCK");
             txtStockStatus.setBackgroundResource(R.drawable.bg_stock_out);
             btnAddToCart.setEnabled(false);
-            //itemView.setAlpha(0.6f);
         }
+        checkCartStatus(productId,size.getId());
     }
 
+    private void checkCartStatus(int productId, int sizeId) {
+        executor.execute(() -> {
+
+            int uId = loginSession.isLoggedIn() ?
+                    Integer.parseInt(loginSession.getUserId()) : 0;
+
+            CartItem item = db.cartDao().checkItem(productId, uId);
+
+            requireActivity().runOnUiThread(() -> {
+                if (item != null) {
+
+                    currentQuantity = item.getQuantity();
+                    txtQuantity.setText(String.valueOf(currentQuantity));
+
+                    btnAddToCart.setVisibility(View.GONE);
+                    layoutStickyCart.setVisibility(View.VISIBLE);
+
+                } else {
+
+                    btnAddToCart.setVisibility(View.VISIBLE);
+                    layoutStickyCart.setVisibility(View.GONE);
+                }
+            });
+        });
+    }
     @Override
     public void onCartUpdated() {
 

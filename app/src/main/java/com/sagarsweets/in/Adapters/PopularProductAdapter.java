@@ -13,6 +13,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RatingBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.FragmentActivity;
@@ -163,7 +164,8 @@ public class PopularProductAdapter
             // here size is available
             int totalStock = 0;
             for (SizeModel size : sizes) {
-                int stock = size.getStock();
+                Integer stock = size.getStock();
+                totalStock += (stock == null ? 0 : stock);
                 Log.d("ProductstockLL",product.getProductName()+"-"+String.valueOf(stock));
                 totalStock += stock;
             }
@@ -223,7 +225,6 @@ public class PopularProductAdapter
         }
 
         // ---------- WISH LIST CHECK --------
-        LoginSession loginSession = new LoginSession(context);
         if(loginSession.isLoggedIn()){
             if(product.getWIshListed()){
                 vh.imgWishlist.setImageResource(R.drawable.ic_heart_filled);
@@ -290,6 +291,12 @@ public class PopularProductAdapter
         vh.btnPlus.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                int availableStock = getAvailableStock(product, vh.selectedSizeId);
+
+                if (vh.quantity >= availableStock) {
+                    Toast.makeText(context, "Maximum stock reached", Toast.LENGTH_SHORT).show();
+                    return;
+                }
                 vh.quantity++;
                 vh.tvQuantity.setText(String.valueOf(vh.quantity));
 
@@ -350,7 +357,8 @@ public class PopularProductAdapter
 
                         vh.sizeSelected = true;
                         vh.selectedSizeId = sizeId;
-
+                        vh.tvPrice.setText("₹"+(int)existingItem.getMrp());
+                        vh.tvSalePrice.setText("₹"+(int)existingItem.getPrice());
                         vh.sizeAdapter.setSelectedSizeById(sizeId);
                     }
 
@@ -375,6 +383,12 @@ public class PopularProductAdapter
 
     private void cartControlVisible(ProductVH vh, ProductModel product,
                                     int selectedSizeId, View v) {
+        int availableStock = getAvailableStock(product, selectedSizeId);
+
+        if (availableStock <= 0) {
+            Toast.makeText(context, "Out of stock", Toast.LENGTH_SHORT).show();
+            return;
+        }
         vh.layoutCartSection.setVisibility(View.VISIBLE);
         vh.frIvCart.setVisibility(View.GONE);
         vh.quantity = 1;
@@ -454,19 +468,35 @@ public class PopularProductAdapter
             CartItem existingItem = db.cartDao().checkItem(productId, userId);
             String pName = product.getProductName();
             String pImage = product.getImagePath();
-            double price = Double.parseDouble(product.getSellingPrice());
+            // PRICE/MRP SETTING
+            double price;
+            double mrp;
+
+            if (selectedSizeId != 0) {
+                price = vh.sellPrice;
+                mrp   = vh.mrpPrice;
+            } else {
+                price = Double.parseDouble(product.getSellingPrice());
+                mrp   = Double.parseDouble(product.getMrp());
+            }
+            // END
             //int quantity = 1;
             int sizeId = selectedSizeId;
-
+            Log.d("TESTCART","Product id-"+String.valueOf(productId));
             if (existingItem != null) {
+                existingItem.setMrp(mrp);
+                existingItem.setPrice(price);
                 existingItem.setQuantity(quantity);
+                existingItem.setUpdatedAt(System.currentTimeMillis());
+                existingItem.setSynced(false);
                 db.cartDao().update(existingItem);
                 CartSaveOnServer.saveCartOnServer(existingItem,v,
                         loginSession, DeviceInfo.getDeviceString(context));
                 Log.d("DEBUG_CART","Updated insert");
             } else {
                 CartItem newItem = new CartItem(productId,pName,
-                        pImage,price,quantity,sizeId,userId,sizeSelectedName);
+                        pImage,price,mrp,quantity,sizeId,userId,
+                        sizeSelectedName,System.currentTimeMillis(),false);
                 db.cartDao().insert(newItem);
                 CartSaveOnServer.saveCartOnServer(newItem,v,
                         loginSession, DeviceInfo.getDeviceString(context));
@@ -486,7 +516,6 @@ public class PopularProductAdapter
 
 
     private void wishListSaved(int pId, ProductVH vh) {
-        LoginSession loginSession = new LoginSession(context);
         if(loginSession.isLoggedIn()){
             // if user login then call api
             WishListClicked.clicked(context, loginSession.getUserId(), String.valueOf(pId),vh.imgWishlist);
@@ -535,11 +564,33 @@ public class PopularProductAdapter
 
     private void updatePriceAndStock(ProductVH vh, SizeModel size) {
 
-        vh.tvSalePrice.setText("₹" + size.getSellingPrice());
-        vh.tvPrice.setText("₹" + size.getMrp());
+        // 1️⃣ Save selected size info
         vh.sizeSelected = true;
         vh.selectedSizeId = size.getId();
         vh.sizeSelectedName = size.getTitle();
+
+        // 2️⃣ Store price in ViewHolder (important for cart)
+        vh.sellPrice = Double.parseDouble(size.getSellingPrice());
+        vh.mrpPrice  = Double.parseDouble(size.getMrp());
+
+        // 3️⃣ Update UI price immediately
+        vh.tvSalePrice.setText("₹" + size.getSellingPrice());
+        vh.tvPrice.setText("₹" + size.getMrp());
+
+        // 4️⃣ Reset cart UI (do NOT delete from DB)
+        vh.layoutCartSection.setVisibility(View.GONE);
+        vh.frIvCart.setVisibility(View.VISIBLE);
+        vh.quantity = 0;
+        vh.tvQuantity.setText("0");
+
+
+        /*vh.sellPrice = Double.parseDouble(size.getSellingPrice());*/
+        /*vh.mrpPrice  = Double.parseDouble(size.getMrp());*/
+        /*vh.tvSalePrice.setText("₹" + size.getSellingPrice());*/
+        /*vh.tvPrice.setText("₹" + size.getMrp());*/
+        /*vh.sizeSelected = true;*/
+        /*vh.selectedSizeId = size.getId();*/
+        /*vh.sizeSelectedName = size.getTitle();*/
 
 
         int productId = vh.vhProductId;
@@ -592,6 +643,23 @@ public class PopularProductAdapter
                 .getDisplayMetrics().density);
     }
 
+    private int getAvailableStock(ProductModel product, int selectedSizeId) {
+        List<SizeModel> sizes = product.getSizeList();
+
+        // ✅ If size-based product
+        if (sizes != null && !sizes.isEmpty()) {
+            for (SizeModel size : sizes) {
+                if (size.getId() == selectedSizeId) {
+                    Integer stock = size.getStock();
+                    return stock == null ? 0 : size.getStock();
+                }
+            }
+            return 0; // size not found
+        }
+
+        // ✅ Non-size product
+        return product.getStock() == null ? 0 : product.getStock();
+    }
     // --------------------------------------------------
     // VIEW HOLDERS
     // --------------------------------------------------
@@ -613,7 +681,7 @@ public class PopularProductAdapter
         int quantity;
         int vhProductId;
         SizeAdapter sizeAdapter;
-
+        double sellPrice,mrpPrice;
         public ProductVH(@NonNull View itemView) {
             super(itemView);
             imgProduct = itemView.findViewById(R.id.imgProduct);

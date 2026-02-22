@@ -15,11 +15,14 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.sagarsweets.in.Adapters.CartAdapter;
 import com.sagarsweets.in.ApiControllers.LoginRetrofitClient;
 import com.sagarsweets.in.ApiInterface.ApiService;
 import com.sagarsweets.in.ApiModel.RemoveCartRequest;
+import com.sagarsweets.in.ApiModel.StockRequest;
+import com.sagarsweets.in.ApiModel.StockResponse;
 import com.sagarsweets.in.ApiModel.UpdateCartRequest;
 import com.sagarsweets.in.RoomDatabase.AppDatabase;
 import com.sagarsweets.in.Session.CartItem;
@@ -75,9 +78,24 @@ public class CartFragment extends Fragment {
 
     private void syncronizeCart() {
         if(loginSession.isLoggedIn()){
+            Executors.newSingleThreadExecutor().execute(() -> {
 
+                int userId = Integer.parseInt(loginSession.getUserId());
+
+                List<CartItem> localCart = db.cartDao().getCartItemsList(userId);
+
+                CartSaveOnServer.syncFullCart(
+                        localCart,
+                        loginSession,
+                        DeviceInfo.getDeviceString(getContext()),
+                        getContext()
+                );
+
+            });
+            //CartSaveOnServer.syncFullCart();
         }
     }
+
 
 
     private void setCart() {
@@ -91,15 +109,16 @@ public class CartFragment extends Fragment {
 
             @Override
             public void onQuantityChanged(CartItem model, View v) {
+                checkStockFromApi(model, v);
 
-                executor.execute(() -> {
+                /* executor.execute(() -> {
 
                     db.cartDao().update(model);
                 });
                 // 🔥 If logged in → update server
                 if (loginSession.isLoggedIn()) {
                     updateCartOnServer(model,v);
-                }
+                } */
             }
 
             @Override
@@ -143,6 +162,58 @@ public class CartFragment extends Fragment {
                         cardItemCount.setVisibility(View.GONE);
                     }
                 });
+    }
+
+    private void checkStockFromApi(CartItem model, View v) {
+
+        ApiService apiService =
+                LoginRetrofitClient.getClient().create(ApiService.class);
+
+        StockRequest request =
+                new StockRequest(model.getProductId(), model.getSizeId());
+
+        apiService.checkStock(request).enqueue(new Callback<StockResponse>() {
+
+            @Override
+            public void onResponse(Call<StockResponse> call,
+                                   Response<StockResponse> response) {
+
+                if (!response.isSuccessful() || response.body() == null) return;
+
+                Integer availableStock = (Integer) response.body().getStock();
+                if (availableStock == null) availableStock = 0;
+
+                int finalStock = availableStock;
+
+                executor.execute(() -> {
+
+                    if (model.getQuantity() > finalStock) {
+
+                        requireActivity().runOnUiThread(() -> {
+                            model.setQuantity(finalStock);
+                            adapter.notifyDataSetChanged();
+                            Toast.makeText(getContext(), "Adjusted to max stock.", Toast.LENGTH_SHORT).show();
+                            Log.d("STOCK", "Adjusted to max stock");
+                        });
+
+                        return;
+                    }
+
+                    // ✅ safe to update DB
+                    db.cartDao().update(model);
+
+                    if (loginSession.isLoggedIn()) {
+                        requireActivity().runOnUiThread(() ->
+                                updateCartOnServer(model, v));
+                    }
+                });
+            }
+
+            @Override
+            public void onFailure(Call<StockResponse> call, Throwable t) {
+                Log.e("STOCK_API", t.getMessage());
+            }
+        });
     }
 
     private void removeCartFromServer(CartItem model, View v) {

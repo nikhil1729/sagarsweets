@@ -5,6 +5,7 @@ import java.util.List;
 
 public class ProductDetailsModel {
 
+    int id;
     @SerializedName("default_image")
     private String defaultImage;
 
@@ -58,6 +59,14 @@ public class ProductDetailsModel {
     Boolean isWishListedMain;
     // ---------- GETTERS ----------
 
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
 
     public Boolean getWishListedMain() {
         return isWishListedMain;

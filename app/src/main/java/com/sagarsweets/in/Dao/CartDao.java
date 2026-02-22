@@ -4,6 +4,7 @@ import androidx.lifecycle.LiveData;
 import androidx.room.Dao;
 import androidx.room.Delete;
 import androidx.room.Insert;
+import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
 import androidx.room.Update;
 
@@ -48,5 +49,14 @@ public interface CartDao {
     @Query("DELETE FROM cart_table WHERE userId = :userId")
     void clearAllCartByUser(int userId);
 
+    @Query("SELECT * FROM cart_table WHERE userId = :userId AND isSynced = 0")
+    List<CartItem> getUnsyncedItems(int userId);
+
+    @Query("UPDATE cart_table SET isSynced = 1 WHERE productId = :productId AND userId = :userId AND sizeId = :sizeId")
+    void markAsSynced(int productId, int userId, int sizeId);
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    void insertAll(List<CartItem> cartItems);
+    @Query("SELECT * FROM cart_table WHERE productId = :productId AND userId = :userId AND sizeId = :sizeId LIMIT 1")
+    CartItem checkItemWithSize(int productId, int userId, int sizeId);
 }
 

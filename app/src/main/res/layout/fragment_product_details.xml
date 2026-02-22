@@ -228,17 +228,111 @@
 
     </FrameLayout>
 
-    <!-- ADD TO CART -->
-    <Button
-        android:visibility="gone"
-        android:id="@+id/btnAddToCart"
+    <!-- BOTTOM ACTION CONTAINER -->
+    <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="56dp"
-        android:text="ADD TO CART"
-        android:textStyle="bold"
-        android:textColor="#FFF"
-        android:backgroundTint="@color/sagar_button"
+        android:layout_height="wrap_content"
         android:layout_gravity="bottom"
-        android:layout_margin="0dp"/>
+        android:background="#FFF"
+        android:elevation="8dp">
 
+        <!-- ADD TO CART BUTTON -->
+        <Button
+            android:id="@+id/btnAddToCart"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:text="ADD TO CART"
+            android:textStyle="bold"
+            android:textColor="#FFF"
+            android:backgroundTint="@color/sagar_button"
+            android:visibility="gone"/>
+
+        <!-- PREMIUM FLOATING STICKY CART BAR -->
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/layoutStickyCart"
+            android:layout_width="match_parent"
+            android:layout_height="72dp"
+            android:layout_gravity="bottom"
+            android:layout_margin="12dp"
+            android:visibility="gone"
+            app:cardCornerRadius="20dp"
+            app:cardElevation="12dp"
+            app:cardBackgroundColor="@android:color/white">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:padding="12dp">
+
+                <!-- PRICE + STOCK -->
+                <LinearLayout
+
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/txtStickyPrice"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="₹299"
+                        android:textSize="20sp"
+                        android:textStyle="bold"
+                        android:textColor="#E53935"/>
+
+                    <TextView
+                        android:id="@+id/txtStickyStock"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="In Stock"
+                        android:textSize="13sp"
+                        android:textColor="#388E3C"/>
+                </LinearLayout>
+
+                <!-- QUANTITY STEPPER -->
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="48dp"
+                    android:orientation="horizontal"
+                    android:gravity="center"
+                    android:background="@drawable/bg_quantity_container"
+                    android:paddingStart="8dp"
+                    android:paddingEnd="8dp">
+
+                    <ImageView
+                        android:id="@+id/btnMinus"
+                        android:layout_width="36dp"
+                        android:layout_height="36dp"
+                        android:background="@drawable/bg_quantity_circle"
+                        android:padding="8dp"
+                        android:src="@drawable/ic_minus"
+                        app:tint="@color/sagar_button" />
+
+                    <TextView
+                        android:id="@+id/txtQuantity"
+                        android:layout_width="50dp"
+                        android:layout_height="wrap_content"
+                        android:gravity="center"
+                        android:text="1"
+                        android:textSize="16sp"
+                        android:textStyle="bold"/>
+
+                    <ImageView
+                        android:id="@+id/btnPlus"
+                        android:layout_width="36dp"
+                        android:layout_height="36dp"
+                        android:background="@drawable/bg_quantity_circle"
+                        android:padding="8dp"
+                        android:src="@drawable/ic_plus"
+                        app:tint="@color/sagar_button" />
+                </LinearLayout>
+
+            </LinearLayout>
+
+        </com.google.android.material.card.MaterialCardView>
+
+    </FrameLayout>
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

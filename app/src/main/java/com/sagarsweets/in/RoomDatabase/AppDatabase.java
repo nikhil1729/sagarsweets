@@ -13,7 +13,7 @@ import com.sagarsweets.in.Session.WishlistItem;
 @Database(entities = {
         WishlistItem.class,
         CartItem.class
-}, version = 4)
+}, version = 6)
 public abstract class AppDatabase extends RoomDatabase {
 
     private static AppDatabase instance;

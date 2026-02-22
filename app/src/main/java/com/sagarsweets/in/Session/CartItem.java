@@ -13,30 +13,48 @@ public class CartItem {
     private String productName;
     private String productImage;
     private double price;
+    private double mrp;
     private int quantity;
-    private int sizeId;
+    protected int sizeId;
     private int userId;   // important if login system exists
     private String sizeSelectedName;
+    private long updatedAt;
+    private boolean isSynced;
 
-    public CartItem(int productId, String productName,
-                    String productImage, double price, int quantity,
-                    int sizeId, int userId, String sizeSelectedName) {
-        this.id = id;
+    public CartItem(int productId, String productName, String productImage,
+                    double price, double mrp, int quantity, int sizeId,
+                    int userId, String sizeSelectedName, long updatedAt, boolean isSynced) {
         this.productId = productId;
         this.productName = productName;
         this.productImage = productImage;
         this.price = price;
+        this.mrp = mrp;
         this.quantity = quantity;
         this.sizeId = sizeId;
         this.userId = userId;
         this.sizeSelectedName = sizeSelectedName;
+        this.updatedAt = updatedAt;
+        this.isSynced = isSynced;
     }
-
-
-
 
     // Getters & Setters
 
+
+    public long getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(long updatedAt) {
+        this.updatedAt = updatedAt;
+    }
+
+    public boolean isSynced() {
+        return isSynced;
+    }
+
+    public void setSynced(boolean synced) {
+        isSynced = synced;
+    }
 
     public String getSizeSelectedName() {
         return sizeSelectedName;
@@ -84,6 +102,14 @@ public class CartItem {
 
     public void setPrice(double price) {
         this.price = price;
+    }
+
+    public double getMrp() {
+        return mrp;
+    }
+
+    public void setMrp(double mrp) {
+        this.mrp = mrp;
     }
 
     public int getQuantity() {
