@@ -14,5 +14,8 @@
     <color name="md_theme_error">#B3261E</color>
     <color name="md_theme_onErrorContainer">#410E0B</color>
     <color name="search_bg">#F4F4F4</color>
+    <!-- count down color -->
+    <color name="slot_closed_green">#2E7D32</color>
+    <color name="slot_active_red">#E53935</color>
 
 </resources>

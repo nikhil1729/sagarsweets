@@ -2,7 +2,10 @@ package com.sagarsweets.in.Adapters;
 
 import android.content.Context;
 import android.content.res.Resources;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.VibrationEffect;
+import android.os.Vibrator;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -147,8 +150,8 @@ public class PopularProductAdapter
         // ---------- TEXT ----------
         vh.vhProductId = product.getId();
         vh.tvProductName.setText(product.getProductName());
-        vh.tvSalePrice.setText("₹" + product.getSellingPrice());
-        vh.tvPrice.setText("₹" + product.getMrp());
+        vh.tvSalePrice.setText(DeviceInfo.rupeeSymbol() + product.getSellingPrice());
+        vh.tvPrice.setText(DeviceInfo.rupeeSymbol() + product.getMrp());
         vh.ratingBar.setRating(product.getRating());
         vh.tvRatingCount.setText("(" + product.getRatingCount() + ")");
         List<SizeModel> sizes = product.getSizeList();
@@ -166,8 +169,8 @@ public class PopularProductAdapter
             for (SizeModel size : sizes) {
                 Integer stock = size.getStock();
                 totalStock += (stock == null ? 0 : stock);
-                Log.d("ProductstockLL",product.getProductName()+"-"+String.valueOf(stock));
-                totalStock += stock;
+                Log.d("ProductstockLL",
+                        product.getProductName() + "-" + stock);
             }
             if(totalStock > 0){
                 // product is in stock
@@ -332,6 +335,7 @@ public class PopularProductAdapter
     }
 
     private void checkProductInCart(ProductVH vh, ProductModel product) {
+
         executor.execute(() -> {
 
             int productId = product.getId();
@@ -353,17 +357,20 @@ public class PopularProductAdapter
                     vh.tvQuantity.setText(String.valueOf(count));
                     vh.quantity = count;
 
-                    if (sizeId != 0 && vh.sizeAdapter != null) {
+                    // ✅ ALWAYS restore price from DB
+                    vh.sellPrice = existingItem.getPrice();
+                    vh.mrpPrice  = existingItem.getMrp();
 
+                    vh.tvSalePrice.setText(DeviceInfo.rupeeSymbol() + (int) vh.sellPrice);
+                    vh.tvPrice.setText(DeviceInfo.rupeeSymbol() + (int) vh.mrpPrice);
+
+                    // ✅ If size-based product
+                    if (sizeId != 0 && vh.sizeAdapter != null) {
                         vh.sizeSelected = true;
                         vh.selectedSizeId = sizeId;
-                        vh.tvPrice.setText("₹"+(int)existingItem.getMrp());
-                        vh.tvSalePrice.setText("₹"+(int)existingItem.getPrice());
                         vh.sizeAdapter.setSelectedSizeById(sizeId);
                     }
-
                 });
-
             }
         });
     }
@@ -398,6 +405,8 @@ public class PopularProductAdapter
     }
 
     private void showSizeSelected(ProductVH vh) {
+
+        DeviceInfo.vibratMobile(context);
             vh.rvSizes.animate()
                     .translationX(20)
                     .setDuration(50)
@@ -479,6 +488,8 @@ public class PopularProductAdapter
                 price = Double.parseDouble(product.getSellingPrice());
                 mrp   = Double.parseDouble(product.getMrp());
             }
+            Log.d("MRP/SELLING",selectedSizeId+"- selectedSizeId");
+            Log.d("MRP/SELLING",vh.sellPrice+"-"+mrp);
             // END
             //int quantity = 1;
             int sizeId = selectedSizeId;
@@ -574,8 +585,8 @@ public class PopularProductAdapter
         vh.mrpPrice  = Double.parseDouble(size.getMrp());
 
         // 3️⃣ Update UI price immediately
-        vh.tvSalePrice.setText("₹" + size.getSellingPrice());
-        vh.tvPrice.setText("₹" + size.getMrp());
+        vh.tvSalePrice.setText(DeviceInfo.rupeeSymbol() + (int) vh.sellPrice);
+        vh.tvPrice.setText(DeviceInfo.rupeeSymbol() + (int) vh.mrpPrice);
 
         // 4️⃣ Reset cart UI (do NOT delete from DB)
         vh.layoutCartSection.setVisibility(View.GONE);
@@ -586,8 +597,8 @@ public class PopularProductAdapter
 
         /*vh.sellPrice = Double.parseDouble(size.getSellingPrice());*/
         /*vh.mrpPrice  = Double.parseDouble(size.getMrp());*/
-        /*vh.tvSalePrice.setText("₹" + size.getSellingPrice());*/
-        /*vh.tvPrice.setText("₹" + size.getMrp());*/
+        /*vh.tvSalePrice.setText(DeviceInfo.rupeeSymbol() + size.getSellingPrice());*/
+        /*vh.tvPrice.setText(DeviceInfo.rupeeSymbol() + size.getMrp());*/
         /*vh.sizeSelected = true;*/
         /*vh.selectedSizeId = size.getId();*/
         /*vh.sizeSelectedName = size.getTitle();*/
@@ -610,11 +621,11 @@ public class PopularProductAdapter
             db.cartDao().deleteCartByProductId(userId, productId);
         });
 
-        // ✅ UI updates on main thread ONLY
+        /*// ✅ UI updates on main thread ONLY
         vh.layoutCartSection.setVisibility(View.GONE);
         vh.frIvCart.setVisibility(View.VISIBLE);
         vh.quantity = 0;
-        vh.tvQuantity.setText("0");
+        vh.tvQuantity.setText("0");*/
 
 
     }

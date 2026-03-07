@@ -2,6 +2,8 @@ package com.sagarsweets.in.utils;
 
 import android.content.Context;
 import android.os.Build;
+import android.os.VibrationEffect;
+import android.os.Vibrator;
 import android.provider.Settings;
 
 import com.google.gson.Gson;
@@ -113,5 +115,26 @@ public class DeviceInfo {
         return visible + "xxxx@" + domain;
     }
 
+    public static void vibratMobile(Context context){
+        Vibrator vibrator = (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
+
+        if (vibrator != null) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                vibrator.vibrate(
+                        VibrationEffect.createOneShot(
+                                200,
+                                VibrationEffect.DEFAULT_AMPLITUDE
+                        )
+                );
+            } else {
+                vibrator.vibrate(200);
+            }
+        }
+    }
+
+    public static String rupeeSymbol(){
+        //return "Rs";
+        return "₹";
+    }
 
 }

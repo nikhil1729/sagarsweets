@@ -7,10 +7,13 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
@@ -20,6 +23,8 @@ import android.widget.Toast;
 import com.sagarsweets.in.Adapters.CartAdapter;
 import com.sagarsweets.in.ApiControllers.LoginRetrofitClient;
 import com.sagarsweets.in.ApiInterface.ApiService;
+import com.sagarsweets.in.ApiModel.CouponRequest;
+import com.sagarsweets.in.ApiModel.CouponResponse;
 import com.sagarsweets.in.ApiModel.RemoveCartRequest;
 import com.sagarsweets.in.ApiModel.StockRequest;
 import com.sagarsweets.in.ApiModel.StockResponse;
@@ -43,7 +48,7 @@ public class CartFragment extends Fragment {
 
     RecyclerView rvCart;
     LinearLayout layoutEmpty;
-    EditText etCoupon;
+
     TextView txtCouponError,txtAppliedCoupon;
     LinearLayout layoutCouponApplied;
     TextView txtSubtotal,txtDelivery,txtDiscount,txtGrandTotal;
@@ -56,6 +61,15 @@ public class CartFragment extends Fragment {
     private final Executor executor = Executors.newSingleThreadExecutor();
     LoginSession loginSession;
     String device;
+    /*VARIABLES FOR COUPONS*/
+    EditText etCoupon; // other i have done above.
+    Double subTotal;
+    String couponDiscount="0.0",finalAmount;
+    List<CartItem> currentCartList;
+    LinearLayout layoutCouponInput;
+    String couponCode;
+    /*VARIABLE COUPONS END*/
+    Double delivery;
     public CartFragment() {
         // Required empty public constructor
     }
@@ -71,9 +85,128 @@ public class CartFragment extends Fragment {
         //getCartProductDetailsApi();
         setCart();
         syncronizeCart();
+        couponsRelatedFunction();
         //clearCartAllItem();
+        btnCheckout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                CheckoutFragment checkoutFragment = new CheckoutFragment();
+                Bundle bundle = new Bundle();
+                bundle.putString("coupon_code", couponCode);
+                checkoutFragment.setArguments(bundle);
+                requireActivity()
+                        .getSupportFragmentManager()
+                        .beginTransaction()
+                        .replace(R.id.container, checkoutFragment)
+                        .addToBackStack("checkout_fragment")
+                        .commit();
+            }
+        });
+
         // Inflate the layout for this fragment
         return view;
+    }
+
+    private void couponsRelatedFunction() {
+        /* REMOVING COUPON CODE */
+        btnRemoveCoupon.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                layoutCouponApplied.setVisibility(View.GONE);
+                layoutCouponInput.setVisibility(View.VISIBLE);
+                couponDiscount = "0.0";
+                etCoupon.setText("");
+                couponCode = "";
+                if(currentCartList != null){
+                    calculateTotal(currentCartList);   // 🔥 THIS FIXES YOUR ISSUE
+                }
+            }
+        });
+        /* END OF REMOVING COUPON CODE */
+        //hiding error on text change
+        etCoupon.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                txtCouponError.setVisibility(View.GONE);
+            }
+
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+                txtCouponError.setVisibility(View.GONE);
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                txtCouponError.setVisibility(View.GONE);
+            }
+
+        });
+
+        // clicking on apply button
+        btnApplyCoupon.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String couponText = etCoupon.getText().toString().trim();
+                if(couponText.isEmpty()){
+                    txtCouponError.setText("Enter coupon code");
+                    txtCouponError.setVisibility(View.VISIBLE);
+                    return;
+                }
+                // Call API to validate coupon
+                applyCouponApi(couponText);
+            }
+        });
+    }
+
+    private void applyCouponApi(String couponText) {
+        if (loginSession.isLoggedIn()){
+            String userId = loginSession.getUserId();
+            String device = DeviceInfo.getDeviceString(getContext());
+
+            CouponRequest couponRequest = new CouponRequest(userId,couponText,
+                    device,subTotal);
+            ApiService apiService  = LoginRetrofitClient
+                    .getClient()
+                    .create(ApiService.class);
+            apiService.couponApply(couponRequest).enqueue(new Callback<CouponResponse>() {
+                @Override
+                public void onResponse(Call<CouponResponse> call, Response<CouponResponse> response) {
+                    if (response.isSuccessful() && response.body() != null) {
+                        CouponResponse res = response.body();
+                        if(res.getStatus()){
+                            // coupon apply success
+                            couponCode = couponText;
+                            couponDiscount = res.getDiscount();
+                            finalAmount = res.getFinalAmount();
+                            String message = res.getMessage();
+                            txtCouponError.setVisibility(View.GONE);
+                            layoutCouponApplied.setVisibility(View.VISIBLE);
+                            txtAppliedCoupon.setText(message);
+                            layoutCouponInput.setVisibility(View.GONE);
+                            if(currentCartList != null){
+                                calculateTotal(currentCartList);   // 🔥 THIS FIXES YOUR ISSUE
+                            }
+                        }else{
+                            // coupon error , show in error
+                            txtCouponError.setText(res.getMessage());
+                            txtCouponError.setVisibility(View.VISIBLE);
+                        }
+                    }else{
+                        txtCouponError.setText("Internal server error");
+                        txtCouponError.setVisibility(View.VISIBLE);
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<CouponResponse> call, Throwable t) {
+                    txtCouponError.setText(t.getMessage());
+                    txtCouponError.setVisibility(View.VISIBLE);
+                }
+            });
+        }else{
+            txtCouponError.setText("For apply couponcode login required");
+            txtCouponError.setVisibility(View.VISIBLE);
+        }
     }
 
     private void syncronizeCart() {
@@ -106,11 +239,10 @@ public class CartFragment extends Fragment {
                 : 0;
 
         adapter = new CartAdapter(getContext(), new CartAdapter.CartItemListener() {
-
             @Override
             public void onQuantityChanged(CartItem model, View v) {
                 checkStockFromApi(model, v);
-
+                removeCouponCode();
                 /* executor.execute(() -> {
 
                     db.cartDao().update(model);
@@ -120,48 +252,49 @@ public class CartFragment extends Fragment {
                     updateCartOnServer(model,v);
                 } */
             }
-
             @Override
             public void onItemRemoved(CartItem model, View v) {
-
                 executor.execute(() -> {
                     db.cartDao().deleteCart(model);
                 });
                 if (loginSession.isLoggedIn()) {
                     removeCartFromServer(model,v);
                 }
+                removeCouponCode();
             }
         });
-
         rvCart.setLayoutManager(new LinearLayoutManager(getContext()));
         rvCart.setAdapter(adapter);
-
         // 🔥 Observe LiveData
         db.cartDao().getCartItems(userId)
                 .observe(getViewLifecycleOwner(), cartList -> {
-
                     if (cartList != null && !cartList.isEmpty()) {
-
                         adapter.setList(cartList);
-
+                        currentCartList = cartList;
                         layoutEmpty.setVisibility(View.GONE);
                         rvCart.setVisibility(View.VISIBLE);
-
                         tvItemCount.setText(cartList.size() + " Items in Cart");
-
                         cardItemCount.setVisibility(View.VISIBLE);
                         calculateTotal(cartList);
-
                     } else {
-
                         layoutEmpty.setVisibility(View.VISIBLE);
                         rvCart.setVisibility(View.GONE);
-
                         txtSubtotal.setText("₹0");
                         txtGrandTotal.setText("₹0");
                         cardItemCount.setVisibility(View.GONE);
                     }
                 });
+    }
+
+    private void removeCouponCode() {
+        if(!couponDiscount.equals("0.0")){
+            Toast.makeText(getContext(),"Coupon Removed,Please try again.",Toast.LENGTH_SHORT).show();
+        }
+        couponDiscount = "0.0";
+        layoutCouponInput.setVisibility(View.VISIBLE);
+        layoutCouponApplied.setVisibility(View.GONE);
+        calculateTotal(currentCartList);
+
     }
 
     private void checkStockFromApi(CartItem model, View v) {
@@ -227,19 +360,21 @@ public class CartFragment extends Fragment {
     }
 
     private void calculateTotal(List<CartItem> cartList) {
-        double subtotal = 0;
+        subTotal = 0.0;
 
         for (CartItem item : cartList) {
-            subtotal += item.getPrice() * item.getQuantity();
+            subTotal += item.getPrice() * item.getQuantity();
         }
 
-        double delivery = subtotal > 500 ? 0 : 40;   // Free delivery above 500
-        double discount = 0; // Later connect coupon
+        //double delivery = subTotal > 500 ? 0 : 40;   // Free delivery above 500
+        delivery = 0.0;
+        double discount = Double.parseDouble(couponDiscount); // Later connect coupon
 
-        double grandTotal = subtotal + delivery - discount;
+        double grandTotal = subTotal + delivery - discount;
 
-        txtSubtotal.setText("₹" + subtotal);
+        txtSubtotal.setText("₹" + subTotal);
         txtDelivery.setText("₹" + delivery);
+        //txtDelivery.setVisibility(View.GONE);
         txtDiscount.setText("- ₹" + discount);
         txtGrandTotal.setText("₹" + grandTotal);
     }
@@ -252,6 +387,7 @@ public class CartFragment extends Fragment {
         txtCouponError = view.findViewById(R.id.txtCouponError);
         txtAppliedCoupon = view.findViewById(R.id.txtAppliedCoupon);
         layoutCouponApplied = view.findViewById(R.id.layoutCouponApplied);
+        layoutCouponInput = view.findViewById(R.id.layoutCouponInput);
         txtSubtotal = view.findViewById(R.id.txtSubtotal);
         txtDelivery = view.findViewById(R.id.txtDelivery);
         txtDiscount = view.findViewById(R.id.txtDiscount);
@@ -264,6 +400,7 @@ public class CartFragment extends Fragment {
         db = AppDatabase.getInstance(getContext());
         loginSession = new LoginSession(getContext());
         device = DeviceInfo.getDeviceString(getContext());
+
     }
 
     private void clearCartAllItem() {

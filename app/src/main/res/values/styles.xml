@@ -31,4 +31,11 @@
         <item name="android:foreground">?attr/selectableItemBackground</item>
     </style>
 
+    <style name="CustomTimeChip" parent="Widget.MaterialComponents.Chip.Choice">
+        <item name="chipCornerRadius">24dp</item>
+        <item name="chipStrokeWidth">1dp</item>
+        <item name="chipStrokeColor">#E65100</item>
+        <item name="android:textColor">@color/black</item>
+    </style>
+
 </resources>

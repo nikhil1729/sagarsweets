@@ -1,5 +1,6 @@
 package com.sagarsweets.in;
 
+import android.content.Context;
 import android.os.Build;
 import android.os.Bundle;
 
@@ -84,6 +85,7 @@ public class ProductDetailsFragment extends Fragment
     int selectedSizeId;
     String selectedSizeName;
     Double selectedSizePrice;
+    Double selectedSizeMrp;
     private boolean sizeSelected;
     ProductDetailsModel product;
     private final Executor executor = Executors.newSingleThreadExecutor();
@@ -91,8 +93,8 @@ public class ProductDetailsFragment extends Fragment
     AppDatabase db;
     MaterialCardView layoutStickyCart;
     ImageView btnPlus, btnMinus;
-    TextView txtQuantity;
-    int currentQuantity = 1;
+    TextView txtQuantity,txtStickyPrice,txtStickyStock;
+    int currentQuantity;
     SizeAdapter sizeAdapter;
     public ProductDetailsFragment() {
         // Required empty public constructor
@@ -138,11 +140,13 @@ public class ProductDetailsFragment extends Fragment
     }
 
     private void clickedFunction() {
+        stepperButtonClicked(); // + and - button
         btnAddToCart.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 double sellingPrice = product.getSellingPrice();
-                int quantity = 1;
+                double mrp = product.getMrp();
+                currentQuantity = 1;
                 int selecteSize = 0;
                 String sizeName = "NA";
                 Long updatedAt = System.currentTimeMillis();
@@ -157,24 +161,90 @@ public class ProductDetailsFragment extends Fragment
                         return;
                     }
                     sellingPrice = selectedSizePrice;
+                    mrp = selectedSizeMrp;
                     selecteSize = selectedSizeId;
                     sizeName = selectedSizeName;
-                    addedToCart(product,selecteSize,quantity,sizeName,v);
+                    int availableStock = getAvailableStock(product,selectedSizeId);
+                    if (availableStock <= 0) {
+                        Toast.makeText(getContext(), "Out of stock", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+                    addedToCart(product,selecteSize,currentQuantity,sizeName,v,sellingPrice,mrp);
                 }else{
 
                     Log.d("DEBUG_CART","cart clicked-size is not available");
-                    addedToCart(product,0,1,"NA",v);
+                    addedToCart(product,0,currentQuantity,"NA",v, sellingPrice, mrp);
                 }
                 //addedToCart(product,selecteSize,quantity,sizeName,v); // ✅ MAIN CALL
             }
         });
     }
 
+    private void stepperButtonClicked() {
+
+        btnMinus.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (currentQuantity > 1) {
+                    currentQuantity--;
+                    double sellingPrice = product.getSellingPrice();
+                    double mrp = product.getMrp();
+                    if(sizeSelected){
+                        sellingPrice = selectedSizePrice;
+                        mrp = selectedSizeMrp;
+                    }
+                    txtQuantity.setText(String.valueOf(currentQuantity));
+                    addedToCart(product, selectedSizeId,currentQuantity, selectedSizeName,v, sellingPrice, mrp);
+                }else{
+                    currentQuantity =0;
+                    removeFromCart(productId,selectedSizeId);
+                }
+            }
+        });
+        btnPlus.setOnClickListener(v -> {
+            int availableStock = getAvailableStock(product, selectedSizeId);
+            if (currentQuantity >= availableStock) {
+                Toast.makeText(getContext(), "Maximum stock reached", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            Log.d("currentQuantity","curr quan-"+currentQuantity);
+            double sellingPrice = product.getSellingPrice();
+            double mrp = product.getMrp();
+            if(sizeSelected){
+                sellingPrice = selectedSizePrice;
+                mrp = selectedSizeMrp;
+            }
+            currentQuantity++;
+            Log.d("currentQuantity","curr quan-"+currentQuantity);
+            txtQuantity.setText(String.valueOf(currentQuantity));
+            addedToCart(product, selectedSizeId,currentQuantity, selectedSizeName,v, sellingPrice, mrp);
+        });
+    }
+
+    private int getAvailableStock(ProductDetailsModel product, int selectedSizeId) {
+        List<SizeModel> sizes = product.getSizeList();
+        Log.d("STOCKCHECK", "Selected Size-"+String.valueOf(selectedSizeId));
+        // ✅ If size-based product
+        if (sizes != null && !sizes.isEmpty()) {
+            for (SizeModel size : sizes) {
+                if (size.getId() == selectedSizeId) {
+                    Integer stock = size.getStock();
+                    Log.d("STOCKCHECK", String.valueOf(stock));
+                    return stock == null ? 0 : size.getStock();
+                }
+            }
+            return 0; // size not found
+        }
+
+        // ✅ Non-size product
+        return product.getStock() == null ? 0 : product.getStock();
+    }
+
     private void addedToCart(ProductDetailsModel product,
                              int selectedSizeId,
                              int quantity,
                              String sizeSelectedName,
-                             View v) {
+                             View v, double sellingPrice, double mrp) {
 
         executor.execute(() -> {
 
@@ -189,8 +259,9 @@ public class ProductDetailsFragment extends Fragment
             CartItem itemToSync;
 
             if (existingItem != null) {
-
-                existingItem.setQuantity(existingItem.getQuantity() + quantity);
+                existingItem.setPrice(sellingPrice);
+                existingItem.setMrp(mrp);
+                existingItem.setQuantity(quantity);
                 existingItem.setUpdatedAt(System.currentTimeMillis());
                 existingItem.setSynced(false);
 
@@ -203,8 +274,8 @@ public class ProductDetailsFragment extends Fragment
                         productId,
                         product.getProductTitle(),
                         product.getDefaultImage(),
-                        product.getSellingPrice(),
-                        product.getMrp(),
+                        sellingPrice,
+                        mrp,
                         quantity,
                         selectedSizeId,
                         userId,
@@ -222,10 +293,14 @@ public class ProductDetailsFragment extends Fragment
 
                 // show stepper
                 txtQuantity.setText(String.valueOf(itemToSync.getQuantity()));
+                Integer totalPriceSticky = (int)( quantity * sellingPrice );
+                txtStickyPrice.setText(String.valueOf(DeviceInfo.rupeeSymbol()+totalPriceSticky));
 
                 btnAddToCart.setVisibility(View.GONE);
                 layoutStickyCart.setVisibility(View.VISIBLE);
-
+                int totalStock = getAvailableStock(product,selectedSizeId);
+                int pendingStock = totalStock - quantity;
+                txtStickyStock.setText("Remaining-"+(int)pendingStock);
                 // now call API
                 CartSaveOnServer.saveCartOnServer(
                         itemToSync,
@@ -240,6 +315,9 @@ public class ProductDetailsFragment extends Fragment
 
 
     private void showSizeSelected() {
+        Context context = requireContext();
+        DeviceInfo.vibratMobile(context);
+        // Shake animation
         rvSizes.animate()
                 .translationX(20)
                 .setDuration(50)
@@ -334,8 +412,15 @@ public class ProductDetailsFragment extends Fragment
         btnPlus = view.findViewById(R.id.btnPlus);
         btnMinus = view.findViewById(R.id.btnMinus);
         txtQuantity = view.findViewById(R.id.txtQuantity);
+        txtStickyPrice = view.findViewById(R.id.txtStickyPrice);
+        txtStickyStock = view.findViewById(R.id.txtStickyStock);
         db = AppDatabase.getInstance(getContext());
 
+        sizeSelected = false;
+        selectedSizeId = 0;
+        selectedSizeName = "NA";
+        selectedSizePrice = 0.0;
+        selectedSizeMrp = 0.0;
     }
 
 
@@ -366,6 +451,7 @@ public class ProductDetailsFragment extends Fragment
 
                     // stock checking
                     Integer stock = product.getStock();
+                    Log.d("STOCKCHECK", String.valueOf(stock));
                     if (stock != null && stock > 0) {
                         txtStockStatus.setText("IN STOCK");
                         txtStockStatus.setBackgroundResource(R.drawable.bg_stock_in);
@@ -380,15 +466,19 @@ public class ProductDetailsFragment extends Fragment
                     // rating bar
                     Float rating = product.getRating();
                     ratingBar.setRating(rating != null ? rating : 0f);
+                    // review
                     Integer reviewCount = product.getRatingCount();
+                    // mrp sell price and discount
                     txtReviewCount.setText("(" + (reviewCount != null ? reviewCount : 0) + " reviews)");
                     Double selling = Double.valueOf(product.getSellingPrice());
-                    txtSellingPrice.setText("₹" + (selling != null ? selling : 0));
+                    txtSellingPrice.setText(DeviceInfo.rupeeSymbol() + (int)(selling != null ? selling : 0));
                     Double mrp = Double.valueOf(product.getMrp());
-                    txtMrp.setText("₹" + (mrp != null ? mrp : 0));
+                    txtMrp.setText(DeviceInfo.rupeeSymbol() + (int)(mrp != null ? mrp : 0));
                     Double discount = product.getDiscountPercentage();
                     int dis = discount != null ? (int) Math.round(discount) : 0;
                     txtDiscount.setText(dis + "% OFF");
+                    // end mrp sell price and discount
+
                     // HTML DELIVERY TEXT
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
                         txtDelivery.setText(
@@ -425,32 +515,42 @@ public class ProductDetailsFragment extends Fragment
                         sizeAdapter = new SizeAdapter(sizes, size -> {
                            updatePriceAndStock(product,size);
                         });
+
                         /*CHECK PRODUCT SIZE IS IN CART*/
+                        int productId = product.getId();
+                        int userId = loginSession.isLoggedIn()
+                                ? Integer.parseInt(loginSession.getUserId())
+                                : 0;
                         executor.execute(() -> {
-
-                            int productId = product.getId();
-                            int userId = loginSession.isLoggedIn()
-                                    ? Integer.parseInt(loginSession.getUserId())
-                                    : 0;
-
                             CartItem existingItem =
                                     db.cartDao().checkItem(productId, userId);
-
                             if (existingItem != null) {
-
                                 int sizeId = existingItem.getSizeId();   // ✅ SAFE NOW
-
+                                selectedSizeId = sizeId;
+                                currentQuantity = existingItem.getQuantity();
+                                selectedSizePrice = existingItem.getPrice();
+                                double mrpSize = (int)existingItem.getMrp();
+                                double sellPriceSize = (int)existingItem.getPrice();
                                 requireActivity().runOnUiThread(() -> {
-
+                                    currentQuantity = existingItem.getQuantity();
                                     txtQuantity.setText(String.valueOf(existingItem.getQuantity()));
-
                                     btnAddToCart.setVisibility(View.GONE);
                                     layoutStickyCart.setVisibility(View.VISIBLE);
 
                                     if (sizeId != 0 && sizeAdapter != null) {
                                         sizeAdapter.setSelectedSizeById(sizeId);
+                                        txtSellingPrice.setText(DeviceInfo.rupeeSymbol() + (int)sellPriceSize);
+                                        txtMrp.setText(DeviceInfo.rupeeSymbol() + (int)mrpSize);
+                                        int discountSize = calculateDiscount(mrpSize,sellPriceSize);
+                                        txtDiscount.setText(discountSize + "% OFF");
                                     }
+
                                 });
+                                double totalPrice = existingItem.getQuantity() * existingItem.getPrice();
+                                int totalStock = getAvailableStock(product,selectedSizeId);
+                                int pendigStock = totalStock - existingItem.getQuantity();
+                                txtStickyPrice.setText(DeviceInfo.rupeeSymbol() + (int)totalPrice);
+                                txtStickyStock.setText("Remaining-"+pendigStock);
                             }
                         });
                         /*CHECK CART IS END*/
@@ -459,6 +559,9 @@ public class ProductDetailsFragment extends Fragment
                     } else {
                         tvSizeTitle.setVisibility(View.GONE);
                         rvSizes.setVisibility(View.GONE);
+                        /*Function is use for if product is available in cart
+                         * then hide add cart button*/
+                        checkProductInCart(product);
                     }
 
                     // -------- SPECIFICATIONS --------
@@ -473,6 +576,8 @@ public class ProductDetailsFragment extends Fragment
                     } else {
                         Log.e("SPEC_DEBUG", "Specification is NULL");
                     }
+
+                    /*WISH LIST */
                     Log.e("WISHLIST_DEBUG", "Wish list is "+String.valueOf(product.getWishListedMain()));
                     if (Boolean.TRUE.equals(product.getWishListedMain())) {
                         imgWishlist.setImageResource(R.drawable.ic_heart_filled);
@@ -485,12 +590,7 @@ public class ProductDetailsFragment extends Fragment
                             wishListCkicked(productId);
                         }
                     });
-
-//                    SpecificationAdapter specificationAdapter =
-  //                          new SpecificationAdapter(product.getSpecification());
-
-    //                Log.d("specification", String.valueOf(product.getSpecification()));
-      //              rvSpecification.setAdapter(specificationAdapter);
+                    /*WISH LIST END*/
 
                     // -------- RELATED PRODUCTS --------
                     List<ProductModel> productList = product.getRelatedProduct();
@@ -520,6 +620,38 @@ public class ProductDetailsFragment extends Fragment
 
     }
 
+    private void checkProductInCart(ProductDetailsModel productDetailsModel) {
+        int userId = loginSession.isLoggedIn()
+                ? Integer.parseInt(loginSession.getUserId())
+                : 0;
+        executor.execute(() -> {
+            CartItem existingItem =
+                    db.cartDao().checkItem(productDetailsModel.getId(), userId);
+            if (existingItem != null) {
+                txtQuantity.setText(String.valueOf(existingItem.getQuantity()));
+                btnAddToCart.setVisibility(View.GONE);
+                layoutStickyCart.setVisibility(View.VISIBLE);
+                currentQuantity = existingItem.getQuantity();
+                double price = currentQuantity * productDetailsModel.getSellingPrice();
+                int pendingStock = getAvailableStock(productDetailsModel,0)-currentQuantity;
+                txtStickyStock.setText("Pending Stock "+pendingStock);
+                txtStickyPrice.setText(DeviceInfo.rupeeSymbol()+ (int) price);
+            }else{
+                currentQuantity = 0;
+                txtQuantity.setText("0");
+                btnAddToCart.setVisibility(View.VISIBLE);
+                layoutStickyCart.setVisibility(View.GONE);
+            }
+        });
+    }
+
+    private int calculateDiscount(double mrp, double sellingPrice) {
+        if (mrp <= 0) return 0;   // safety check
+
+        double discount = ((mrp - sellingPrice) / mrp) * 100;
+        return (int) Math.round(discount);
+    }
+
     private void wishListCkicked(Integer pId) {
         Toast.makeText(getContext(),"Product id = "+String.valueOf(pId),Toast.LENGTH_LONG).show();
         if(loginSession.isLoggedIn()){
@@ -547,20 +679,17 @@ public class ProductDetailsFragment extends Fragment
             e.printStackTrace();
         }
 
-        txtSellingPrice.setText("₹" + sellingPrice);
-        txtMrp.setText("₹" + mrp);
-
+        txtSellingPrice.setText(DeviceInfo.rupeeSymbol() + (int)sellingPrice);
+        txtMrp.setText(DeviceInfo.rupeeSymbol() + (int)mrp);
+        int discountSize = calculateDiscount(mrp,sellingPrice);
+        txtDiscount.setText(discountSize + "% OFF");
         sizeSelected = true;
         selectedSizeId = size.getId() != null ? size.getId() : 0;
         selectedSizeName = size.getTitle() != null ? size.getTitle() : "NA";
         selectedSizePrice = sellingPrice;
+        selectedSizeMrp = mrp;
 
-        int discount = 0;
-        if (mrp > 0) {
-            discount = (int) Math.round(((mrp - sellingPrice) / mrp) * 100);
-        }
 
-        txtDiscount.setText(discount + "% OFF");
 
         Integer stockObj = size.getStock();
         int stock = stockObj != null ? stockObj : 0;
@@ -574,33 +703,29 @@ public class ProductDetailsFragment extends Fragment
             txtStockStatus.setBackgroundResource(R.drawable.bg_stock_out);
             btnAddToCart.setEnabled(false);
         }
-        checkCartStatus(productId,size.getId());
+
+        removeFromCart(productId,selectedSizeId);
     }
 
-    private void checkCartStatus(int productId, int sizeId) {
+    private void removeFromCart(int productId, int sizeId) {
+        int userId = loginSession.isLoggedIn()
+                ? Integer.parseInt(loginSession.getUserId())
+                : 0;
+        // ✅ Database work in background if any size will select
         executor.execute(() -> {
 
-            int uId = loginSession.isLoggedIn() ?
-                    Integer.parseInt(loginSession.getUserId()) : 0;
+            CartItem existingItem = db.cartDao().checkItem(productId, userId);
+            if(existingItem != null){
+                CartSaveOnServer.cartRemoveFromServer(existingItem,null,
+                        loginSession,DeviceInfo.getDeviceString(getContext()));
+                currentQuantity =0;
+            }
 
-            CartItem item = db.cartDao().checkItem(productId, uId);
-
-            requireActivity().runOnUiThread(() -> {
-                if (item != null) {
-
-                    currentQuantity = item.getQuantity();
-                    txtQuantity.setText(String.valueOf(currentQuantity));
-
-                    btnAddToCart.setVisibility(View.GONE);
-                    layoutStickyCart.setVisibility(View.VISIBLE);
-
-                } else {
-
-                    btnAddToCart.setVisibility(View.VISIBLE);
-                    layoutStickyCart.setVisibility(View.GONE);
-                }
-            });
+            db.cartDao().deleteCartByProductId(userId, productId);
         });
+        btnAddToCart.setVisibility(View.VISIBLE);
+        layoutStickyCart.setVisibility(View.GONE);
+
     }
     @Override
     public void onCartUpdated() {
@@ -610,3 +735,4 @@ public class ProductDetailsFragment extends Fragment
         }
     }
 }
+

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.textfield.TextInputLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+    android:id="@+id/tilPincode"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="16dp"
+    android:hint="Pincode"
+    app:boxStrokeWidth="1dp"
+    app:boxCornerRadiusTopStart="14dp"
+    app:boxCornerRadiusTopEnd="14dp"
+    app:boxCornerRadiusBottomStart="14dp"
+    app:boxCornerRadiusBottomEnd="14dp">
+
+    <com.google.android.material.textfield.TextInputEditText
+        android:id="@+id/etPincode"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:inputType="phone"
+        android:maxLength="6"/>
+
+</com.google.android.material.textfield.TextInputLayout>

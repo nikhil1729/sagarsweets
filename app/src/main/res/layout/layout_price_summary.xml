@@ -18,7 +18,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:layout_marginBottom="12dp">
+            android:layout_marginBottom="2dp">
 
             <!-- Coupon Input Box -->
             <LinearLayout
@@ -126,6 +126,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
+            android:visibility="gone"
             android:layout_marginTop="8dp">
 
             <TextView
@@ -215,6 +216,6 @@
         android:textSize="16sp"
         android:textStyle="bold"
         android:textColor="#FFFFFF"
-        android:background="@drawable/bg_checkout_button"/>
+        android:backgroundTint="@color/sagar_button"/>
 
 </LinearLayout>

@@ -3,16 +3,23 @@ package com.sagarsweets.in.ApiInterface;
 
 
 import com.sagarsweets.in.ApiModel.AboutResponse;
+import com.sagarsweets.in.ApiModel.AddAddressRequest;
+import com.sagarsweets.in.ApiModel.AddAddressResponse;
 import com.sagarsweets.in.ApiModel.AllCategoryResponse;
 import com.sagarsweets.in.ApiModel.CartSyncRequest;
 import com.sagarsweets.in.ApiModel.CartSyncResponse;
 import com.sagarsweets.in.ApiModel.CategoryProductRequest;
 import com.sagarsweets.in.ApiModel.CategoryProductResponse;
 import com.sagarsweets.in.ApiModel.CategoryResponse;
+import com.sagarsweets.in.ApiModel.CheckoutRequest;
+import com.sagarsweets.in.ApiModel.CheckoutResponse;
 import com.sagarsweets.in.ApiModel.ContactUsFormRequest;
 import com.sagarsweets.in.ApiModel.ContactUsFormResponse;
 import com.sagarsweets.in.ApiModel.ContactUsResponse;
+import com.sagarsweets.in.ApiModel.CouponRequest;
+import com.sagarsweets.in.ApiModel.CouponResponse;
 import com.sagarsweets.in.ApiModel.ForgetPasswordRequest;
+import com.sagarsweets.in.ApiModel.GetUserAddressResponse;
 import com.sagarsweets.in.ApiModel.LoginOtpRequest;
 import com.sagarsweets.in.ApiModel.LoginRequest;
 import com.sagarsweets.in.ApiModel.LoginResponse;
@@ -38,6 +45,7 @@ import com.sagarsweets.in.ApiModel.StockResponse;
 import com.sagarsweets.in.ApiModel.TopCategoryRequest;
 import com.sagarsweets.in.ApiModel.TopCategoryResponse;
 import com.sagarsweets.in.ApiModel.UpdateCartRequest;
+import com.sagarsweets.in.ApiModel.UserAddressRequest;
 import com.sagarsweets.in.ApiModel.WishListByLoggedInUserRequest;
 import com.sagarsweets.in.ApiModel.WishListByLoggedInUserResponse;
 import com.sagarsweets.in.ApiModel.WishListProductResponse;
@@ -156,4 +164,14 @@ public interface ApiService {
 
     @POST("rest/user/checkstock")
     Call<StockResponse> checkStock(@Body StockRequest request);
+
+    @POST("rest/coupons/apply")
+    Call<CouponResponse> couponApply(@Body CouponRequest couponRequest);
+    @POST("rest/checkout/index")
+    Call<CheckoutResponse> checkoutIndex(@Body CheckoutRequest checkoutRequest);
+
+    @POST("rest/user/getuseraddress")
+    Call<GetUserAddressResponse> getUserAddress(@Body UserAddressRequest userAddressRequest);
+    @POST("rest/user/saveuseraddress")
+    Call<AddAddressResponse> addAddressUser(@Body AddAddressRequest addAddressRequest);
 }
