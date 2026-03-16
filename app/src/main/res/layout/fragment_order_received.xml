@@ -1,0 +1,514 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#F7F7F7">
+
+    <ScrollView
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:fillViewport="true"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/buttonContainer"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="18dp">
+
+            <!-- SUCCESS HEADER -->
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:orientation="vertical"
+                android:layout_marginTop="30dp">
+
+                <ImageView
+                    android:id="@+id/imgSuccess"
+                    android:layout_width="80dp"
+                    android:layout_height="80dp"
+                    android:src="@drawable/ic_success"
+                    app:tint="#4CAF50" />
+
+                <TextView
+                    android:id="@+id/txtTitle"
+                    android:text="Order Placed Successfully"
+                    android:textSize="22sp"
+                    android:textStyle="bold"
+                    android:textColor="#111"
+                    android:layout_marginTop="14dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+
+                <TextView
+                    android:id="@+id/txtOrderId"
+                    android:text="Order ID #458239"
+                    android:textSize="14sp"
+                    android:textColor="#777"
+                    android:layout_marginTop="4dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+
+            </LinearLayout>
+
+
+            <!-- ORDERED ITEMS -->
+
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cardItems"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="28dp"
+                app:cardCornerRadius="18dp"
+                app:strokeWidth="1dp"
+                app:strokeColor="#E6E6E6"
+                app:cardElevation="0dp">
+
+                <LinearLayout
+                    android:padding="18dp"
+                    android:orientation="vertical"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <LinearLayout
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:layout_marginBottom="12dp"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content">
+
+                        <ImageView
+                            android:layout_width="22dp"
+                            android:layout_height="22dp"
+                            android:src="@drawable/ic_food"
+                            app:tint="@color/sagar_button" />
+
+                        <TextView
+                            android:text="Ordered Items"
+                            android:textSize="17sp"
+                            android:textStyle="bold"
+                            android:layout_marginStart="10dp"
+                            android:textColor="#111"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"/>
+
+                    </LinearLayout>
+
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/recyclerOrderedItems"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:nestedScrollingEnabled="false"/>
+
+                </LinearLayout>
+
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- DELIVERY SCHEDULE -->
+
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cardDeliverySlot"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="24dp"
+                app:cardCornerRadius="18dp"
+                app:strokeWidth="1dp"
+                app:strokeColor="#E6E6E6">
+
+                <LinearLayout
+                    android:padding="18dp"
+                    android:orientation="vertical"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <!-- Header -->
+                    <LinearLayout
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:layout_marginBottom="12dp"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content">
+
+                        <ImageView
+                            android:layout_width="22dp"
+                            android:layout_height="22dp"
+                            android:src="@drawable/ic_calendar"
+                            app:tint="@color/sagar_button" />
+
+                        <TextView
+                            android:text="Delivery Schedule"
+                            android:textSize="17sp"
+                            android:textStyle="bold"
+                            android:layout_marginStart="10dp"
+                            android:textColor="#111"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"/>
+
+                    </LinearLayout>
+
+                    <!-- Delivery Date -->
+                    <TextView
+                        android:text="Delivery Date"
+                        android:textSize="13sp"
+                        android:textColor="#777"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"/>
+
+                    <TextView
+                        android:id="@+id/txtDeliveryDate"
+                        android:text="25 March 2026"
+                        android:textSize="15sp"
+                        android:textStyle="bold"
+                        android:layout_marginBottom="10dp"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"/>
+
+                    <!-- Time Slot -->
+                    <TextView
+                        android:text="Time Slot"
+                        android:textSize="13sp"
+                        android:textColor="#777"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"/>
+
+                    <TextView
+                        android:id="@+id/txtTimeSlot"
+                        android:text="Morning (9 AM - 12 PM)"
+                        android:textSize="15sp"
+                        android:textStyle="bold"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"/>
+
+                </LinearLayout>
+
+            </com.google.android.material.card.MaterialCardView>
+
+
+            <!-- BILL DETAILS -->
+
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cardBill"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="18dp"
+                app:cardCornerRadius="18dp"
+                app:strokeWidth="1dp"
+                app:strokeColor="#E6E6E6">
+
+                <LinearLayout
+                    android:padding="18dp"
+                    android:orientation="vertical"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <LinearLayout
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:layout_marginBottom="12dp"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content">
+
+                        <ImageView
+                            android:layout_width="22dp"
+                            android:layout_height="22dp"
+                            android:src="@drawable/ic_receipt"
+                            app:tint="@color/sagar_button" />
+
+                        <TextView
+                            android:text="Bill Details"
+                            android:textSize="17sp"
+                            android:textStyle="bold"
+                            android:layout_marginStart="10dp"
+                            android:textColor="#111"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"/>
+
+                    </LinearLayout>
+
+                    <TextView
+                        android:layout_height="wrap_content"
+                        android:layout_width="wrap_content"
+                        android:id="@+id/txtSubtotal"
+                        android:text="Subtotal : ₹300"
+                        android:textSize="14sp"/>
+
+                    <TextView
+                        android:layout_height="wrap_content"
+                        android:layout_width="wrap_content"
+                        android:id="@+id/txtDelivery"
+                        android:text="Delivery : ₹20"
+                        android:textSize="14sp"
+                        android:layout_marginTop="4dp"/>
+
+                    <TextView
+                        android:layout_height="wrap_content"
+                        android:layout_width="wrap_content"
+                        android:id="@+id/txtDiscount"
+                        android:text="Discount : -₹30"
+                        android:textSize="14sp"
+                        android:layout_marginTop="4dp"/>
+                    <!-- Coupon Applied -->
+
+                    <LinearLayout
+                        android:id="@+id/layoutCoupon"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:layout_marginTop="6dp"
+                        android:layout_marginBottom="6dp">
+
+                        <ImageView
+                            android:layout_width="18dp"
+                            android:layout_height="18dp"
+                            android:src="@drawable/ic_coupon"
+                            android:layout_marginEnd="6dp"
+                            app:tint="#4CAF50" />
+
+                        <TextView
+                            android:id="@+id/txtCouponCode"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Coupon: SAVE30"
+                            android:textStyle="bold"
+                            android:textSize="14sp"
+                            android:textColor="#4CAF50"/>
+
+                    </LinearLayout>
+
+                    <TextView
+                        android:id="@+id/txtCouponSaving"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="You saved ₹30 with this coupon"
+                        android:textSize="13sp"
+                        android:textColor="#4CAF50"
+                        android:layout_marginBottom="8dp"/>
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="#F1F1F1"
+                        android:layout_marginVertical="10dp"/>
+
+                    <TextView
+                        android:layout_height="wrap_content"
+                        android:layout_width="wrap_content"
+                        android:id="@+id/txtTotal"
+                        android:text="Total : ₹290"
+                        android:textSize="16sp"
+                        android:textStyle="bold"/>
+
+                </LinearLayout>
+
+            </com.google.android.material.card.MaterialCardView>
+
+
+            <!-- PAYMENT METHOD -->
+
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cardPayment"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="18dp"
+                app:cardCornerRadius="18dp"
+                app:strokeWidth="1dp"
+                app:strokeColor="#E6E6E6">
+
+                <LinearLayout
+                    android:padding="18dp"
+                    android:orientation="vertical"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <LinearLayout
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:layout_marginBottom="10dp"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content">
+
+                        <ImageView
+                            android:layout_width="22dp"
+                            android:layout_height="22dp"
+                            android:src="@drawable/ic_payment"
+                            app:tint="@color/sagar_button" />
+
+                        <TextView
+                            android:text="Payment Method"
+                            android:textSize="17sp"
+                            android:textStyle="bold"
+                            android:layout_marginStart="10dp"
+                            android:textColor="#111"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"/>
+
+                    </LinearLayout>
+
+                    <TextView
+                        android:layout_height="wrap_content"
+                        android:layout_width="wrap_content"
+                        android:id="@+id/txtPaymentMethod"
+                        android:text="Cash on Delivery"
+                        android:textSize="14sp"/>
+
+                </LinearLayout>
+
+            </com.google.android.material.card.MaterialCardView>
+
+
+            <!-- DELIVERY ADDRESS -->
+
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cardAddress"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="18dp"
+                app:cardCornerRadius="18dp"
+                app:strokeWidth="1dp"
+                app:strokeColor="#E6E6E6">
+
+                <LinearLayout
+                    android:padding="18dp"
+                    android:orientation="vertical"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <LinearLayout
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:layout_marginBottom="10dp"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content">
+
+                        <ImageView
+                            android:layout_width="22dp"
+                            android:layout_height="22dp"
+                            android:src="@drawable/ic_location"
+                            app:tint="@color/sagar_button" />
+
+                        <TextView
+                            android:text="Delivery Address"
+                            android:textSize="17sp"
+                            android:textStyle="bold"
+                            android:layout_marginStart="10dp"
+                            android:textColor="#111"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"/>
+
+                    </LinearLayout>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/txtAddress"
+                        android:text="Bhelupur, Varanasi\nUttar Pradesh - 221010"
+                        android:textSize="14sp"/>
+
+                </LinearLayout>
+
+            </com.google.android.material.card.MaterialCardView>
+
+
+            <!-- DELIVERY ADDRESS -->
+
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cardPickupAddress"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="18dp"
+                app:cardCornerRadius="18dp"
+                app:strokeWidth="1dp"
+                app:strokeColor="#E6E6E6">
+
+                <LinearLayout
+                    android:padding="18dp"
+                    android:orientation="vertical"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <LinearLayout
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:layout_marginBottom="10dp"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content">
+
+                        <ImageView
+                            android:layout_width="22dp"
+                            android:layout_height="22dp"
+                            android:src="@drawable/ic_location"
+                            app:tint="@color/sagar_button" />
+
+                        <TextView
+                            android:text="Store Pickup Address"
+                            android:textSize="17sp"
+                            android:textStyle="bold"
+                            android:layout_marginStart="10dp"
+                            android:textColor="#111"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"/>
+
+                    </LinearLayout>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/txtStorePickupAddress"
+                        android:text="Bhelupur, Varanasi\nUttar Pradesh - 221010"
+                        android:textSize="14sp"/>
+
+                </LinearLayout>
+
+            </com.google.android.material.card.MaterialCardView>
+
+        </LinearLayout>
+
+    </ScrollView>
+
+
+    <!-- BOTTOM BUTTONS -->
+
+    <LinearLayout
+        android:id="@+id/buttonContainer"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="18dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnTrack"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:text="Track Order"
+            android:textColor="@android:color/white"
+            android:textSize="16sp"
+            android:backgroundTint="@color/sagar_button"
+            app:cornerRadius="14dp"/>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnContinue"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:text="Continue Shopping"
+            android:textColor="@color/sagar_button"
+            android:textSize="16sp"
+            android:layout_marginTop="10dp"
+            android:backgroundTint="@android:color/white"
+            app:strokeWidth="2dp"
+            app:strokeColor="@color/sagar_button"
+            app:cornerRadius="14dp"/>
+
+    </LinearLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

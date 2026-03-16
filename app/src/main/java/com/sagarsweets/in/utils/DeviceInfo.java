@@ -122,12 +122,12 @@ public class DeviceInfo {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 vibrator.vibrate(
                         VibrationEffect.createOneShot(
-                                200,
+                                100,
                                 VibrationEffect.DEFAULT_AMPLITUDE
                         )
                 );
             } else {
-                vibrator.vibrate(200);
+                vibrator.vibrate(100);
             }
         }
     }

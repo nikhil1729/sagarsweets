@@ -70,5 +70,6 @@ dependencies {
     // room data base
     implementation "androidx.room:room-runtime:2.6.1"
     annotationProcessor "androidx.room:room-compiler:2.6.1"
-
+    implementation 'com.airbnb.android:lottie:6.0.0'
+    implementation 'com.razorpay:checkout:1.6.38'
 }

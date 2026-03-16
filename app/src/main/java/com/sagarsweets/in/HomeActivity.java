@@ -44,6 +44,8 @@ import com.google.android.material.badge.ExperimentalBadgeUtils;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.navigation.NavigationView;
 import com.google.android.material.textfield.MaterialAutoCompleteTextView;
+import com.razorpay.Checkout;
+import com.razorpay.PaymentResultListener;
 import com.sagarsweets.in.Adapters.PopularProductAdapter;
 import com.sagarsweets.in.Adapters.SearchSuggestionAdapter;
 import com.sagarsweets.in.ApiControllers.LoginRetrofitClient;
@@ -65,7 +67,9 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 public class HomeActivity extends AppCompatActivity
-        implements PopularProductAdapter.CartUpdateListener{
+        implements PopularProductAdapter.CartUpdateListener,
+        PaymentResultListener
+{
 
     TextView tvLocation;
     TextView drawName, drawEmail;
@@ -84,10 +88,38 @@ public class HomeActivity extends AppCompatActivity
     private Handler searchHandler = new Handler(Looper.getMainLooper());
     private Runnable searchRunnable;
 
+    @Override
+    public void onPaymentSuccess(String razorpayPaymentID) {
+
+        Fragment fragment =
+                getSupportFragmentManager()
+                        .findFragmentById(R.id.container);
+
+        if (fragment instanceof CheckoutFragment) {
+            ((CheckoutFragment) fragment)
+                    .handlePaymentSuccess(razorpayPaymentID);
+        }
+    }
+
+    @Override
+    public void onPaymentError(int code, String response) {
+
+        Fragment fragment =
+                getSupportFragmentManager()
+                        .findFragmentById(R.id.container);
+
+        if (fragment instanceof CheckoutFragment) {
+            ((CheckoutFragment) fragment)
+                    .handlePaymentError(code, response);
+        }
+    }
+
+
     @OptIn(markerClass = ExperimentalBadgeUtils.class)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Checkout.preload(getApplicationContext());
         // IMPORTANT
         //EdgeToEdge.enable(this);
         setContentView(R.layout.activity_home);

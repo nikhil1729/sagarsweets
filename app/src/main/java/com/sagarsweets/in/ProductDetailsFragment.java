@@ -5,6 +5,7 @@ import android.os.Build;
 import android.os.Bundle;
 
 import androidx.annotation.Nullable;
+import androidx.cardview.widget.CardView;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -96,6 +97,7 @@ public class ProductDetailsFragment extends Fragment
     TextView txtQuantity,txtStickyPrice,txtStickyStock;
     int currentQuantity;
     SizeAdapter sizeAdapter;
+    //CardView cardDeliveryAddress;
     public ProductDetailsFragment() {
         // Required empty public constructor
         //this.productId = "12";
@@ -414,6 +416,7 @@ public class ProductDetailsFragment extends Fragment
         txtQuantity = view.findViewById(R.id.txtQuantity);
         txtStickyPrice = view.findViewById(R.id.txtStickyPrice);
         txtStickyStock = view.findViewById(R.id.txtStickyStock);
+        // cardDeliveryAddress = view.findViewById(R.id.cardDeliveryAddress);
         db = AppDatabase.getInstance(getContext());
 
         sizeSelected = false;

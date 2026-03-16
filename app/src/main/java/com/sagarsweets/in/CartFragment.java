@@ -32,6 +32,7 @@ import com.sagarsweets.in.ApiModel.UpdateCartRequest;
 import com.sagarsweets.in.RoomDatabase.AppDatabase;
 import com.sagarsweets.in.Session.CartItem;
 import com.sagarsweets.in.Session.LoginSession;
+import com.sagarsweets.in.utils.ButtonLoaderUtil;
 import com.sagarsweets.in.utils.CartSaveOnServer;
 import com.sagarsweets.in.utils.DeviceInfo;
 
@@ -87,9 +88,15 @@ public class CartFragment extends Fragment {
         syncronizeCart();
         couponsRelatedFunction();
         //clearCartAllItem();
+
         btnCheckout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
+                if(currentCartList.size() <= 0){
+                    ButtonLoaderUtil.makeToast(getContext(),"Cart is empty");
+                    return;
+                }
                 CheckoutFragment checkoutFragment = new CheckoutFragment();
                 Bundle bundle = new Bundle();
                 bundle.putString("coupon_code", couponCode);
@@ -277,6 +284,7 @@ public class CartFragment extends Fragment {
                         cardItemCount.setVisibility(View.VISIBLE);
                         calculateTotal(cartList);
                     } else {
+                        //btnCheckout.setEnabled(false);
                         layoutEmpty.setVisibility(View.VISIBLE);
                         rvCart.setVisibility(View.GONE);
                         txtSubtotal.setText("₹0");

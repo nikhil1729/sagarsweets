@@ -25,8 +25,12 @@ import com.sagarsweets.in.ApiModel.LoginRequest;
 import com.sagarsweets.in.ApiModel.LoginResponse;
 import com.sagarsweets.in.ApiModel.OtpResponse;
 import com.sagarsweets.in.ApiModel.PapularProductHome;
+import com.sagarsweets.in.ApiModel.PayonDeleveryOtpRequest;
+import com.sagarsweets.in.ApiModel.PayonDeleveryOtpResponse;
 import com.sagarsweets.in.ApiModel.PincodeRequest;
 import com.sagarsweets.in.ApiModel.PincodeResponse;
+import com.sagarsweets.in.ApiModel.PodVerifyOtpRequest;
+import com.sagarsweets.in.ApiModel.PodVerifyOtpResponse;
 import com.sagarsweets.in.ApiModel.PolicyResponse;
 import com.sagarsweets.in.ApiModel.PopularProductResponse;
 import com.sagarsweets.in.ApiModel.ProductDetailsModel;
@@ -174,4 +178,12 @@ public interface ApiService {
     Call<GetUserAddressResponse> getUserAddress(@Body UserAddressRequest userAddressRequest);
     @POST("rest/user/saveuseraddress")
     Call<AddAddressResponse> addAddressUser(@Body AddAddressRequest addAddressRequest);
+
+
+    /* SEND OTP FOR POD ORDERS */
+    @POST("rest/checkout/payondeliveryotp")
+    Call<PayonDeleveryOtpResponse> getPayonDeliveryOtp(@Body PayonDeleveryOtpRequest payonDeleveryOtpRequest);
+    @POST("rest/checkout/podotpconfirm")
+    Call<PodVerifyOtpResponse> getVerifyPodOtp(@Body PodVerifyOtpRequest podVerifyOtpRequest);
+
 }

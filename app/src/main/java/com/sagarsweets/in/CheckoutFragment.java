@@ -12,10 +12,12 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.os.Parcelable;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.RadioButton;
@@ -23,17 +25,23 @@ import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.facebook.shimmer.ShimmerFrameLayout;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.material.chip.Chip;
 import com.google.android.material.chip.ChipGroup;
+import com.razorpay.Checkout;
 import com.sagarsweets.in.Adapters.PickupPreviewAdapter;
 import com.sagarsweets.in.ApiControllers.LoginRetrofitClient;
+import com.sagarsweets.in.ApiControllers.SuperController;
 import com.sagarsweets.in.ApiInterface.ApiService;
+import com.sagarsweets.in.ApiModel.CheckoutProcessData;
 import com.sagarsweets.in.ApiModel.CheckoutRequest;
 import com.sagarsweets.in.ApiModel.CheckoutResponse;
 import com.sagarsweets.in.ApiModel.CouponDetails;
 import com.sagarsweets.in.ApiModel.GetUserAddressResponse;
+import com.sagarsweets.in.ApiModel.PayonDeleveryOtpRequest;
+import com.sagarsweets.in.ApiModel.PayonDeleveryOtpResponse;
 import com.sagarsweets.in.ApiModel.PickStoreAddress;
 import com.sagarsweets.in.ApiModel.UserAddressRequest;
 import com.sagarsweets.in.ApiModel.UserDefaultAddress;
@@ -47,6 +55,9 @@ import com.sagarsweets.in.utils.AddressFormatter;
 import com.sagarsweets.in.utils.ButtonLoaderUtil;
 import com.sagarsweets.in.utils.DeviceInfo;
 
+import org.json.JSONObject;
+
+import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -60,14 +71,14 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 
-public class CheckoutFragment extends Fragment {
+public class CheckoutFragment extends Fragment{
     TextView btnAddAddress,btnChangeAddress,txtCheckoutAddress,txtPickupAddress;
-    ProgressBar progressChangeAddress;
+    ProgressBar progressChangeAddress,progressPlaceOrder;
     TextView txtDeliveryDate;
     RadioButton radioCOD;
     RadioButton radioOnline;
-
-    LinearLayout layoutCOD;
+    Button btnPlaceOrder;
+    LinearLayout layoutCOD,radioPaymentMethod;
     LinearLayout layoutOnline;
     RadioGroup radioOrderType;
     RadioButton radioDelivery, radioPickup;
@@ -83,7 +94,7 @@ public class CheckoutFragment extends Fragment {
     String currentTime;
 
 
-    String timeZone,deliveryCharge;
+    String timeZone,deliveryCharge,deliveryChargeTmp;
     UserDefaultAddress userDefaultAddress;
     PickStoreAddress pickStoreAddress;
     CouponDetails couponDetails;
@@ -96,9 +107,10 @@ public class CheckoutFragment extends Fragment {
     private Runnable clockRunnable;
     Chip chipMorning,chipAfternoon,chipEvening;
     Chip chipToday, chipTomorrow, chipDayAfter, chipCustom;
-    ChipGroup chipGroupDate;
+    ChipGroup chipGroupDate,chipGroupTime;
+    Boolean chipDateSelected,chipTimeSlotSelected;
 
-    String selectedDate,selectedAddress;
+    String selectedDate,selectedTimeSlot,selectedAddress,orderType,paymentType;
     String serverDateTime;// server time
     TextView txtMorningCountdown, txtAfternoonCountdown, txtEveningCountdown;
 
@@ -113,7 +125,17 @@ public class CheckoutFragment extends Fragment {
     String state;
     String pincode;
     String area;
+    ShimmerFrameLayout shimmer;
+    View content ;
+    private String deliveryType=Constants.HOME_DELIVERY;
+    public class Constants {
 
+        public static final String HOME_DELIVERY = "HOME_DELIVERY";
+        public static final String STORE_PICKUP = "STORE_PICKUP";
+        public static final String PAY_ON_DELIVERY = "POD";
+        public static final String PAY_ONLINE = "ONLINE";
+
+    }
     public CheckoutFragment() {
         // Required empty public constructor
     }
@@ -122,7 +144,7 @@ public class CheckoutFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
+        //Checkout.preload(getContext());
         if (getArguments() != null) {
             receivedCoupon = getArguments().getString("coupon_code");
         }
@@ -132,8 +154,11 @@ public class CheckoutFragment extends Fragment {
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_checkout, container, false);
         initViews(view);
+        shimmer = view.findViewById(R.id.layoutShimmer);
+        content = view.findViewById(R.id.layoutContent);
         initSessions();
         setupDateChips();   // ✅ ADD THIS
+        setupTimeSlotChips();
         getSelectedDate();
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireActivity());
@@ -143,11 +168,235 @@ public class CheckoutFragment extends Fragment {
         radioCodOnlineSetting();
         deliveryPickup();
         addressRelatedFunctions();
+        functionForCheckout();
 
         // Inflate the layout for this fragment
         return view;
     }
 
+
+    private void setupTimeSlotChips() {
+        chipMorning.setTag("Morning (8AM-12PM)");
+        chipAfternoon.setTag("Afternoon (12PM-4PM)");
+        chipEvening.setTag("Evening (4PM-10PM)");
+    }
+
+    private void clearCartAllItem() {
+        LoginSession loginSession = new LoginSession(getContext());
+        int userId = loginSession.isLoggedIn()
+                ? Integer.parseInt(loginSession.getUserId())
+                : 0;
+
+        Executors.newSingleThreadExecutor().execute(() -> {
+            AppDatabase.getInstance(getContext())
+                    .cartDao()
+                    .clearAllCartByUser(userId);
+        });
+    }
+    private void functionForCheckout() {
+        btnPlaceOrder.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.d("CLICK_TEST","Button clicked");
+                Log.d("CLICK_TEST","delivery_type-"+deliveryType);
+                Log.d("CLICK_TEST","delivery_charge-"+deliveryCharge);
+                Log.d("CLICK_TEST","delivery_address-"+selectedAddress);
+                Log.d("CLICK_TEST","delivery Date-"+selectedDate);
+                Log.d("CLICK_TEST","date selecte - "+chipDateSelected);
+                Log.d("CLICK_TEST","Delivery Time slot-"+selectedTimeSlot);
+                Log.d("CLICK_TEST","time select-"+chipTimeSlotSelected);
+                Log.d("CLICK_TEST","Payment Type-"+paymentType);
+                Log.d("CLICK_TEST","CART-"+currentCartList.size());
+                if(Constants.HOME_DELIVERY.equals(deliveryType)){
+                    // if home delevery then check user's addressId
+                    if(selectedAddress == null){
+                        ButtonLoaderUtil.showSizeSelected(requireContext(),cardDeliveryAddress);
+                        ButtonLoaderUtil.makeToast(getContext(),"Address not selected");
+                        return;
+                    }
+                }
+                // check delivery date
+                if(chipDateSelected == null || chipDateSelected != true ){
+                    ButtonLoaderUtil.showSizeSelected(requireContext(),chipGroupDate);
+                    ButtonLoaderUtil.makeToast(getContext(),"date not selected");
+                    return;
+                }
+                // delivery time slot
+                if(chipTimeSlotSelected == null || chipTimeSlotSelected != true){
+                    ButtonLoaderUtil.showSizeSelected(requireContext(),chipGroupTime);
+                    ButtonLoaderUtil.makeToast(getContext(),"Time slot not selected");
+                    return;
+                }
+                // check payment type
+                if(paymentType == null){
+                    ButtonLoaderUtil.showSizeSelected(requireContext(),radioPaymentMethod);
+                    ButtonLoaderUtil.makeToast(getContext(),"Payment method not selected");
+                    return;
+                }
+                // checking cart is not empty
+                if(currentCartList.size() <= 0 ){
+                    //ButtonLoaderUtil.showSizeSelected(requireContext(),);
+                    ButtonLoaderUtil.makeToast(getContext(),"Cart is empty");
+                    return;
+                }
+
+                if(Constants.PAY_ON_DELIVERY.equals(paymentType)){
+                    ButtonLoaderUtil.showLoading(btnPlaceOrder,progressPlaceOrder);
+                    // send OTP then change fragment
+                    PayonDeleveryOtpRequest payonDeleveryOtpRequest =
+                            new PayonDeleveryOtpRequest(device,loginSession.getUserId(),
+                                    selectedAddress,longitude,latitude);
+                    apiService.getPayonDeliveryOtp(payonDeleveryOtpRequest).enqueue(new Callback<PayonDeleveryOtpResponse>() {
+                        @Override
+                        public void onResponse(Call<PayonDeleveryOtpResponse> call, Response<PayonDeleveryOtpResponse> response) {
+                            ButtonLoaderUtil.hideLoading(btnPlaceOrder,progressPlaceOrder,"Proceed To Payment");
+                            if (response.body() != null){
+                                if(response.body().getStatus()){
+                                    //ButtonLoaderUtil.makeToast(getContext(), "all valid, POD");
+                                    // delete all item fromcart
+                                    clearCartAllItem();
+                                    CheckoutProcessData checkoutProcessData = new CheckoutProcessData(
+                                            loginSession.getUserId(),
+                                            device,
+                                            deliveryType,
+                                            selectedAddress,
+                                            selectedDate,
+                                            selectedTimeSlot,
+                                            paymentType,
+                                            receivedCoupon,
+                                            response.body().getPodId(),
+                                            longitude,
+                                            latitude
+                                    );
+                                    // now load pod fragment
+                                    PayonDeliveryFragment payonDeliveryFragment = new PayonDeliveryFragment();
+                                    Bundle bundle = new Bundle();
+                                    bundle.putSerializable("checkoutData", checkoutProcessData);
+                                    payonDeliveryFragment.setArguments(bundle);
+                                    requireActivity()
+                                            .getSupportFragmentManager()
+                                            .beginTransaction()
+                                            .replace(R.id.container, payonDeliveryFragment)
+                                            .addToBackStack("payon_delivery_fragment")
+                                            .commit();
+                                }else{
+                                    ButtonLoaderUtil.makeToast(getContext(),response.body().getMessage());
+                                }
+                            }else{
+
+                            }
+                        }
+
+                        @Override
+                        public void onFailure(Call<PayonDeleveryOtpResponse> call, Throwable t) {
+                            ButtonLoaderUtil.hideLoading(btnPlaceOrder,progressPlaceOrder,"Proceed To Payment");
+                        }
+                    });
+
+                }else{
+                    if(Constants.PAY_ONLINE.equals(paymentType)){
+                        // load onlinepayment fragment
+                        // here i want razorpay integration
+                        startRazorpayPayment();
+                    }
+                }
+
+            }
+        });
+    }
+
+    private void startRazorpayPayment() {
+
+        try {
+
+            com.razorpay.Checkout checkout = new com.razorpay.Checkout();
+            checkout.setKeyID(SuperController.testAPIRazorPay);
+
+            double amount = 152.00;
+
+            JSONObject options = new JSONObject();
+
+            options.put("name", "Sagar Sweets");
+            options.put("description", "Order Payment");
+            options.put("currency", "INR");
+
+            options.put("amount", Math.round(amount * 100));
+
+            JSONObject prefill = new JSONObject();
+            prefill.put("email", "tapsya1729@gmail.com");
+            prefill.put("contact", "8887836925");
+
+            options.put("prefill", prefill);
+
+            checkout.open(requireActivity(), options);
+
+        }
+        catch (Exception e) {
+
+            Toast.makeText(getContext(),
+                    "Payment Error",
+                    Toast.LENGTH_LONG).show();
+        }
+    }
+
+    public void handlePaymentError(int code, String response) {
+
+        Toast.makeText(getContext(),
+                "Payment Failed: " + response,
+                Toast.LENGTH_LONG).show();
+    }
+
+
+    public void handlePaymentSuccess(String paymentId) {
+
+        Toast.makeText(getContext(),
+                "Payment Successful: " + paymentId,
+                Toast.LENGTH_LONG).show();
+
+        // clear cart
+        //clearCartAllItem();
+
+        /*CheckoutProcessData checkoutProcessData =
+                new CheckoutProcessData(
+                        loginSession.getUserId(),
+                        device,
+                        deliveryType,
+                        selectedAddress,
+                        selectedDate,
+                        selectedTimeSlot,
+                        paymentType,
+                        receivedCoupon,
+                        paymentId,
+                        longitude,
+                        latitude
+                );
+
+        OnlinePaymentSuccessFragment fragment =
+                new OnlinePaymentSuccessFragment();
+
+        Bundle bundle = new Bundle();
+        bundle.putSerializable("checkoutData", checkoutProcessData);
+        fragment.setArguments(bundle);
+
+        requireActivity()
+                .getSupportFragmentManager()
+                .beginTransaction()
+                .replace(R.id.container, fragment)
+                .addToBackStack(null)
+                .commit();*/
+    }
+
+    private void showLoading(){
+        shimmer.setVisibility(View.VISIBLE);
+        content.setVisibility(View.GONE);
+        shimmer.startShimmer();
+    }
+
+    private void hideLoading(){
+        shimmer.stopShimmer();
+        shimmer.setVisibility(View.GONE);
+        content.setVisibility(View.VISIBLE);
+    }
     private void addressRelatedFunctions() {
         btnChangeAddress.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -276,9 +525,36 @@ public class CheckoutFragment extends Fragment {
         textView.setTextColor(ContextCompat.getColor(requireContext(), R.color.slot_active_red));
     }
     private void getSelectedDate() {
+        chipGroupTime.setOnCheckedStateChangeListener((group, checkedIds) -> {
+            chipTimeSlotSelected = true;
+            if(checkedIds.size()==0){
+                chipTimeSlotSelected = false;
+            }
+            if (!checkedIds.isEmpty()) {
+                int id = checkedIds.get(0);
+                com.google.android.material.chip.Chip chip = group.findViewById(id);
+
+                Object tag = chip.getTag();
+
+                if (tag != null) {
+                    selectedTimeSlot = tag.toString();
+                } else {
+                    selectedTimeSlot = null;
+                    return; // avoid crash
+                }
+            }
+        });
         chipGroupDate.setOnCheckedStateChangeListener((group, checkedIds) -> {
 
+            /* this is for check date is selected or not */
+            chipDateSelected = true;
+            if(checkedIds.size() == 0){
+                chipDateSelected = false;
+            }
+            selectedTimeSlot = null;
+            chipTimeSlotSelected = false;
             if (!checkedIds.isEmpty()) {
+
                 int id = checkedIds.get(0);
                 com.google.android.material.chip.Chip chip = group.findViewById(id);
 
@@ -287,6 +563,7 @@ public class CheckoutFragment extends Fragment {
                 if (tag != null) {
                     selectedDate = tag.toString();
                 } else {
+                    selectedDate = null;
                     return; // avoid crash
                 }
 
@@ -351,7 +628,7 @@ public class CheckoutFragment extends Fragment {
         chipDayAfter.setText("Day After-" + getDisplayDate(cal));
         chipDayAfter.setTag(dayAfter);
 
-        chipToday.setChecked(true);
+        //chipToday.setChecked(true);
         selectedDate = today;
     }
     private String getDisplayDate(java.util.Calendar cal) {
@@ -447,18 +724,20 @@ public class CheckoutFragment extends Fragment {
     }
     private void gettingDetailsFromApi() {
         if(loginSession.isLoggedIn()){
+            showLoading();
             CheckoutRequest checkoutRequest = new CheckoutRequest(device,currentCartList,
                     loginSession.getUserId(),longitude,latitude,receivedCoupon);
             apiService.checkoutIndex(checkoutRequest).enqueue(new Callback<CheckoutResponse>() {
                 @Override
                 public void onResponse(Call<CheckoutResponse> call, Response<CheckoutResponse> response) {
                     if (response.isSuccessful()) {
-
+                        hideLoading();
                         CheckoutResponse apiResponse = response.body();
                         if(apiResponse.isStatus()){
                             currentTime = apiResponse.getResult().getCurrentTime();
                             timeZone = apiResponse.getResult().getServerTimeZone();
                             deliveryCharge = apiResponse.getResult().getDeliveryCharge();
+                            deliveryChargeTmp = apiResponse.getResult().getDeliveryCharge();
                             userDefaultAddress = apiResponse.getResult().getUserDefaultAddress();
                             pickStoreAddress = apiResponse.getResult().getPickStoreAddress();
                             couponDetails = apiResponse.getResult().getCouponDetails();
@@ -535,7 +814,7 @@ public class CheckoutFragment extends Fragment {
 
             disableChipIfPassed(currentHour, chipMorning, 12);
             disableChipIfPassed(currentHour, chipAfternoon, 16);
-            disableChipIfPassed(currentHour, chipEvening, 20);
+            disableChipIfPassed(currentHour, chipEvening, 22);
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -611,22 +890,24 @@ public class CheckoutFragment extends Fragment {
     }
 
     private void setUserDefaultAddress() {
-        if(userDefaultAddress.getStatus() != null){
-            if(userDefaultAddress.getStatus() == false){
-                txtCheckoutAddress.setText(userDefaultAddress.getMessage());
-            }else{
-                selectedAddress = String.valueOf(userDefaultAddress.getAddress().getAddressId());
-                txtCheckoutAddress.setText(
-                        AddressFormatter.formatDeliveryAddress(userDefaultAddress)
-                );
-            }
-        }else{
+
+        if (userDefaultAddress == null) return;
+
+        if (userDefaultAddress.getStatus() != null && !userDefaultAddress.getStatus()) {
+
+            txtCheckoutAddress.setText(userDefaultAddress.getMessage());
+
+        } else if (userDefaultAddress.getAddress() != null) {
+
+            selectedAddress = String.valueOf(userDefaultAddress.getAddress().getAddressId());
+
+            Log.d("selected_address", selectedAddress);
+
             txtCheckoutAddress.setText(
                     AddressFormatter.formatDeliveryAddress(userDefaultAddress)
             );
+
         }
-
-
     }
 
     private void getCartItem() {
@@ -681,17 +962,20 @@ public class CheckoutFragment extends Fragment {
 
                 cardDeliveryAddress.setVisibility(View.VISIBLE);
                 cardPickupInfo.setVisibility(View.GONE);
+                deliveryCharge = deliveryChargeTmp;
+                deliveryType = Constants.HOME_DELIVERY;
 
-                //delivery = 40.0; // delivery charge
-                //calculateTotal(currentCartList);
+                calculateAmount();
 
             } else if (checkedId == R.id.radioPickup) {
 
                 cardDeliveryAddress.setVisibility(View.GONE);
                 cardPickupInfo.setVisibility(View.VISIBLE);
+                deliveryType = Constants.STORE_PICKUP;
+                deliveryCharge = "0.0"; // no delivery charge
+                calculateAmount();
 
-                //delivery = 0.0; // no delivery charge
-                //calculateTotal(currentCartList);
+
             }
         });
     }
@@ -699,20 +983,24 @@ public class CheckoutFragment extends Fragment {
     private void radioCodOnlineSetting() {
         layoutCOD.setOnClickListener(v -> {
             radioCOD.setChecked(true);
+            paymentType = Constants.PAY_ON_DELIVERY;
             radioOnline.setChecked(false);
         });
 
         layoutOnline.setOnClickListener(v -> {
             radioOnline.setChecked(true);
+            paymentType = Constants.PAY_ONLINE;
             radioCOD.setChecked(false);
         });
 
         radioCOD.setOnClickListener(v -> {
             radioOnline.setChecked(false);
+            paymentType = Constants.PAY_ON_DELIVERY;
         });
 
         radioOnline.setOnClickListener(v -> {
             radioCOD.setChecked(false);
+            paymentType = Constants.PAY_ONLINE;
         });
     }
 
@@ -749,6 +1037,7 @@ public class CheckoutFragment extends Fragment {
         chipDayAfter = view.findViewById(R.id.chipDayAfter);
         chipCustom = view.findViewById(R.id.chipCustom);
         chipGroupDate = view.findViewById(R.id.chipGroupDate);
+        chipGroupTime = view.findViewById(R.id.chipGroupTime);
 
         txtMorningCountdown = view.findViewById(R.id.txtMorningCountdown);
         txtAfternoonCountdown = view.findViewById(R.id.txtAfternoonCountdown);
@@ -766,6 +1055,9 @@ public class CheckoutFragment extends Fragment {
         btnAddAddress = view.findViewById(R.id.btnAddAddress);
         btnChangeAddress = view.findViewById(R.id.btnChangeAddress);
         progressChangeAddress = view.findViewById(R.id.progressChangeAddress);
+        btnPlaceOrder = view.findViewById(R.id.btnPlaceOrder);
+        progressPlaceOrder = view.findViewById(R.id.progressPlaceOrder);
+        radioPaymentMethod = view.findViewById(R.id.radioPaymentMethod);
     }
 
     @Override
