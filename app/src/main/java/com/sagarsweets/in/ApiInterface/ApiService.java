@@ -23,6 +23,8 @@ import com.sagarsweets.in.ApiModel.GetUserAddressResponse;
 import com.sagarsweets.in.ApiModel.LoginOtpRequest;
 import com.sagarsweets.in.ApiModel.LoginRequest;
 import com.sagarsweets.in.ApiModel.LoginResponse;
+import com.sagarsweets.in.ApiModel.MyOrderRequest;
+import com.sagarsweets.in.ApiModel.MyOrderResponse;
 import com.sagarsweets.in.ApiModel.OtpResponse;
 import com.sagarsweets.in.ApiModel.PapularProductHome;
 import com.sagarsweets.in.ApiModel.PayonDeleveryOtpRequest;
@@ -38,6 +40,7 @@ import com.sagarsweets.in.ApiModel.ProductDetailsOfCartRequest;
 import com.sagarsweets.in.ApiModel.ProductDetailsOfCartResponse;
 import com.sagarsweets.in.ApiModel.ProductDetailsRequest;
 import com.sagarsweets.in.ApiModel.ProductReviewRequest;
+import com.sagarsweets.in.ApiModel.RazorpayRequest;
 import com.sagarsweets.in.ApiModel.RegisterUserRequest;
 import com.sagarsweets.in.ApiModel.RemoveCartRequest;
 import com.sagarsweets.in.ApiModel.ReviewResponse;
@@ -186,4 +189,10 @@ public interface ApiService {
     @POST("rest/checkout/podotpconfirm")
     Call<PodVerifyOtpResponse> getVerifyPodOtp(@Body PodVerifyOtpRequest podVerifyOtpRequest);
 
+    @POST("rest/checkout/razorpay")
+    Call<PodVerifyOtpResponse> getVerifyRazorPay(@Body RazorpayRequest razorpayRequest);
+
+    /*MYORDER API*/
+    @POST("rest/order/myorder")
+    Call<MyOrderResponse> getMyOrder(@Body MyOrderRequest myOrderRequest);
 }

@@ -3,7 +3,7 @@ package com.sagarsweets.in.ApiModel;
 public class Item {
 
     private String name;
-    private int size;
+    private String size;
     private int quantity;
 
     public String getName() {
@@ -14,11 +14,11 @@ public class Item {
         this.name = name;
     }
 
-    public int getSize() {
+    public String getSize() {
         return size;
     }
 
-    public void setSize(int size) {
+    public void setSize(String size) {
         this.size = size;
     }
 

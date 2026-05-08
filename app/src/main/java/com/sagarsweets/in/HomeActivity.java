@@ -451,7 +451,7 @@ public class HomeActivity extends AppCompatActivity
             Toast.makeText(this,"Successfully logout",Toast.LENGTH_SHORT).show();
             startActivity(new Intent(this, MainActivity.class).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_CLEAR_TASK));
             finish();
-        }
+        }else if(id == R.id.draw_myorders){ loadFragment(new MyOrderFragment(),"My Orders",false);}
     }
 
     private void loadFragment(Fragment fragment, String title, boolean add) {

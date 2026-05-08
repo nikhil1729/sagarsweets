@@ -7,10 +7,10 @@ public class CouponDetails {
     private boolean status;
 
     @SerializedName("discount")
-    private int discount;
+    private Double discount;
 
     @SerializedName("final_amount")
-    private int finalAmount;
+    private Double finalAmount;
 
     @SerializedName("message")
     private String message;
@@ -19,11 +19,11 @@ public class CouponDetails {
         return status;
     }
 
-    public int getDiscount() {
+    public Double getDiscount() {
         return discount;
     }
 
-    public int getFinalAmount() {
+    public Double getFinalAmount() {
         return finalAmount;
     }
 

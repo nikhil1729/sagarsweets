@@ -30,6 +30,7 @@ import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.material.chip.Chip;
 import com.google.android.material.chip.ChipGroup;
+import com.google.gson.Gson;
 import com.razorpay.Checkout;
 import com.sagarsweets.in.Adapters.PickupPreviewAdapter;
 import com.sagarsweets.in.ApiControllers.LoginRetrofitClient;
@@ -43,6 +44,8 @@ import com.sagarsweets.in.ApiModel.GetUserAddressResponse;
 import com.sagarsweets.in.ApiModel.PayonDeleveryOtpRequest;
 import com.sagarsweets.in.ApiModel.PayonDeleveryOtpResponse;
 import com.sagarsweets.in.ApiModel.PickStoreAddress;
+import com.sagarsweets.in.ApiModel.PodVerifyOtpResponse;
+import com.sagarsweets.in.ApiModel.RazorpayRequest;
 import com.sagarsweets.in.ApiModel.UserAddressRequest;
 import com.sagarsweets.in.ApiModel.UserDefaultAddress;
 import com.sagarsweets.in.BottomSheets.AddAddressBottomSheet;
@@ -127,6 +130,7 @@ public class CheckoutFragment extends Fragment{
     String area;
     ShimmerFrameLayout shimmer;
     View content ;
+    Double amountToPaid;
     private String deliveryType=Constants.HOME_DELIVERY;
     public class Constants {
 
@@ -295,8 +299,8 @@ public class CheckoutFragment extends Fragment{
 
                 }else{
                     if(Constants.PAY_ONLINE.equals(paymentType)){
-                        // load onlinepayment fragment
-                        // here i want razorpay integration
+                        // here razorpay integration
+                        Log.d("mobile_number",loginSession.getMobile());
                         startRazorpayPayment();
                     }
                 }
@@ -312,7 +316,7 @@ public class CheckoutFragment extends Fragment{
             com.razorpay.Checkout checkout = new com.razorpay.Checkout();
             checkout.setKeyID(SuperController.testAPIRazorPay);
 
-            double amount = 152.00;
+            //double amount = calculateAmount();
 
             JSONObject options = new JSONObject();
 
@@ -320,11 +324,11 @@ public class CheckoutFragment extends Fragment{
             options.put("description", "Order Payment");
             options.put("currency", "INR");
 
-            options.put("amount", Math.round(amount * 100));
+            options.put("amount", Math.round(amountToPaid * 100));
 
             JSONObject prefill = new JSONObject();
-            prefill.put("email", "tapsya1729@gmail.com");
-            prefill.put("contact", "8887836925");
+            prefill.put("email", loginSession.getEmail());
+            prefill.put("contact", loginSession.getMobile());
 
             options.put("prefill", prefill);
 
@@ -354,10 +358,10 @@ public class CheckoutFragment extends Fragment{
                 Toast.LENGTH_LONG).show();
 
         // clear cart
-        //clearCartAllItem();
+        // clearCartAllItem();
 
-        /*CheckoutProcessData checkoutProcessData =
-                new CheckoutProcessData(
+        RazorpayRequest razorpayRequest =
+                new RazorpayRequest(
                         loginSession.getUserId(),
                         device,
                         deliveryType,
@@ -370,20 +374,42 @@ public class CheckoutFragment extends Fragment{
                         longitude,
                         latitude
                 );
+        apiService.getVerifyRazorPay(razorpayRequest).enqueue(new Callback<PodVerifyOtpResponse>() {
+            @Override
+            public void onResponse(Call<PodVerifyOtpResponse> call, Response<PodVerifyOtpResponse> response) {
+                if (response.body() != null){
+                    if(response.body().getStatus()){
+                        //ButtonLoaderUtil.makeToast(getContext(), "all valid, POD");
+                        // delete all item fromcart
+                        clearCartAllItem();
+                        OrderReceivedFragment orderReceivedFragment = new OrderReceivedFragment();
+                        Gson gson = new Gson();
+                        String json = gson.toJson(response.body());
+                        Bundle bundle = new Bundle();
+                        bundle.putString("order_data", json);
+                        //bundle.putSerializable("resultData", (Serializable) res);
+                        orderReceivedFragment.setArguments(bundle);
 
-        OnlinePaymentSuccessFragment fragment =
-                new OnlinePaymentSuccessFragment();
+                        requireActivity()
+                                .getSupportFragmentManager()
+                                .beginTransaction()
+                                .replace(R.id.container, orderReceivedFragment)
+                                .addToBackStack("order_received_fragment")
+                                .commit();
+                    }else{
+                        ButtonLoaderUtil.makeToast(getContext(),response.body().getMessage());
+                    }
+                }else{
 
-        Bundle bundle = new Bundle();
-        bundle.putSerializable("checkoutData", checkoutProcessData);
-        fragment.setArguments(bundle);
+                }
+            }
 
-        requireActivity()
-                .getSupportFragmentManager()
-                .beginTransaction()
-                .replace(R.id.container, fragment)
-                .addToBackStack(null)
-                .commit();*/
+            @Override
+            public void onFailure(Call<PodVerifyOtpResponse> call, Throwable t) {
+
+            }
+        });
+
     }
 
     private void showLoading(){
@@ -784,7 +810,7 @@ public class CheckoutFragment extends Fragment{
 
 
         double grandTotal = subTotal + delivery - discount;
-
+        amountToPaid = grandTotal;
         txtSubtotal.setText("₹" + subTotal);
         txtDelivery.setText("₹" + delivery);
         txtDiscount.setText("- ₹" + discount);

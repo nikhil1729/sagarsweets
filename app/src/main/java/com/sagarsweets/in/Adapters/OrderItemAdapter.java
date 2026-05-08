@@ -38,8 +38,8 @@ public class OrderItemAdapter extends RecyclerView.Adapter<OrderItemAdapter.View
 
         holder.txtName.setText(item.getName());
 
-        Integer size = item.getSize();
-        if(size == null || size == 0){
+        String size = item.getSize();
+        if(size == null || "0".equals(size)){
             holder.txtSize.setVisibility(View.GONE);
         }else{
             holder.txtSize.setVisibility(View.VISIBLE);

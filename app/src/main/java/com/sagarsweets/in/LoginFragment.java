@@ -65,6 +65,7 @@ public class LoginFragment extends Fragment {
     String deviceInfo,ip;
     AppDatabase db;
     LoginSession loginSession;
+    String userMobileNumber;
     public LoginFragment() {
         // Required empty public constructor
     }
@@ -140,7 +141,7 @@ public class LoginFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 String mobile = edtMobile.getText().toString().trim();
-
+                userMobileNumber = mobile;
                 if (mobile.length() != 10) {
                     showErrorDialog("Enter valid mobile number");
                     return;
@@ -280,6 +281,7 @@ public class LoginFragment extends Fragment {
     private void validateLogin() {
         String mobile = edtMobile.getText().toString().trim();
         String password = edtPassword.getText().toString().trim();
+        userMobileNumber = mobile;
         if (!isValidMobile(mobile)) {
             showErrorDialog("Enter a valid 10 digit mobile number");
             return;
@@ -478,7 +480,7 @@ public class LoginFragment extends Fragment {
         String userId = String.valueOf(user.getId());
         String userName = user.getFirst_name()+" "+user.getLast_name();
         // setting session here
-        loginSession.createLoginSession(userId, userName);
+        loginSession.createLoginSession(userId, userName,userMobileNumber,user.getEmail());
 
         // synchronize function for wish list and cart
         synchronize(); // this is for wishlist

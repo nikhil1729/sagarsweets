@@ -75,7 +75,7 @@ public class OrderReceivedFragment extends Fragment {
     }
 
     private void settextView() {
-        txtOrderId.setText(order.getTxn_id());
+        txtOrderId.setText("Order ID "+order.getTxn_id());
         txtDeliveryDate.setText(order.getDelivery_date());
         txtTimeSlot.setText(order.getDelivery_time_slot());
         txtPaymentMethod.setText(order.getPayment_gateway());
