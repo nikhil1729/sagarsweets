@@ -271,8 +271,8 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:backgroundTint="@color/sagar_button"
-                android:text="Track Order"/>
+                android:backgroundTint="@color/slot_active_red"
+                android:text="Cancel this Order"/>
 
             <Button
                 android:layout_width="0dp"

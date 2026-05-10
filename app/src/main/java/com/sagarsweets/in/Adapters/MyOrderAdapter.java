@@ -75,6 +75,26 @@ public class MyOrderAdapter extends RecyclerView.Adapter<MyOrderAdapter.ViewHold
             holder.txtCoupon.setVisibility(View.GONE);
         }
 
+        holder.btnCancel.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(context);
+                View sheetView = LayoutInflater.from(context).inflate(R.layout.bottom_cancel_order, null);
+                bottomSheetDialog.setContentView(sheetView);
+                bottomSheetDialog.show();
+            }
+        });
+        //holder.btnTrack.setVisibility(View.VISIBLE);
+        holder.btnTrack.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(context);
+                View sheetView = LayoutInflater.from(context).inflate(R.layout.botton_track_order, null);
+                bottomSheetDialog.setContentView(sheetView);
+                bottomSheetDialog.show();
+            }
+        });
+
         holder.btnViewDetails.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -97,12 +117,14 @@ public class MyOrderAdapter extends RecyclerView.Adapter<MyOrderAdapter.ViewHold
                 txtDeliveryType,txtCoupon,txtItemCount,txtStatus;
         ImageView imgProduct;
 
-        Button btnViewDetails;
+        Button btnViewDetails,btnCancel,btnTrack;
         public ViewHolder(View itemView) {
             super(itemView);
 
             imgProduct = itemView.findViewById(R.id.imgProduct);
             btnViewDetails = itemView.findViewById(R.id.btnViewDetails);
+            btnCancel = itemView.findViewById(R.id.btnCancle);
+            btnTrack = itemView.findViewById(R.id.btnTrack);
             txtStatus = itemView.findViewById(R.id.txtStatus);
             txtItemCount = itemView.findViewById(R.id.txtItemCount);
             txtTxnId = itemView.findViewById(R.id.txtTxnId);

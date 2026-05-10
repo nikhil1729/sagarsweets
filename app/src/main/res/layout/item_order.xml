@@ -159,11 +159,21 @@
                     android:layout_height="wrap_content"/>
 
                 <Button
-                    android:id="@+id/btnReorder"
-                    android:text="Reorder"
+                    android:id="@+id/btnCancle"
+                    android:text="Canceled"
                     android:layout_marginStart="6dp"
                     android:layout_weight="1"
                     android:layout_width="0dp"
+                    android:visibility="visible"
+                    android:backgroundTint="@color/slot_active_red"
+                    android:layout_height="wrap_content"/>
+                <Button
+                    android:id="@+id/btnTrack"
+                    android:text="Track Order"
+                    android:layout_marginStart="6dp"
+                    android:layout_weight="1"
+                    android:layout_width="0dp"
+                    android:visibility="gone"
                     android:backgroundTint="@color/wallet_highlighted_text_holo_dark"
                     android:layout_height="wrap_content"/>
             </LinearLayout>

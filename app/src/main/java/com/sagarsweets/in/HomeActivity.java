@@ -446,6 +446,7 @@ public class HomeActivity extends AppCompatActivity
         else if (id == R.id.draw_login) loadFragment(new LoginFragment(), "Login", false);
         else if (id == R.id.draw_register) loadFragment(new RegisterFragment(), "Register", false);
         else if (id == R.id.draw_wishlist) loadFragment(new WishListFragment(),"my_wish_list",false);
+        else if(id == R.id.draw_profile) loadFragment(new MyProfileFragment(),"my_profile",false);
         else if (id == R.id.draw_logout) {
             loginSession.logout();
             Toast.makeText(this,"Successfully logout",Toast.LENGTH_SHORT).show();

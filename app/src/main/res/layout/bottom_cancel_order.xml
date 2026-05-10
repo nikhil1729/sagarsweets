@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="utf-8"?>
+    <!-- Cancel Order Card -->
+<LinearLayout android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:background="@android:color/white"
+    android:padding="16dp"
+    android:elevation="2dp"
+    android:layout_marginTop="12dp"
+    android:layout_marginBottom="12dp"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- Title -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Cancel Order"
+        android:textStyle="bold"
+        android:textSize="18sp"
+        android:textColor="#D32F2F"/>
+
+    <!-- Message -->
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Are you sure you want to cancel this order? This action cannot be undone."
+        android:textSize="14sp"
+        android:textColor="#666"
+        android:layout_marginTop="8dp"/>
+
+    <!-- Reason Dropdown -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Select Reason"
+        android:textStyle="bold"
+        android:textSize="14sp"
+        android:layout_marginTop="16dp"/>
+
+    <Spinner
+        android:id="@+id/spinnerCancelReason"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:layout_marginTop="8dp"
+        android:background="@android:drawable/edit_text"/>
+
+    <!-- Optional Note -->
+    <EditText
+        android:id="@+id/edtCancelNote"
+        android:layout_width="match_parent"
+        android:layout_height="100dp"
+        android:layout_marginTop="16dp"
+        android:gravity="top"
+        android:hint="Additional note (optional)"
+        android:padding="12dp"
+        android:background="@android:drawable/edit_text"
+        android:inputType="textMultiLine"/>
+
+    <!-- Refund Info -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:background="#FFF3E0"
+        android:padding="12dp"
+        android:layout_marginTop="16dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Refund Amount : "
+            android:textStyle="bold"
+            android:textColor="#E65100"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="₹940"
+            android:textStyle="bold"
+            android:textColor="#E65100"/>
+    </LinearLayout>
+
+    <!-- Buttons -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginTop="20dp">
+
+        <Button
+            android:id="@+id/btnKeepOrder"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_weight="1"
+            android:backgroundTint="@color/sagar_button"
+            android:text="Keep Order"/>
+
+        <Button
+            android:id="@+id/btnCancelOrder"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_weight="1"
+            android:text="Cancel Order"
+            android:textColor="@android:color/white"
+            android:backgroundTint="@color/red"
+            android:layout_marginStart="10dp"/>
+    </LinearLayout>
+
+</LinearLayout>
