@@ -51,12 +51,12 @@ public class AddAddressBottomSheet extends BottomSheetDialogFragment {
     String area;
     private AddressListener addressListener;
     public interface AddressListener {
-        void onAddressSaved(String address_id, String address);
-
+        void onAddressSaved(String address_id, Address address);
     }
     public void setAddressListener(AddressListener listener){
         this.addressListener = listener;
     }
+
     public static AddAddressBottomSheet newInstance(String userId,String name, String lat, String lon,
                                                     String device,String city,String district,String state,String pincode,String area) {
 
@@ -248,8 +248,9 @@ public class AddAddressBottomSheet extends BottomSheetDialogFragment {
                             UserDefaultAddress userDefaultAddress = response.body().getAddress();
                             addressListener.onAddressSaved(
                                     response.body().getAddressId(),
-                                    AddressFormatter.formatDeliveryAddress(userDefaultAddress)
+                                    userDefaultAddress.getAddress()
                             );
+
                         }
 
                         dismiss(); // close bottom sheet

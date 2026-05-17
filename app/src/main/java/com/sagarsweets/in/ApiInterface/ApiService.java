@@ -5,6 +5,7 @@ package com.sagarsweets.in.ApiInterface;
 import com.sagarsweets.in.ApiModel.AboutResponse;
 import com.sagarsweets.in.ApiModel.AddAddressRequest;
 import com.sagarsweets.in.ApiModel.AddAddressResponse;
+import com.sagarsweets.in.ApiModel.AddressSetDefaultRequest;
 import com.sagarsweets.in.ApiModel.AllCategoryResponse;
 import com.sagarsweets.in.ApiModel.CartSyncRequest;
 import com.sagarsweets.in.ApiModel.CartSyncResponse;
@@ -40,6 +41,10 @@ import com.sagarsweets.in.ApiModel.ProductDetailsOfCartRequest;
 import com.sagarsweets.in.ApiModel.ProductDetailsOfCartResponse;
 import com.sagarsweets.in.ApiModel.ProductDetailsRequest;
 import com.sagarsweets.in.ApiModel.ProductReviewRequest;
+import com.sagarsweets.in.ApiModel.ProfileRequest;
+import com.sagarsweets.in.ApiModel.ProfileResponse;
+import com.sagarsweets.in.ApiModel.ProfileUpdateRequest;
+import com.sagarsweets.in.ApiModel.ProfileUpdateResponse;
 import com.sagarsweets.in.ApiModel.RazorpayRequest;
 import com.sagarsweets.in.ApiModel.RegisterUserRequest;
 import com.sagarsweets.in.ApiModel.RemoveCartRequest;
@@ -60,6 +65,7 @@ import com.sagarsweets.in.ApiModel.WishListRequest;
 import com.sagarsweets.in.ApiModel.WishListResponse;
 import com.sagarsweets.in.ApiModel.WishListSyncronizeRequest;
 import com.sagarsweets.in.ApiModel.WishListSyncronizeResponse;
+import com.sagarsweets.in.ApiModel.addressSetDefaultResponse;
 import com.sagarsweets.in.Session.WishlistItem;
 
 import java.util.List;
@@ -195,4 +201,14 @@ public interface ApiService {
     /*MYORDER API*/
     @POST("rest/order/myorder")
     Call<MyOrderResponse> getMyOrder(@Body MyOrderRequest myOrderRequest);
+
+    /* PROFILE API */
+    @POST("rest/user/get-profile-details")
+    Call<ProfileResponse> getProfile(@Body ProfileRequest profileRequest);
+
+    @POST("rest/user/profile-save")
+    Call<ProfileUpdateResponse> getProfileUpdate(@Body ProfileUpdateRequest profileUpdateRequest);
+    @POST("rest/user/profile-address-set-default")
+    Call<addressSetDefaultResponse> setDefaultAddress(@Body AddressSetDefaultRequest addressSetDefaultRequest);
+    /* PROFILE END */
 }

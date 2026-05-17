@@ -480,8 +480,8 @@ public class CheckoutFragment extends Fragment{
                     // Update variables and address
                     //set here address_id in future
                     selectedAddress = address_id;
-                    txtCheckoutAddress.setText(address);
-                    Log.d("ADDRESS_RESULT", address_id+" - "+address);
+                    txtCheckoutAddress.setText(AddressFormatter.formatDeliveryAddressSingle(address));
+                    //Log.d("ADDRESS_RESULT", address_id+" - "+address);
 
                 });
                 bottomSheet.show(getParentFragmentManager(), "AddAddressBottomSheet");

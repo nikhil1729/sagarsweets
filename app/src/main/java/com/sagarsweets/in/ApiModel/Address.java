@@ -88,4 +88,8 @@ public class Address {
     public int getIsDefault() {
         return isDefault;
     }
+
+    public void setIsDefault(int isDefault) {
+        this.isDefault = isDefault;
+    }
 }
