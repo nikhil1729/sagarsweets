@@ -335,7 +335,7 @@ public class MyProfileFragment extends Fragment {
 
 
 
-        adapter = new AddressProfileAdapter(getContext(), addressList);
+        adapter = new AddressProfileAdapter(getContext(), addressList,loginSession.getUserId());
 
         rvAddresses.setAdapter(adapter);
     }

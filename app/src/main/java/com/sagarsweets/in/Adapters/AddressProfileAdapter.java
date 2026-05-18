@@ -4,7 +4,6 @@ import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -15,9 +14,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.sagarsweets.in.ApiControllers.LoginRetrofitClient;
 import com.sagarsweets.in.ApiInterface.ApiService;
 import com.sagarsweets.in.ApiModel.Address;
-import com.sagarsweets.in.ApiModel.AddressProfileModel;
 import com.sagarsweets.in.ApiModel.AddressSetDefaultRequest;
-import com.sagarsweets.in.ApiModel.ProfileResponse;
 import com.sagarsweets.in.ApiModel.addressSetDefaultResponse;
 import com.sagarsweets.in.R;
 import com.sagarsweets.in.utils.ButtonLoaderUtil;
@@ -32,9 +29,11 @@ public class AddressProfileAdapter extends RecyclerView.Adapter<AddressProfileAd
     Context context;
     List<Address> list;
     ApiService apiService;
-    public AddressProfileAdapter(Context context, List<Address> list) {
+    String userId;
+    public AddressProfileAdapter(Context context, List<Address> list, String userId) {
         this.context = context;
         this.list = list;
+        this.userId = userId;
     }
 
     @NonNull
@@ -99,7 +98,7 @@ public class AddressProfileAdapter extends RecyclerView.Adapter<AddressProfileAd
             @Override
             public void onClick(View v) {
                 Integer addId = model.getAddressId();
-                AddressSetDefaultRequest addressSetDefaultRequest = new AddressSetDefaultRequest(addId);
+                AddressSetDefaultRequest addressSetDefaultRequest = new AddressSetDefaultRequest(addId,userId);
                 apiService = LoginRetrofitClient
                         .getClient()
                         .create(ApiService.class);
