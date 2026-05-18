@@ -20,6 +20,9 @@ public class ResultCheckout {
 
     @SerializedName("deliveryCharge")
     private String deliveryCharge;
+    private String razorpay_key;
+    private String razorpay_salt;
+
 
     public String getCurrentTime() {
         return currentTime;
@@ -43,5 +46,13 @@ public class ResultCheckout {
 
     public String getDeliveryCharge() {
         return deliveryCharge;
+    }
+
+    public String getRazorpay_key() {
+        return razorpay_key;
+    }
+
+    public String getRazorpay_salt() {
+        return razorpay_salt;
     }
 }

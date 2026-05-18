@@ -128,6 +128,7 @@ public class CheckoutFragment extends Fragment{
     String state;
     String pincode;
     String area;
+    String paymentGatewayKey,paymentGatewaySalt;
     ShimmerFrameLayout shimmer;
     View content ;
     Double amountToPaid;
@@ -314,7 +315,7 @@ public class CheckoutFragment extends Fragment{
         try {
 
             com.razorpay.Checkout checkout = new com.razorpay.Checkout();
-            checkout.setKeyID(SuperController.testAPIRazorPay);
+            checkout.setKeyID(paymentGatewayKey); // key is coming from database
 
             //double amount = calculateAmount();
 
@@ -767,7 +768,8 @@ public class CheckoutFragment extends Fragment{
                             userDefaultAddress = apiResponse.getResult().getUserDefaultAddress();
                             pickStoreAddress = apiResponse.getResult().getPickStoreAddress();
                             couponDetails = apiResponse.getResult().getCouponDetails();
-
+                            paymentGatewayKey = apiResponse.getResult().getRazorpay_key();
+                            paymentGatewaySalt = apiResponse.getResult().getRazorpay_salt();
                             startLiveClock();
                             txtTimeZone.setText(timeZone);
                             setUserDefaultAddress();
