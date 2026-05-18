@@ -181,7 +181,7 @@ public class MyProfileFragment extends Fragment {
                 state = address.getAdminArea();
                 pincode = address.getPostalCode();
                 area = address.getSubLocality();
-
+                // log
                 Log.d("ADDRESS", "City: " + city);
                 Log.d("ADDRESS", "District: " + district);
                 Log.d("ADDRESS", "State: " + state);
