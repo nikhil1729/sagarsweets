@@ -24,6 +24,8 @@ import com.sagarsweets.in.ApiModel.GetUserAddressResponse;
 import com.sagarsweets.in.ApiModel.LoginOtpRequest;
 import com.sagarsweets.in.ApiModel.LoginRequest;
 import com.sagarsweets.in.ApiModel.LoginResponse;
+import com.sagarsweets.in.ApiModel.MyOrderDetailsRequest;
+import com.sagarsweets.in.ApiModel.MyOrderDetailsResponse;
 import com.sagarsweets.in.ApiModel.MyOrderRequest;
 import com.sagarsweets.in.ApiModel.MyOrderResponse;
 import com.sagarsweets.in.ApiModel.OtpResponse;
@@ -201,6 +203,10 @@ public interface ApiService {
     /*MYORDER API*/
     @POST("rest/order/myorder")
     Call<MyOrderResponse> getMyOrder(@Body MyOrderRequest myOrderRequest);
+    @POST("rest/order/get-order-details")
+    Call<MyOrderDetailsResponse> getOrderDetails(@Body MyOrderDetailsRequest myOrderDetailsRequest);
+
+    /* MY ORDER API END */
 
     /* PROFILE API */
     @POST("rest/user/get-profile-details")

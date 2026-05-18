@@ -13,6 +13,7 @@
 
         <!-- Order Status Card -->
         <LinearLayout
+            android:id="@+id/layoutOrderStatus"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
@@ -22,6 +23,7 @@
             android:layout_marginBottom="12dp">
 
             <TextView
+                android:id="@+id/tvOrderStatus"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Order Delivered"
@@ -30,6 +32,7 @@
                 android:textColor="#2E7D32" />
 
             <TextView
+                android:id="@+id/tvOrderId"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Order ID : #ORD123456"
@@ -38,6 +41,7 @@
                 android:layout_marginTop="4dp"/>
 
             <TextView
+                android:id="@+id/tvOrderDate"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="06 May 2026, 10:20 AM"
@@ -48,6 +52,7 @@
 
         <!-- Customer Details -->
         <LinearLayout
+            android:id="@+id/layoutCustomerDetails"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
@@ -57,6 +62,7 @@
             android:layout_marginBottom="12dp">
 
             <TextView
+                android:id="@+id/tvCustomerTitle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Customer Details"
@@ -65,6 +71,7 @@
                 android:textColor="#000"/>
 
             <TextView
+                android:id="@+id/tvCustomerName"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Nikhil Gupta"
@@ -72,6 +79,7 @@
                 android:layout_marginTop="8dp"/>
 
             <TextView
+                android:id="@+id/tvCustomerMobile"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="+91 9876543210"
@@ -79,6 +87,7 @@
                 android:textColor="#666"/>
 
             <TextView
+                android:id="@+id/tvCustomerAddress"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="Varanasi, Uttar Pradesh"
@@ -89,6 +98,7 @@
 
         <!-- Product Card -->
         <LinearLayout
+            android:id="@+id/layoutProducts"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
@@ -98,6 +108,7 @@
             android:layout_marginBottom="12dp">
 
             <TextView
+                android:id="@+id/tvProductsTitle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Products"
@@ -106,52 +117,20 @@
                 android:textColor="#000"/>
 
             <!-- Product Item -->
-            <LinearLayout
+
+            <!-- RecyclerView For Product List -->
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/recyclerProducts"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:layout_marginTop="12dp">
-
-                <ImageView
-                    android:layout_width="70dp"
-                    android:layout_height="70dp"
-                    android:src="@mipmap/ic_launcher"
-                    android:scaleType="centerCrop"/>
-
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:orientation="vertical"
-                    android:paddingStart="12dp">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Rasgulla Sweet Box"
-                        android:textStyle="bold"
-                        android:textSize="16sp"/>
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Qty : 2"
-                        android:textColor="#666"
-                        android:layout_marginTop="4dp"/>
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="₹450"
-                        android:textStyle="bold"
-                        android:textColor="#E65100"
-                        android:layout_marginTop="4dp"/>
-                </LinearLayout>
-            </LinearLayout>
+                android:layout_marginTop="12dp"
+                android:nestedScrollingEnabled="false"
+                tools:listitem="@layout/item_order_product"/>
         </LinearLayout>
 
         <!-- Payment Summary -->
         <LinearLayout
+            android:id="@+id/layoutPaymentSummary"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
@@ -161,12 +140,14 @@
             android:layout_marginBottom="12dp">
 
             <TextView
+                android:id="@+id/tvPaymentSummaryTitle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Payment Summary"
                 android:textStyle="bold"
                 android:textSize="18sp"/>
 
+            <!-- Subtotal -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -174,17 +155,20 @@
                 android:layout_marginTop="12dp">
 
                 <TextView
+                    android:id="@+id/tvSubtotalLabel"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:text="Subtotal"/>
 
                 <TextView
+                    android:id="@+id/tvSubtotalAmount"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="₹900"/>
             </LinearLayout>
 
+            <!-- Delivery -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -192,17 +176,20 @@
                 android:layout_marginTop="6dp">
 
                 <TextView
+                    android:id="@+id/tvDeliveryLabel"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:text="Delivery"/>
 
                 <TextView
+                    android:id="@+id/tvDeliveryAmount"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="₹40"/>
             </LinearLayout>
-            <!-- Coupon Applied Row -->
+
+            <!-- Coupon Applied -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -210,6 +197,7 @@
                 android:layout_marginTop="6dp">
 
                 <TextView
+                    android:id="@+id/tvCouponLabel"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
@@ -217,6 +205,7 @@
                     android:textColor="#2E7D32"/>
 
                 <TextView
+                    android:id="@+id/tvCouponAmount"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="- ₹100"
@@ -226,24 +215,29 @@
 
             <!-- Coupon Code -->
             <TextView
+                android:id="@+id/tvCouponCode"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Code: SAVE100"
                 android:textSize="12sp"
                 android:textColor="#888"
                 android:layout_marginTop="2dp"/>
+
             <View
+                android:id="@+id/viewDivider"
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
                 android:background="#DDDDDD"
                 android:layout_marginVertical="10dp"/>
 
+            <!-- Total -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal">
 
                 <TextView
+                    android:id="@+id/tvTotalLabel"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
@@ -252,6 +246,7 @@
                     android:textSize="16sp"/>
 
                 <TextView
+                    android:id="@+id/tvTotalAmount"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="₹940"
@@ -263,11 +258,13 @@
 
         <!-- Buttons -->
         <LinearLayout
+            android:id="@+id/layoutButtons"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal">
 
             <Button
+                android:id="@+id/btnCancelOrder"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
@@ -275,6 +272,7 @@
                 android:text="Cancel this Order"/>
 
             <Button
+                android:id="@+id/btnInvoice"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"

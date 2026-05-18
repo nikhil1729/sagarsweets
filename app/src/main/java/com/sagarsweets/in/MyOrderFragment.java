@@ -25,6 +25,7 @@ import com.sagarsweets.in.ApiModel.MyOrderRequest;
 import com.sagarsweets.in.ApiModel.MyOrderResponse;
 import com.sagarsweets.in.ApiModel.OrderData;
 import com.sagarsweets.in.Session.LoginSession;
+import com.sagarsweets.in.utils.DeviceInfo;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -66,7 +67,8 @@ public class MyOrderFragment extends Fragment {
         LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
         recyclerOrders.setLayoutManager(layoutManager);
 
-        adapter = new MyOrderAdapter(getContext(), list);
+        adapter = new MyOrderAdapter(getContext(), list,
+                loginSession.getUserId(), DeviceInfo.getDeviceString(getContext()));
         recyclerOrders.setAdapter(adapter);
         loadMyOrders(page);
         // Pagination Scroll Listener

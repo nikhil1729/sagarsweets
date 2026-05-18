@@ -145,39 +145,89 @@
                 android:layout_height="wrap_content"/>
             <!-- Buttons Row -->
             <LinearLayout
-                android:orientation="horizontal"
-                android:layout_marginTop="8dp"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content">
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:orientation="horizontal">
 
-                <Button
-                    android:id="@+id/btnViewDetails"
-                    android:text="Details"
-                    android:layout_weight="1"
+                <!-- Details Button -->
+                <FrameLayout
                     android:layout_width="0dp"
-                    android:backgroundTint="@color/sagar_button"
-                    android:layout_height="wrap_content"/>
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1">
 
-                <Button
-                    android:id="@+id/btnCancle"
-                    android:text="Canceled"
-                    android:layout_marginStart="6dp"
-                    android:layout_weight="1"
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnViewDetails"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Details"
+                        android:backgroundTint="@color/sagar_button" />
+
+                    <ProgressBar
+                        android:id="@+id/progressDetails"
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:layout_gravity="center"
+                        android:visibility="gone" />
+
+                </FrameLayout>
+
+                <!-- Cancel Button -->
+                <FrameLayout
                     android:layout_width="0dp"
-                    android:visibility="visible"
-                    android:backgroundTint="@color/slot_active_red"
-                    android:layout_height="wrap_content"/>
-                <Button
-                    android:id="@+id/btnTrack"
-                    android:text="Track Order"
-                    android:layout_marginStart="6dp"
+                    android:layout_height="wrap_content"
                     android:layout_weight="1"
+                    android:layout_marginStart="6dp">
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnCancle"
+                        android:layout_width="match_parent"
+                        android:layout_height="48dp"
+                        android:minHeight="48dp"
+                        android:text="Canceled"
+                        android:textAllCaps="false"
+                        android:paddingStart="12dp"
+                        android:paddingEnd="12dp"
+                        android:backgroundTint="@color/slot_active_red" />
+
+                    <ProgressBar
+                        android:id="@+id/progressCancel"
+                        android:layout_width="22dp"
+                        android:layout_height="22dp"
+                        android:layout_gravity="center"
+                        android:visibility="gone" />
+
+                </FrameLayout>
+
+                <!-- Track Button -->
+                <FrameLayout
                     android:layout_width="0dp"
-                    android:visibility="gone"
-                    android:backgroundTint="@color/wallet_highlighted_text_holo_dark"
-                    android:layout_height="wrap_content"/>
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginStart="6dp">
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnTrack"
+                        android:layout_width="match_parent"
+                        android:layout_height="48dp"
+                        android:minHeight="48dp"
+                        android:text="Track"
+                        android:textAllCaps="false"
+                        android:paddingStart="12dp"
+                        android:paddingEnd="12dp"
+                        android:backgroundTint="@color/wallet_highlighted_text_holo_dark"
+                        android:visibility="visible" />
+
+                    <ProgressBar
+                        android:id="@+id/progressTrack"
+                        android:layout_width="22dp"
+                        android:layout_height="22dp"
+                        android:layout_gravity="center"
+                        android:visibility="gone" />
+
+                </FrameLayout>
+
             </LinearLayout>
-
         </LinearLayout>
 
     </LinearLayout>
