@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
+
 <androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -11,13 +12,13 @@
         android:id="@+id/txtTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_margin="16dp"
         android:text="My Orders"
+        android:textColor="#000"
         android:textSize="20sp"
         android:textStyle="bold"
-        android:textColor="#000"
-        android:layout_margin="16dp"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent"/>
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"/>
 
     <!-- Search Bar -->
     <androidx.cardview.widget.CardView
@@ -25,19 +26,19 @@
         android:layout_width="0dp"
         android:layout_height="50dp"
         android:layout_marginStart="16dp"
-        android:layout_marginEnd="8dp"
         android:layout_marginTop="10dp"
+        android:layout_marginEnd="8dp"
         app:cardCornerRadius="25dp"
         app:cardElevation="3dp"
-        app:layout_constraintTop_toBottomOf="@id/txtTitle"
+        app:layout_constraintEnd_toStartOf="@id/btnFilter"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toStartOf="@id/btnFilter">
+        app:layout_constraintTop_toBottomOf="@id/txtTitle">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:orientation="horizontal"
             android:gravity="center_vertical"
+            android:orientation="horizontal"
             android:paddingStart="12dp"
             android:paddingEnd="12dp">
 
@@ -51,16 +52,54 @@
                 android:id="@+id/edtSearch"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:hint="Search orders..."
                 android:background="@android:color/transparent"
+                android:hint="Search orders by txn id..."
                 android:paddingStart="10dp"
-                android:textSize="14sp"
                 android:textColor="#000"
-                android:textColorHint="#999"/>
+                android:textColorHint="#999"
+                android:textSize="14sp"
+                android:imeOptions="actionSearch"
+                android:inputType="text"/>
         </LinearLayout>
 
     </androidx.cardview.widget.CardView>
+    <com.google.android.material.chip.ChipGroup
+        android:id="@+id/chipGroupFilters"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginTop="8dp"
+        android:visibility="visible"
+        app:chipSpacingHorizontal="6dp"
+        app:chipSpacingVertical="6dp"
+        app:layout_constraintTop_toBottomOf="@id/searchCard"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
 
+        <com.google.android.material.chip.Chip
+            android:id="@+id/chipStatus"
+            style="@style/Widget.MaterialComponents.Chip.Entry"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Delivered"
+            android:visibility="gone"
+            app:checkedIconEnabled="false"
+            app:chipBackgroundColor="@color/chip_selector"
+            app:closeIconEnabled="true"/>
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/chipDate"
+            style="@style/Widget.MaterialComponents.Chip.Entry"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="18/5/2026 - 19/5/2026"
+            android:visibility="gone"
+            app:checkedIconEnabled="false"
+            app:chipBackgroundColor="@color/chip_selector"
+            app:closeIconEnabled="true"/>
+
+    </com.google.android.material.chip.ChipGroup>
     <!-- Filter Button -->
     <ImageView
         android:id="@+id/btnFilter"
@@ -70,10 +109,38 @@
         android:background="@drawable/bg_filter_circle"
         android:padding="12dp"
         android:src="@android:drawable/ic_menu_sort_by_size"
-        app:layout_constraintTop_toTopOf="@id/searchCard"
         app:layout_constraintBottom_toBottomOf="@id/searchCard"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@id/searchCard"
         app:tint="#FFF" />
+    <!-- Active Filter Chip -->
+
+    <!-- Shimmer Layout -->
+    <com.facebook.shimmer.ShimmerFrameLayout
+        android:id="@+id/shimmerLayout"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:visibility="visible"
+        app:layout_constraintTop_toBottomOf="@id/chipGroupFilters"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:shimmer_auto_start="true"
+        app:shimmer_duration="1000">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="8dp">
+
+            <include layout="@layout/shimmer_myorder_item"/>
+            <include layout="@layout/shimmer_myorder_item"/>
+            <include layout="@layout/shimmer_myorder_item"/>
+
+        </LinearLayout>
+
+    </com.facebook.shimmer.ShimmerFrameLayout>
 
     <!-- RecyclerView -->
     <androidx.recyclerview.widget.RecyclerView
@@ -81,10 +148,11 @@
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:padding="10dp"
-        app:layout_constraintTop_toBottomOf="@id/searchCard"
+        android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"/>
+        app:layout_constraintTop_toBottomOf="@id/chipGroupFilters"/>
 
     <!-- Empty State -->
     <TextView
@@ -92,12 +160,12 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="No Orders Found"
-        android:textSize="16sp"
         android:textColor="#777"
+        android:textSize="16sp"
         android:visibility="gone"
-        app:layout_constraintTop_toBottomOf="@id/searchCard"
         app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"/>
+        app:layout_constraintTop_toBottomOf="@id/chipGroupFilters"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<com.facebook.shimmer.ShimmerFrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    app:shimmer_auto_start="true"
+    app:shimmer_duration="1000">
+
+    <androidx.cardview.widget.CardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="8dp"
+        app:cardCornerRadius="12dp"
+        app:cardElevation="4dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:padding="12dp">
+
+            <!-- Image -->
+            <View
+                android:layout_width="70dp"
+                android:layout_height="70dp"
+                android:layout_marginEnd="10dp"
+                android:background="@drawable/shimmer_bg_rounded"/>
+
+            <!-- Right Content -->
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <!-- Top Row -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <View
+                        android:layout_width="120dp"
+                        android:layout_height="16dp"
+                        android:layout_weight="1"
+                        android:background="@drawable/shimmer_bg_rounded"/>
+
+                    <View
+                        android:layout_width="55dp"
+                        android:layout_height="22dp"
+                        android:layout_marginStart="8dp"
+                        android:background="@drawable/shimmer_bg_rounded"/>
+
+                    <View
+                        android:layout_width="70dp"
+                        android:layout_height="22dp"
+                        android:layout_marginStart="8dp"
+                        android:background="@drawable/shimmer_bg_rounded"/>
+                </LinearLayout>
+
+                <!-- Date -->
+                <View
+                    android:layout_width="90dp"
+                    android:layout_height="12dp"
+                    android:layout_marginTop="10dp"
+                    android:background="@drawable/shimmer_bg_rounded"/>
+
+                <!-- Delivery -->
+                <View
+                    android:layout_width="140dp"
+                    android:layout_height="12dp"
+                    android:layout_marginTop="8dp"
+                    android:background="@drawable/shimmer_bg_rounded"/>
+
+                <!-- Slot -->
+                <View
+                    android:layout_width="160dp"
+                    android:layout_height="12dp"
+                    android:layout_marginTop="8dp"
+                    android:background="@drawable/shimmer_bg_rounded"/>
+
+                <!-- Item Count -->
+                <View
+                    android:layout_width="70dp"
+                    android:layout_height="12dp"
+                    android:layout_marginTop="8dp"
+                    android:background="@drawable/shimmer_bg_rounded"/>
+
+                <!-- Amount -->
+                <View
+                    android:layout_width="80dp"
+                    android:layout_height="16dp"
+                    android:layout_marginTop="10dp"
+                    android:background="@drawable/shimmer_bg_rounded"/>
+
+                <!-- Coupon -->
+                <View
+                    android:layout_width="150dp"
+                    android:layout_height="24dp"
+                    android:layout_marginTop="10dp"
+                    android:background="@drawable/shimmer_bg_rounded"/>
+
+                <!-- Buttons -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="14dp"
+                    android:orientation="horizontal">
+
+                    <View
+                        android:layout_width="0dp"
+                        android:layout_height="45dp"
+                        android:layout_weight="1"
+                        android:background="@drawable/shimmer_bg_rounded"/>
+
+                    <View
+                        android:layout_width="0dp"
+                        android:layout_height="45dp"
+                        android:layout_weight="1"
+                        android:layout_marginStart="6dp"
+                        android:background="@drawable/shimmer_bg_rounded"/>
+
+                    <View
+                        android:layout_width="0dp"
+                        android:layout_height="45dp"
+                        android:layout_weight="1"
+                        android:layout_marginStart="6dp"
+                        android:background="@drawable/shimmer_bg_rounded"/>
+                </LinearLayout>
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+    </androidx.cardview.widget.CardView>
+
+</com.facebook.shimmer.ShimmerFrameLayout>

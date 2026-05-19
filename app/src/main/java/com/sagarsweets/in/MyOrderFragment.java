@@ -10,13 +10,18 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
+import android.widget.TextView;
 import android.widget.Toast;
 
+import com.facebook.shimmer.ShimmerFrameLayout;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.button.MaterialButton;
+import com.google.android.material.chip.Chip;
+import com.google.android.material.chip.ChipGroup;
 import com.google.android.material.textfield.TextInputEditText;
 import com.sagarsweets.in.Adapters.MyOrderAdapter;
 import com.sagarsweets.in.ApiControllers.LoginRetrofitClient;
@@ -51,6 +56,12 @@ public class MyOrderFragment extends Fragment {
     boolean isLastPage = false;
     List<OrderData> list = new ArrayList<>();
     MyOrderAdapter adapter;
+    BottomSheetDialog bottomSheetDialog;
+    ShimmerFrameLayout shimmerLayout;
+    TextView txtEmpty;
+    ChipGroup chipGroupFilters;
+    Chip chipStatus, chipDate;
+    EditText edtSearch;
     public MyOrderFragment() {
         // Required empty public constructor
     }
@@ -64,13 +75,15 @@ public class MyOrderFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_my_order, container, false);
         initViews(view);
         filterCalling(); // filter clicked
+        chipGroupFunction();
+        searchByTxnId();
         LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
         recyclerOrders.setLayoutManager(layoutManager);
 
         adapter = new MyOrderAdapter(getContext(), list,
                 loginSession.getUserId(), DeviceInfo.getDeviceString(getContext()));
         recyclerOrders.setAdapter(adapter);
-        loadMyOrders(page);
+        loadMyOrders(page, order_status, first_date, second_date, search);
         // Pagination Scroll Listener
         recyclerOrders.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
@@ -84,7 +97,7 @@ public class MyOrderFragment extends Fragment {
                 if (!isLoading && !isLastPage) {
                     if ((visibleItemCount + firstVisibleItemPosition) >= totalItemCount) {
                         page++;
-                        loadMyOrders(page);
+                        loadMyOrders(page, order_status, first_date, second_date, search);
                     }
                 }
             }
@@ -93,11 +106,88 @@ public class MyOrderFragment extends Fragment {
         return view;
     }
 
+    private void searchByTxnId() {
+        edtSearch.setOnEditorActionListener((v, actionId, event) -> {
+
+            if (actionId == android.view.inputmethod.EditorInfo.IME_ACTION_SEARCH
+                    || actionId == android.view.inputmethod.EditorInfo.IME_ACTION_DONE
+                    || (event != null
+                    && event.getKeyCode() == android.view.KeyEvent.KEYCODE_ENTER
+                    && event.getAction() == android.view.KeyEvent.ACTION_DOWN)) {
+                page = 1;
+                search = edtSearch.getText().toString().trim();
+                loadMyOrders(page,order_status,first_date,second_date,search);
+                return true;
+            }
+
+            return false;
+        });
+    }
+
+    private void chipGroupFunction() {
+        chipStatus.setOnCloseIconClickListener(v -> {
+
+            order_status = "";
+
+            chipStatus.setVisibility(View.GONE);
+
+            updateFilterUI();
+
+            page = 1;
+            loadMyOrders(page, order_status, first_date, second_date, search);
+        });
+
+        chipDate.setOnCloseIconClickListener(v -> {
+
+            first_date = "";
+            second_date = "";
+
+            chipDate.setVisibility(View.GONE);
+
+            updateFilterUI();
+
+            page = 1;
+            loadMyOrders(page, order_status, first_date, second_date, search);
+        });
+    }
+
+    private void updateFilterUI() {
+
+        boolean hasFilter = false;
+
+        // Status Filter
+        if (order_status != null && !order_status.isEmpty()) {
+
+            chipStatus.setVisibility(View.VISIBLE);
+            chipStatus.setText(order_status);
+
+            hasFilter = true;
+
+        } else {
+            chipStatus.setVisibility(View.GONE);
+        }
+
+        // Date Filter
+        if (first_date != null && !first_date.isEmpty()
+                && second_date != null && !second_date.isEmpty()) {
+
+            chipDate.setVisibility(View.VISIBLE);
+            chipDate.setText(first_date + " - " + second_date);
+
+            hasFilter = true;
+
+        } else {
+            chipDate.setVisibility(View.GONE);
+        }
+
+        chipGroupFilters.setVisibility(hasFilter ? View.VISIBLE : View.GONE);
+    }
+
     private void filterCalling() {
         btnFilter.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(getContext());
+                bottomSheetDialog = new BottomSheetDialog(getContext());
                 View sheetView = LayoutInflater.from(getContext()).inflate(R.layout.bottom_sheet_filter_myorder, null);
 
                 RadioGroup radioGroup = sheetView.findViewById(R.id.radioStatus);
@@ -111,10 +201,17 @@ public class MyOrderFragment extends Fragment {
                     @Override
                     public void onClick(View v) {
                         bottomSheetDialog.dismiss();
+
                         order_status = "";
                         first_date = "";
                         second_date = "";
-                        loadMyOrders(1);
+                        isLastPage = false;
+                        isLoading = false;
+                        page = 1;
+                        list.clear();
+                        adapter.notifyDataSetChanged();
+                        updateFilterUI();
+                        loadMyOrders(page,order_status,first_date,second_date, search);
                     }
                 });
                 btnApply.setOnClickListener(new View.OnClickListener() {
@@ -129,12 +226,20 @@ public class MyOrderFragment extends Fragment {
                             // Get selected text
                             order_status = radioButton.getText().toString();
 
-                            Toast.makeText(getContext(), order_status, Toast.LENGTH_SHORT).show();
+                            //Toast.makeText(getContext(), order_status, Toast.LENGTH_SHORT).show();
                         }else{
                             order_status = "";
-                            Toast.makeText(getContext(),"hello",Toast.LENGTH_LONG).show();
                         }
-
+                        isLastPage = false;
+                        isLoading = false;
+                        first_date   = etFromDate.getText().toString();
+                        second_date  = etToDate.getText().toString();
+                        page = 1;
+                        updateFilterUI();
+                        list.clear();
+                        adapter.notifyDataSetChanged();
+                        loadMyOrders(page,order_status,first_date,second_date, search);
+                        bottomSheetDialog.dismiss();
                     }
                 });
                 bottomSheetDialog.setContentView(sheetView);
@@ -218,33 +323,71 @@ public class MyOrderFragment extends Fragment {
     }
 
 
-    private void loadMyOrders(int page) {
-        MyOrderRequest myOrderRequest = new MyOrderRequest(loginSession.getUserId(),limit,page,search,order_status,first_date,second_date);
+    private void loadMyOrders(int page, String order_status, String first_date, String second_date, String search) {
+        isLoading = true;
+        if (page == 1) {
+            shimmerLayout.setVisibility(View.VISIBLE);
+            shimmerLayout.startShimmer();
+
+            recyclerOrders.setVisibility(View.GONE);
+        }
+        MyOrderRequest myOrderRequest = new MyOrderRequest(loginSession.getUserId(),
+                limit,page, this.search, order_status, first_date, second_date);
         apiService.getMyOrder(myOrderRequest).enqueue(new Callback<MyOrderResponse>() {
             @Override
             public void onResponse(Call<MyOrderResponse> call, Response<MyOrderResponse> response) {
                 if(response.body() != null){
+                    shimmerLayout.stopShimmer();
+                    shimmerLayout.setVisibility(View.GONE);
+
+                    recyclerOrders.setVisibility(View.VISIBLE);
                     MyOrderResponse res = response.body();
-                    if(res.isStatus()){
+                    if(res.isStatus() && res.getData() != null){
                         isLoading = false;
                         List<OrderData> newData = response.body().getData();
                         if (page == 1) {
+
                             list.clear();
+                            list.addAll(newData);
+
+                            adapter.notifyDataSetChanged();
+
+                        } else {
+
+                            adapter.addData(newData);
                         }
-                        adapter.addData(newData);
                         if (page >= response.body().getTotal_pages()) {
                             isLastPage = true;
                         }
                     }else{
                         // show error
-
+                        txtEmpty.setVisibility(View.VISIBLE);
+                        recyclerOrders.setVisibility(View.GONE);
                     }
                 }
             }
 
             @Override
-            public void onFailure(Call<MyOrderResponse> call, Throwable t) {
+            public void onFailure(Call<MyOrderResponse> call, Throwable t)
+            {
                 isLoading = false;
+
+                shimmerLayout.stopShimmer();
+                shimmerLayout.setVisibility(View.GONE);
+
+                if (list.isEmpty()) {
+
+                    txtEmpty.setVisibility(View.VISIBLE);
+                    recyclerOrders.setVisibility(View.GONE);
+
+                } else {
+
+                    recyclerOrders.setVisibility(View.VISIBLE);
+                }
+
+                Toast.makeText(getContext(),
+                        t.getMessage(),
+                        Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -256,5 +399,11 @@ public class MyOrderFragment extends Fragment {
                 .getClient()
                 .create(ApiService.class);
         loginSession = new LoginSession(getContext());
+        shimmerLayout = view.findViewById(R.id.shimmerLayout);
+        txtEmpty = view.findViewById(R.id.txtEmpty);
+        chipGroupFilters = view.findViewById(R.id.chipGroupFilters);
+        chipStatus = view.findViewById(R.id.chipStatus);
+        chipDate = view.findViewById(R.id.chipDate);
+        edtSearch = view.findViewById(R.id.edtSearch);
     }
 }
