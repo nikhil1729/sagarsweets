@@ -1,7 +1,12 @@
 package com.sagarsweets.in;
 
+import android.Manifest;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.SharedPreferences;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -23,9 +28,11 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
+import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.OptIn;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.core.graphics.Insets;
 import androidx.core.view.GravityCompat;
@@ -44,15 +51,21 @@ import com.google.android.material.badge.ExperimentalBadgeUtils;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.navigation.NavigationView;
 import com.google.android.material.textfield.MaterialAutoCompleteTextView;
+import com.google.firebase.messaging.FirebaseMessaging;
 import com.razorpay.Checkout;
 import com.razorpay.PaymentResultListener;
 import com.sagarsweets.in.Adapters.PopularProductAdapter;
 import com.sagarsweets.in.Adapters.SearchSuggestionAdapter;
 import com.sagarsweets.in.ApiControllers.LoginRetrofitClient;
+import com.sagarsweets.in.ApiControllers.ResetOtpRetrofitClient;
 import com.sagarsweets.in.ApiInterface.ApiService;
+import com.sagarsweets.in.ApiModel.NotificationCountRequest;
+import com.sagarsweets.in.ApiModel.NotificationCountResponse;
 import com.sagarsweets.in.ApiModel.PincodeData;
 import com.sagarsweets.in.ApiModel.PincodeRequest;
 import com.sagarsweets.in.ApiModel.PincodeResponse;
+import com.sagarsweets.in.ApiModel.TokenRequest;
+import com.sagarsweets.in.ApiModel.TokenResponse;
 import com.sagarsweets.in.RoomDatabase.AppDatabase;
 import com.sagarsweets.in.Session.LoginSession;
 import com.sagarsweets.in.Session.PincodeSession;
@@ -77,6 +90,7 @@ public class HomeActivity extends AppCompatActivity
     MaterialToolbar topAppBar;
     NavigationView navigationView;
     BadgeDrawable badge;
+    private BadgeDrawable notificationBadge;
     LoginSession loginSession;
     View headerView;
     private LiveData<Integer> cartCountLiveData;
@@ -160,11 +174,19 @@ public class HomeActivity extends AppCompatActivity
                 loadFragment(new CartFragment(), "Cart", false);
                 return true;
             }
+            if (item.getItemId() == R.id.action_notification) {
+
+                loadFragment(new NotificationFragment(),
+                        "Notifications",
+                        false);
+
+                return true;
+            }
             return false;
         });
 
         topAppBar.post(this::setupCartBadge);
-
+        topAppBar.post(this::setupNotificationBadge);
         navigationView.setNavigationItemSelectedListener(item -> {
             openDrawerItem(item.getItemId());
             return true;
@@ -180,6 +202,258 @@ public class HomeActivity extends AppCompatActivity
                 navigationView.setCheckedItem(R.id.draw_login);
             }
         }
+
+        OnBackPressedCallback callback = new OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed() {
+
+                FragmentManager fm = getSupportFragmentManager();
+                Fragment currentFragment =
+                        fm.findFragmentById(R.id.container);
+
+                if (currentFragment instanceof HomeFragment ||
+                        fm.getBackStackEntryCount() <= 1) {
+
+                    Toast.makeText(HomeActivity.this,
+                            "Thank You, Shop again",
+                            Toast.LENGTH_LONG).show();
+
+                    finishAffinity();
+                    return;
+                }
+
+                fm.popBackStack();
+            }
+        };
+
+        getOnBackPressedDispatcher().addCallback(this, callback);
+        Log.d("BEFORE_TOKEN","HOME ACT");
+        Log.d("BEFORE_TOKEN",FirebaseMessaging.getInstance().getToken().toString());
+        firbaseTokenSaving();
+        Log.d("BEFORE_TOKEN","After firebasetakingsaving function");
+        // runtime permission for notification
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+
+            ActivityCompat.requestPermissions(
+                    this,
+                    new String[]{Manifest.permission.POST_NOTIFICATIONS},
+                    101
+            );
+        }
+    }
+
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        if (notificationBadge != null) {
+            loadNotificationCount();
+        }
+    }
+
+    private void firbaseTokenSaving() {
+
+        FirebaseMessaging.getInstance().getToken()
+                .addOnCompleteListener(task -> {
+
+                    if (!task.isSuccessful()) {
+                        Log.e("FCM_TOKEN", "Fetching FCM token failed");
+                        return;
+                    }
+
+                    String token = task.getResult();
+
+                    Log.d("FCM_TOKEN", token);
+
+                    // API for saving token
+                    ApiService apiService = ResetOtpRetrofitClient.getApiService();
+
+                    LoginSession loginSession = new LoginSession(HomeActivity.this);
+
+                    TokenRequest tokenRequest = new TokenRequest(
+                            loginSession.getUserId(),
+                            DeviceInfo.getDeviceString(HomeActivity.this),
+                            token
+                    );
+
+                    Call<TokenResponse> call = apiService.saveTokenOnServer(tokenRequest);
+
+                    call.enqueue(new Callback<TokenResponse>() {
+
+                        @Override
+                        public void onResponse(Call<TokenResponse> call,
+                                               Response<TokenResponse> response) {
+
+                            if (response.isSuccessful()
+                                    && response.body() != null) {
+
+                                TokenResponse tokenResponse = response.body();
+
+                                Log.d("FCM_TOKEN",
+                                        tokenResponse.getMessage());
+
+                            } else {
+
+                                Log.e("FCM_TOKEN",
+                                        "Response body null or API failed");
+
+                                Log.e("FCM_TOKEN",
+                                        "Code: " + response.code());
+
+                                try {
+
+                                    if (response.errorBody() != null) {
+                                        Log.e("FCM_TOKEN",
+                                                response.errorBody().string());
+                                    }
+
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                        }
+
+                        @Override
+                        public void onFailure(Call<TokenResponse> call,
+                                              Throwable t) {
+
+                            Log.e("FCM_TOKEN", t.getMessage());
+                        }
+                    });
+
+                });
+    }
+
+
+    @OptIn(markerClass = ExperimentalBadgeUtils.class)
+    private void setupNotificationBadge() {
+
+        notificationBadge = BadgeDrawable.create(this);
+
+        notificationBadge.setBackgroundColor(
+                ContextCompat.getColor(this, R.color.red));
+
+        notificationBadge.setBadgeTextColor(
+                ContextCompat.getColor(this, android.R.color.white));
+
+        notificationBadge.setMaxCharacterCount(3);
+
+        BadgeUtils.attachBadgeDrawable(
+                notificationBadge,
+                topAppBar,
+                R.id.action_notification
+        );
+
+        loadNotificationCount();
+    }
+
+    private final BroadcastReceiver notificationReceiver =
+            new BroadcastReceiver() {
+                @Override
+                public void onReceive(Context context, Intent intent) {
+
+                    SharedPreferences prefs =
+                            getSharedPreferences(
+                                    "notification_prefs",
+                                    MODE_PRIVATE);
+
+                    int count =
+                            prefs.getInt("unread_count", 0);
+
+                    if (count > 0) {
+                        notificationBadge.setNumber(count);
+                        notificationBadge.setVisible(true);
+                    } else {
+                        notificationBadge.setVisible(false);
+                    }
+                }
+            };
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            registerReceiver(
+                    notificationReceiver,
+                    new IntentFilter("UPDATE_NOTIFICATION_BADGE"),
+                    Context.RECEIVER_NOT_EXPORTED
+            );
+        }
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        unregisterReceiver(notificationReceiver);
+    }
+
+    public void updateNotificationBadge() {
+
+        SharedPreferences prefs =
+                getSharedPreferences(
+                        "notification_prefs",
+                        MODE_PRIVATE);
+
+        int count = prefs.getInt("unread_count", 0);
+
+        if (notificationBadge == null) return;
+
+        if (count > 0) {
+            notificationBadge.setNumber(count);
+            notificationBadge.setVisible(true);
+        } else {
+            notificationBadge.clearNumber();
+            notificationBadge.setVisible(false);
+        }
+    }
+
+    private void loadNotificationCount() {
+        if (!loginSession.isLoggedIn()) {
+            notificationBadge.setVisible(false);
+            return;
+        }
+        ApiService apiService =
+                LoginRetrofitClient.getClient()
+                        .create(ApiService.class);
+        NotificationCountRequest notificationCountRequest
+                = new NotificationCountRequest(loginSession.getUserId());
+        apiService.getNotificationCount(notificationCountRequest)
+                .enqueue(new Callback<NotificationCountResponse>() {
+            @Override
+            public void onResponse(Call<NotificationCountResponse> call, Response<NotificationCountResponse> response) {
+                if (response.isSuccessful()
+                        && response.body() != null
+                        && response.body().getStatus()) {
+
+                    int count = response.body().getCount();
+                    SharedPreferences prefs =
+                            getSharedPreferences(
+                                    "notification_prefs",
+                                    Context.MODE_PRIVATE);
+                    if (count <= 0) {
+                        prefs.edit()
+                                .putInt("unread_count", 0)
+                                .apply();
+                        notificationBadge.setVisible(false);
+
+                    } else {
+                        prefs.edit()
+                                .putInt("unread_count", count)
+                                .apply();
+                        notificationBadge.setNumber(count);
+                        notificationBadge.setVisible(true);
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(Call<NotificationCountResponse> call, Throwable t) {
+                Log.e("NOTIFICATION_BADGE",
+                        t.getMessage());
+            }
+        });
     }
 
     @OptIn(markerClass = ExperimentalBadgeUtils.class)
@@ -507,21 +781,7 @@ public class HomeActivity extends AppCompatActivity
 
 
 
-    @Override
-    public void onBackPressed() {
-        FragmentManager fm = getSupportFragmentManager();
-        Fragment currentFragment = getSupportFragmentManager().findFragmentById(R.id.container);
-        Log.d("currentfragment", String.valueOf(fm.getBackStackEntryCount()));
 
-        if(currentFragment == null|| fm.getBackStackEntryCount() == 1){
-            Toast.makeText(this,"Thank You, Shop again",Toast.LENGTH_LONG).show();
-            finishAffinity();
-        }
-        if(currentFragment instanceof HomeFragment){
-            Toast.makeText(this,"Thank You, Shop again",Toast.LENGTH_LONG).show();
-            finishAffinity();
-        } else super.onBackPressed();
-    }
 
     @Override
     public void onCartUpdated() {

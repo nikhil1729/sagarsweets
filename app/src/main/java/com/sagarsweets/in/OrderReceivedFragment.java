@@ -4,15 +4,18 @@ import android.os.Bundle;
 
 import androidx.activity.OnBackPressedCallback;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.google.android.material.button.MaterialButton;
 import com.google.android.material.card.MaterialCardView;
 import com.google.gson.Gson;
 import com.sagarsweets.in.Adapters.OrderItemAdapter;
@@ -36,6 +39,7 @@ public class OrderReceivedFragment extends Fragment {
     LinearLayout layoutCoupon;
     TextView txtCouponCode,txtCouponSaving;
     PodVerifyOtpResponse order;
+    MaterialButton btnOrder,btnContinue;
     public OrderReceivedFragment() {
         // Required empty public constructor
     }
@@ -53,9 +57,66 @@ public class OrderReceivedFragment extends Fragment {
         initViews(view);
         settextView();
         backSpaceClicked();
+        buttonClicked();
         // Inflate the layout for this fragment
         return view;
     }
+
+    private void buttonClicked() {
+        btnOrder.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                openMyOrder();
+            }
+        });
+
+        btnContinue.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Fragment homeFragment = new HomeFragment();
+
+                requireActivity().getSupportFragmentManager()
+                        .beginTransaction()
+                        .replace(R.id.container, homeFragment)
+                        .commit();
+            }
+        });
+    }
+
+
+    private void openMyOrder() {
+
+        FragmentManager fm =
+                requireActivity()
+                        .getSupportFragmentManager();
+
+        // remove old stack
+        fm.popBackStack(
+                null,
+                FragmentManager.POP_BACK_STACK_INCLUSIVE
+        );
+
+        // add Home as root
+        fm.beginTransaction()
+                .replace(
+                        R.id.container,
+                        new HomeFragment()
+                )
+                .addToBackStack("HOME")
+                .commit();
+
+        fm.executePendingTransactions();
+
+        // open MyOrder
+        fm.beginTransaction()
+                .replace(
+                        R.id.container,
+                        new MyOrderFragment()
+                )
+                .addToBackStack("MY_ORDER")
+                .commit();
+    }
+
 
     private void backSpaceClicked() {
         requireActivity().getOnBackPressedDispatcher().addCallback(
@@ -146,5 +207,7 @@ public class OrderReceivedFragment extends Fragment {
         layoutCoupon = view.findViewById(R.id.layoutCoupon);
         txtCouponSaving = view.findViewById(R.id.txtCouponSaving);
         txtCouponCode = view.findViewById(R.id.txtCouponCode);
+        btnOrder = view.findViewById(R.id.btnOrder);
+        btnContinue = view.findViewById(R.id.btnContinue);
     }
 }

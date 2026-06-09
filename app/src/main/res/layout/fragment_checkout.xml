@@ -13,5 +13,19 @@
         android:id="@+id/layoutContent"
         layout="@layout/layout_checkout_main"
         android:visibility="gone"/>
-
+    <!-- Payment Warning -->
+    <TextView
+        android:id="@+id/txtPaymentWarning"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:layout_margin="16dp"
+        android:padding="12dp"
+        android:text="⚠ Do not press Back or close the app until your order is confirmed."
+        android:textColor="#FFFFFF"
+        android:textStyle="bold"
+        android:textSize="14sp"
+        android:gravity="center"
+        android:background="#D32F2F"
+        android:visibility="gone"/>
 </FrameLayout>

@@ -39,6 +39,7 @@ import com.sagarsweets.in.ApiModel.TopCategoryResponse;
 import com.sagarsweets.in.Session.LoginSession;
 import com.sagarsweets.in.Session.PincodeSession;
 import com.sagarsweets.in.utils.DeviceInfo;
+import com.sagarsweets.in.wizard.ProfileWizardDialog;
 
 import java.util.List;
 
@@ -64,9 +65,11 @@ public class HomeFragment extends Fragment
     RecyclerView rvCategoryWiseProducts;
     CategoryWiseAdapter categoryWiseAdapter;
     List<TopCategoryResponse> categoryWiseList;
+    String address="",email="",dob="";
     public HomeFragment() {
         // Required empty public constructor
     }
+
 
     @Override
     public void onPause() {
@@ -116,6 +119,9 @@ public class HomeFragment extends Fragment
         });
         if(loginSession.isLoggedIn()){
             userId = loginSession.getUserId();
+            email = loginSession.getEmail();
+            dob = loginSession.getDob();
+            popuoWizard(view);
         }
         rvCategories.setLayoutManager(
                 new LinearLayoutManager(
@@ -126,8 +132,31 @@ public class HomeFragment extends Fragment
         loadCategories();
         loadPopularProducts();
         loadTopCategoryProducts();
+
+
         // Inflate the layout for this fragment
         return view;
+    }
+
+    private boolean isEmpty(String value) {
+        return value == null ||
+                value.trim().isEmpty();
+    }
+    private void popuoWizard(View view) {
+        if (isEmpty(email) || isEmpty(dob)) {
+            ProfileWizardDialog dialog =
+                new ProfileWizardDialog(
+                    email,
+                    dob,
+                    loginSession.getUserId(),
+                    DeviceInfo.getDeviceString(getContext()),
+                        loginSession
+                );
+            dialog.show(
+                getChildFragmentManager(),
+                "PROFILE_WIZARD"
+            );
+        }
     }
 
     private void loadTopCategoryProducts() {

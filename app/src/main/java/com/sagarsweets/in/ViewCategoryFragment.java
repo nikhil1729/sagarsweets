@@ -49,7 +49,7 @@ public class ViewCategoryFragment extends Fragment {
         shimmerLayout = view.findViewById(R.id.shimmerLayout);
         // 1 columns grid
         rvCategory.setLayoutManager(new GridLayoutManager(getContext(), 1));
-        rvCategory.setHasFixedSize(true);
+        //rvCategory.setHasFixedSize(true);
 
         loadAllCategory();
 

@@ -122,6 +122,14 @@ public class ForgotPasswordFragment extends Fragment {
                         if (response.isSuccessful() && response.body() != null) {
                             if (response.body().isStatus()) {
                                 showSuccess(response.body().getMessage());
+                                LoginFragment loginFragment = new LoginFragment();
+                                requireActivity()
+                                        .getSupportFragmentManager()
+                                        .beginTransaction()
+                                        .replace(R.id.container, loginFragment)
+                                        .addToBackStack("login_fragment")
+                                        .commit();
+
                             } else {
                                 showError(response.body().getMessage());
                             }

@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Sagar</string>
+    <string name="app_name">Sagar Sweets</string>
     <string name="title_activity_linear">LinearActivity</string>
     <string name="getting_started_heading">Welcome to Sagar Sweets</string>
     <string name="getting_started_under_heading">Order fresh sweets and snacks delivered to your doorstep</string>

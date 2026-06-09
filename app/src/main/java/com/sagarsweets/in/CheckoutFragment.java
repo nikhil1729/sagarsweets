@@ -5,6 +5,9 @@ import android.location.Address;
 import android.location.Geocoder;
 import android.os.Bundle;
 
+import androidx.activity.OnBackPressedCallback;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.cardview.widget.CardView;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
@@ -122,7 +125,7 @@ public class CheckoutFragment extends Fragment{
     CardView cardCouponApplied;
 
     TextView txtSubtotal,txtDiscount,txtDelivery,txtGrandTotal;
-
+    TextView txtPaymentWarning;
     String city;
     String district;
     String state;
@@ -132,6 +135,8 @@ public class CheckoutFragment extends Fragment{
     ShimmerFrameLayout shimmer;
     View content ;
     Double amountToPaid;
+    private OnBackPressedCallback backPressedCallback;
+    private boolean isPaymentProcessing = false;
     private String deliveryType=Constants.HOME_DELIVERY;
     public class Constants {
 
@@ -154,6 +159,26 @@ public class CheckoutFragment extends Fragment{
             receivedCoupon = getArguments().getString("coupon_code");
         }
     }
+
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
+        backPressedCallback = new OnBackPressedCallback(false) {
+            @Override
+            public void handleOnBackPressed() {
+
+                Toast.makeText(requireContext(),
+                        "Please wait, order confirmation is in progress.",
+                        Toast.LENGTH_SHORT).show();
+            }
+        };
+
+        requireActivity()
+                .getOnBackPressedDispatcher()
+                .addCallback(getViewLifecycleOwner(), backPressedCallback);
+    }
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -354,10 +379,11 @@ public class CheckoutFragment extends Fragment{
 
     public void handlePaymentSuccess(String paymentId) {
 
-        Toast.makeText(getContext(),
-                "Payment Successful: " + paymentId,
-                Toast.LENGTH_LONG).show();
-
+        isPaymentProcessing = true;
+        backPressedCallback.setEnabled(true);
+        shimmer.hideShimmer();
+        content.setVisibility(View.GONE);
+        txtPaymentWarning.setVisibility(View.VISIBLE);
         // clear cart
         // clearCartAllItem();
 
@@ -378,10 +404,12 @@ public class CheckoutFragment extends Fragment{
         apiService.getVerifyRazorPay(razorpayRequest).enqueue(new Callback<PodVerifyOtpResponse>() {
             @Override
             public void onResponse(Call<PodVerifyOtpResponse> call, Response<PodVerifyOtpResponse> response) {
-                if (response.body() != null){
-                    if(response.body().getStatus()){
+
+                    if(response.body() != null && response.body().getStatus()){
                         //ButtonLoaderUtil.makeToast(getContext(), "all valid, POD");
-                        // delete all item fromcart
+                        isPaymentProcessing = false;
+                        backPressedCallback.setEnabled(false);
+                        // delete all item from cart
                         clearCartAllItem();
                         OrderReceivedFragment orderReceivedFragment = new OrderReceivedFragment();
                         Gson gson = new Gson();
@@ -395,23 +423,37 @@ public class CheckoutFragment extends Fragment{
                                 .getSupportFragmentManager()
                                 .beginTransaction()
                                 .replace(R.id.container, orderReceivedFragment)
-                                .addToBackStack("order_received_fragment")
                                 .commit();
                     }else{
+                        isPaymentProcessing = false;
+                        backPressedCallback.setEnabled(false);
                         ButtonLoaderUtil.makeToast(getContext(),response.body().getMessage());
-                    }
-                }else{
+                        requireActivity()
+                                .getSupportFragmentManager()
+                                .beginTransaction()
+                                .replace(R.id.container, new CartFragment())
+                                .commit();
 
-                }
+
+                    }
+
             }
 
             @Override
             public void onFailure(Call<PodVerifyOtpResponse> call, Throwable t) {
+                isPaymentProcessing = false;
+                backPressedCallback.setEnabled(false);
+
+                Toast.makeText(getContext(),
+                        "Order verification failed",
+                        Toast.LENGTH_SHORT).show();
 
             }
         });
 
     }
+
+
 
     private void showLoading(){
         shimmer.setVisibility(View.VISIBLE);
@@ -1086,6 +1128,8 @@ public class CheckoutFragment extends Fragment{
         btnPlaceOrder = view.findViewById(R.id.btnPlaceOrder);
         progressPlaceOrder = view.findViewById(R.id.progressPlaceOrder);
         radioPaymentMethod = view.findViewById(R.id.radioPaymentMethod);
+
+        txtPaymentWarning = view.findViewById(R.id.txtPaymentWarning);
     }
 
     @Override
@@ -1095,4 +1139,6 @@ public class CheckoutFragment extends Fragment{
             handler.removeCallbacks(clockRunnable);
         }
     }
+
+
 }

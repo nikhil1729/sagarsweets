@@ -480,7 +480,7 @@ public class LoginFragment extends Fragment {
         String userId = String.valueOf(user.getId());
         String userName = user.getFirst_name()+" "+user.getLast_name();
         // setting session here
-        loginSession.createLoginSession(userId, userName,userMobileNumber,user.getEmail());
+        loginSession.createLoginSession(userId, userName.toUpperCase(),userMobileNumber,user.getEmail(),user.getDob());
 
         // synchronize function for wish list and cart
         synchronize(); // this is for wishlist

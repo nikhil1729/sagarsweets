@@ -28,6 +28,7 @@ import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
+import com.google.android.material.textfield.TextInputLayout;
 import com.sagarsweets.in.Adapters.AddressAdapter;
 import com.sagarsweets.in.Adapters.AddressProfileAdapter;
 import com.sagarsweets.in.ApiControllers.LoginRetrofitClient;
@@ -58,6 +59,8 @@ import retrofit2.Response;
 public class MyProfileFragment extends Fragment {
 
     TextInputEditText etName,etDob,etEmail,etPhone,etCurrentPassword,etNewPassword,etConfirmPassword;
+    TextInputLayout emailLayout;
+
     TextView tvAge,tvProfileAge,tvSuccess,tvError;
     MaterialButton btnAddAddress;
     //Button btnLogout;
@@ -297,6 +300,31 @@ public class MyProfileFragment extends Fragment {
                     etName.setText(profile.getFullName());
                     etDob.setText(profile.getDob());
                     etEmail.setText(profile.getEmail());
+                    String emailVerified =
+                            profile.getEmail_verified();
+                    if("1".equals(emailVerified)){
+                        // Verified
+
+                        etEmail.setEnabled(false);
+
+                        etEmail.setFocusable(false);
+
+                        etEmail.setFocusableInTouchMode(false);
+
+                        etEmail.setClickable(false);
+
+                        emailLayout.setEndIconVisible(true);
+                        emailLayout.setEndIconDrawable(
+                                R.drawable.ic_verified
+                        );
+
+                    }else{
+                        // Not verified
+
+                        etEmail.setEnabled(true);
+
+                        emailLayout.setEndIconVisible(false);
+                    }
                     etPhone.setText(profile.getMobile());
                     tvAge.setText(profile.getAge());
                     if (profile.getNotification() == 1) {
@@ -306,7 +334,13 @@ public class MyProfileFragment extends Fragment {
                     }
                     tvProfileAge.setText("Member Since: " + profile.getProfileAge());
                     addressList = profile.getAddress();
-                    setAddressOfUser(profile.getAddress());
+                    if (!addressList.isEmpty()) {
+
+                        setAddressOfUser(addressList);
+
+                    }
+
+
                 }else{
                     tvError.setText(response.body().getMessage());
                     tvError.setVisibility(View.VISIBLE);
@@ -316,6 +350,14 @@ public class MyProfileFragment extends Fragment {
 
             @Override
             public void onFailure(Call<ProfileResponse> call, Throwable t) {
+                tvError.setText(t.getMessage());
+                tvError.setVisibility(View.VISIBLE);
+                Log.d("PROFILE_ERROR",t.getMessage());
+                Log.e(
+                        "PROFILE_ERROR",
+                        "Profile API Error",
+                        t
+                );
                 Toast.makeText(getContext(),t.getMessage(),Toast.LENGTH_LONG).show();
             }
         });
@@ -436,5 +478,6 @@ public class MyProfileFragment extends Fragment {
         // int notificationValue = switchNotifications.isChecked() ? 1 : 0;
         shimmerLayout = view.findViewById(R.id.shimmerView);
         contentLayout = view.findViewById(R.id.mainContent);
+        emailLayout = view.findViewById(R.id.emailLayout);
     }
 }

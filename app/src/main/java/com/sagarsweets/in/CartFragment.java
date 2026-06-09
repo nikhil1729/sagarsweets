@@ -93,8 +93,13 @@ public class CartFragment extends Fragment {
             @Override
             public void onClick(View v) {
 
-                if(currentCartList.size() <= 0){
-                    ButtonLoaderUtil.makeToast(getContext(),"Cart is empty");
+                if (currentCartList == null || currentCartList.isEmpty()) {
+
+                    ButtonLoaderUtil.makeToast(
+                            getContext(),
+                            "Cart is empty"
+                    );
+
                     return;
                 }
                 CheckoutFragment checkoutFragment = new CheckoutFragment();
@@ -282,6 +287,10 @@ public class CartFragment extends Fragment {
                         rvCart.setVisibility(View.VISIBLE);
                         tvItemCount.setText(cartList.size() + " Items in Cart");
                         cardItemCount.setVisibility(View.VISIBLE);
+                        btnCheckout.setEnabled(true);
+                        btnCheckout.setAlpha(1f);
+                        btnApplyCoupon.setEnabled(true);
+                        btnApplyCoupon.setAlpha(1f);
                         calculateTotal(cartList);
                     } else {
                         //btnCheckout.setEnabled(false);
@@ -290,6 +299,10 @@ public class CartFragment extends Fragment {
                         txtSubtotal.setText("₹0");
                         txtGrandTotal.setText("₹0");
                         cardItemCount.setVisibility(View.GONE);
+                        btnCheckout.setEnabled(false);
+                        btnCheckout.setAlpha(0.5f);
+                        btnApplyCoupon.setEnabled(false);
+                        btnApplyCoupon.setAlpha(0.5f);
                     }
                 });
     }

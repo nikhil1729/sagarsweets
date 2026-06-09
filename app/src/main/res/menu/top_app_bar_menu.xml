@@ -12,5 +12,9 @@
         android:icon="@drawable/ic_cart"
         android:title="Cart"
         app:showAsAction="always" />
-
+    <item
+        android:id="@+id/action_notification"
+        android:icon="@drawable/ic_notifications"
+        android:title="Notifications"
+        app:showAsAction="always"/>
 </menu>

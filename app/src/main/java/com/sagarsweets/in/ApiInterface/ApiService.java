@@ -7,6 +7,10 @@ import com.sagarsweets.in.ApiModel.AddAddressRequest;
 import com.sagarsweets.in.ApiModel.AddAddressResponse;
 import com.sagarsweets.in.ApiModel.AddressSetDefaultRequest;
 import com.sagarsweets.in.ApiModel.AllCategoryResponse;
+import com.sagarsweets.in.ApiModel.CancelProductRequest;
+import com.sagarsweets.in.ApiModel.CancelProductResponse;
+import com.sagarsweets.in.ApiModel.CancellationWindowRequest;
+import com.sagarsweets.in.ApiModel.CancellationWindowResponse;
 import com.sagarsweets.in.ApiModel.CartSyncRequest;
 import com.sagarsweets.in.ApiModel.CartSyncResponse;
 import com.sagarsweets.in.ApiModel.CategoryProductRequest;
@@ -28,6 +32,10 @@ import com.sagarsweets.in.ApiModel.MyOrderDetailsRequest;
 import com.sagarsweets.in.ApiModel.MyOrderDetailsResponse;
 import com.sagarsweets.in.ApiModel.MyOrderRequest;
 import com.sagarsweets.in.ApiModel.MyOrderResponse;
+import com.sagarsweets.in.ApiModel.NotificationCountRequest;
+import com.sagarsweets.in.ApiModel.NotificationCountResponse;
+import com.sagarsweets.in.ApiModel.NotificationRequest;
+import com.sagarsweets.in.ApiModel.NotificationResponse;
 import com.sagarsweets.in.ApiModel.OtpResponse;
 import com.sagarsweets.in.ApiModel.PapularProductHome;
 import com.sagarsweets.in.ApiModel.PayonDeleveryOtpRequest;
@@ -51,11 +59,16 @@ import com.sagarsweets.in.ApiModel.RazorpayRequest;
 import com.sagarsweets.in.ApiModel.RegisterUserRequest;
 import com.sagarsweets.in.ApiModel.RemoveCartRequest;
 import com.sagarsweets.in.ApiModel.ReviewResponse;
+import com.sagarsweets.in.ApiModel.SaveDobRequest;
+import com.sagarsweets.in.ApiModel.SaveEmailRequest;
+import com.sagarsweets.in.ApiModel.SaveEmailResponse;
 import com.sagarsweets.in.ApiModel.SearchProductRequest;
 import com.sagarsweets.in.ApiModel.SearchResponse;
 import com.sagarsweets.in.ApiModel.SliderResponse;
 import com.sagarsweets.in.ApiModel.StockRequest;
 import com.sagarsweets.in.ApiModel.StockResponse;
+import com.sagarsweets.in.ApiModel.TokenRequest;
+import com.sagarsweets.in.ApiModel.TokenResponse;
 import com.sagarsweets.in.ApiModel.TopCategoryRequest;
 import com.sagarsweets.in.ApiModel.TopCategoryResponse;
 import com.sagarsweets.in.ApiModel.UpdateCartRequest;
@@ -81,6 +94,15 @@ import retrofit2.http.POST;
 import retrofit2.http.Query;
 
 public interface ApiService {
+
+    @POST("rest/homefragment/unread-notification-count")
+    Call<NotificationCountResponse> getNotificationCount(@Body NotificationCountRequest notificationCountRequest);
+
+    @POST("rest/user/notifications")
+    Call<NotificationResponse> getNotification(@Body NotificationRequest notificationRequest);
+
+    @POST("rest/user/save-token")
+    Call<TokenResponse>saveTokenOnServer(@Body TokenRequest tokenRequest);
 
     @POST("rest/default/savecontactus")
     Call<ContactUsFormResponse> saveContactUs(@Body ContactUsFormRequest contactUsFormRequest);
@@ -206,6 +228,11 @@ public interface ApiService {
     @POST("rest/order/get-order-details")
     Call<MyOrderDetailsResponse> getOrderDetails(@Body MyOrderDetailsRequest myOrderDetailsRequest);
 
+    @POST("rest/order/get-cancellation-window")
+    Call<CancellationWindowRequest> getCancellationWindow(@Body CancellationWindowResponse cancellationWindowResponse);
+
+    @POST("rest/order/cancel-product")
+    Call<CancelProductResponse> cancelProduct(@Body CancelProductRequest cancelProductRequest);
     /* MY ORDER API END */
 
     /* PROFILE API */
@@ -216,5 +243,11 @@ public interface ApiService {
     Call<ProfileUpdateResponse> getProfileUpdate(@Body ProfileUpdateRequest profileUpdateRequest);
     @POST("rest/user/profile-address-set-default")
     Call<addressSetDefaultResponse> setDefaultAddress(@Body AddressSetDefaultRequest addressSetDefaultRequest);
+
+    @POST("rest/user/save-mail")
+    Call<SaveEmailResponse> saveEmailProfile (@Body SaveEmailRequest saveEmailRequest);
+
+    @POST("rest/user/save-dob")
+    Call<SaveEmailResponse> saveDobProfile (@Body SaveDobRequest saveDobRequest);
     /* PROFILE END */
 }

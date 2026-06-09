@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "600238239708",
+    "project_id": "sagarweet1729",
+    "storage_bucket": "sagarweet1729.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:600238239708:android:480d052286405826926919",
+        "android_client_info": {
+          "package_name": "com.sagarsweets.in"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAXbS9Cf38-pv1voInonMERBk1qUrBSU-E"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -9,6 +9,7 @@ public class LoginSession {
     private static final String KEY_NAME = "user_name";
     private static final String KEY_MOBILE = "mobile_number";
     private static final String KEY_EMAIL = "email";
+    private static final String KEY_DOB = "dob";
     private static final String KEY_LOGIN = "is_logged_in";
 
     private SharedPreferences pref;
@@ -20,12 +21,13 @@ public class LoginSession {
     }
 
     // Save session
-    public void createLoginSession(String id, String name,String mobile, String email) {
+    public void createLoginSession(String id, String name,String mobile, String email,String dob) {
         editor.putBoolean(KEY_LOGIN, true);
         editor.putString(KEY_ID, id);
         editor.putString(KEY_NAME, name);
         editor.putString(KEY_MOBILE, mobile);
         editor.putString(KEY_EMAIL, email);
+        editor.putString(KEY_DOB,dob);
         editor.apply();
     }
 
@@ -45,11 +47,21 @@ public class LoginSession {
         return pref.getString(KEY_EMAIL, "");
     }
 
+    public String getDob(){ return pref.getString(KEY_DOB,"");}
     // Check login
     public boolean isLoggedIn() {
         return pref.getBoolean(KEY_LOGIN, false);
     }
 
+    public void setEmail(String email) {
+        editor.putString(KEY_EMAIL, email);
+        editor.apply();
+    }
+
+    public void setDob(String dob) {
+        editor.putString(KEY_DOB, dob);
+        editor.apply();
+    }
     // Logout
     public void logout() {
         editor.clear();

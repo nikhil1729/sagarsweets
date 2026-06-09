@@ -1,12 +1,17 @@
 package com.sagarsweets.in.Adapters;
 
 import android.content.Context;
+import android.graphics.Color;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -19,6 +24,10 @@ import com.google.android.material.button.MaterialButton;
 import com.sagarsweets.in.ApiControllers.LoginRetrofitClient;
 import com.sagarsweets.in.ApiControllers.SuperController;
 import com.sagarsweets.in.ApiInterface.ApiService;
+import com.sagarsweets.in.ApiModel.CancelProductRequest;
+import com.sagarsweets.in.ApiModel.CancelProductResponse;
+import com.sagarsweets.in.ApiModel.CancellationWindowRequest;
+import com.sagarsweets.in.ApiModel.CancellationWindowResponse;
 import com.sagarsweets.in.ApiModel.MyOrderDetailsRequest;
 import com.sagarsweets.in.ApiModel.MyOrderDetailsResponse;
 import com.sagarsweets.in.ApiModel.OrderData;
@@ -27,6 +36,7 @@ import com.sagarsweets.in.utils.ButtonLoaderUtil;
 
 import org.w3c.dom.Text;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import retrofit2.Call;
@@ -39,6 +49,7 @@ public class MyOrderAdapter extends RecyclerView.Adapter<MyOrderAdapter.ViewHold
     private List<OrderData> list;
     private String userId;
     private String device;
+    private String txnId;
     ApiService apiService;
     public MyOrderAdapter(Context context, List<OrderData> list,String user_id,String device) {
         this.context = context;
@@ -65,7 +76,7 @@ public class MyOrderAdapter extends RecyclerView.Adapter<MyOrderAdapter.ViewHold
                 .getClient()
                 .create(ApiService.class);
         OrderData item = list.get(position);
-
+        this.txnId = item.getTxn_id();
         holder.txtTxnId.setText(item.getTxn_id());
         holder.txtDate.setText(item.getOrdered_date());
         holder.txtAmount.setText("₹" + item.getTotal_product_amount());
@@ -100,16 +111,107 @@ public class MyOrderAdapter extends RecyclerView.Adapter<MyOrderAdapter.ViewHold
         holder.btnCancel.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(context);
-                View sheetView = LayoutInflater.from(context).inflate(R.layout.bottom_cancel_order, null);
-                bottomSheetDialog.setContentView(sheetView);
-                bottomSheetDialog.show();
+                ButtonLoaderUtil.showLoading(holder.btnCancel,holder.progressCancel);
+                CancellationWindowResponse cancellationWindowResponse = new CancellationWindowResponse(userId, item.getTxn_id(), device);
+                apiService.getCancellationWindow(cancellationWindowResponse).enqueue(new Callback<CancellationWindowRequest>() {
+                    @Override
+                    public void onResponse(Call<CancellationWindowRequest> call, Response<CancellationWindowRequest> response) {
+                        ButtonLoaderUtil.hideLoading(holder.btnCancel,holder.progressCancel,"Cancel");
+                        if(response.body() != null && response.body().isStatus()){
+                            BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(context);
+                            View sheetView = LayoutInflater.from(context).inflate(R.layout.bottom_cancel_order, null);
+                            Spinner spinnerCancelReason = sheetView.findViewById(R.id.spinnerCancelReason);
+                            TextView tvRefundAmount = sheetView.findViewById(R.id.tvRefundAmount);
+                            TextView tvMessage = sheetView.findViewById(R.id.tvMessage);
+                            Button btnKeepOrder = sheetView.findViewById(R.id.btnKeepOrder);
+                            ProgressBar progressCancelOrder = sheetView.findViewById(R.id.progressCancelOrder);
+                            EditText edtCancelNote = sheetView.findViewById(R.id.edtCancelNote);
+                            Button btnCancelOrder = sheetView.findViewById(R.id.btnCancelOrder);
+                            tvRefundAmount.setText("₹"+response.body().getRefundAmount());
+                            tvMessage.setText(response.body().getMessage());
+                            List<String> reasonList = new ArrayList<>();
+
+                            reasonList.add("Select Cancel Reason");
+
+                            reasonList.addAll(response.body().getReason().values());
+
+                            ArrayAdapter<String> adapter = new ArrayAdapter<>(
+                                    context,
+                                    android.R.layout.simple_spinner_item,
+                                    reasonList
+                            );
+
+                            adapter.setDropDownViewResource(
+                                    android.R.layout.simple_spinner_dropdown_item
+                            );
+                            btnCancelOrder.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View v) {
+                                    if(spinnerCancelReason.getSelectedItemPosition() == 0){
+                                        TextView errorText = (TextView) spinnerCancelReason.getSelectedView();
+                                        if (errorText != null) {
+                                            errorText.setError("Please select reason");
+                                            errorText.setTextColor(Color.RED);
+                                            errorText.setText("Please select reason");
+                                        }
+                                        return;
+                                    }
+
+                                    String reson_value = spinnerCancelReason.getSelectedItem().toString();
+                                    String cancleNote = edtCancelNote.getText().toString().toString();
+                                    if(reson_value.equalsIgnoreCase("other issue")){
+                                        //Toast.makeText(context,"sasasasa",Toast.LENGTH_LONG).show();
+                                        if(cancleNote.isEmpty()){
+                                            edtCancelNote.setError("If other issue is selected then enter additional note");
+                                            return;
+                                        }
+                                    }
+                                    ButtonLoaderUtil.showLoading(btnCancelOrder,progressCancelOrder);
+                                    CancelProductRequest cancelProductRequest = new CancelProductRequest(userId,device, item.getTxn_id(), reson_value,cancleNote);
+                                    apiService.cancelProduct(cancelProductRequest).enqueue(new Callback<CancelProductResponse>() {
+                                        @Override
+                                        public void onResponse(Call<CancelProductResponse> call, Response<CancelProductResponse> response) {
+                                            ButtonLoaderUtil.hideLoading(btnCancelOrder,progressCancelOrder,"Cancel Order");
+                                        }
+
+                                        @Override
+                                        public void onFailure(Call<CancelProductResponse> call, Throwable t) {
+                                            ButtonLoaderUtil.hideLoading(btnCancelOrder,progressCancelOrder,"Cancel Order");
+                                        }
+                                    });
+
+                                }
+                            });
+                            btnKeepOrder.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View v) {
+                                    bottomSheetDialog.dismiss();
+                                }
+                            });
+                            spinnerCancelReason.setAdapter(adapter);
+
+                            bottomSheetDialog.setContentView(sheetView);
+                            bottomSheetDialog.setCanceledOnTouchOutside(false);
+                            bottomSheetDialog.show();
+                        }else{
+                            Toast.makeText(context,response.body().getMessage(),Toast.LENGTH_LONG).show();
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Call<CancellationWindowRequest> call, Throwable t) {
+                        ButtonLoaderUtil.hideLoading(holder.btnCancel,holder.progressCancel,"Cancel");
+                        Toast.makeText(context,t.getMessage(),Toast.LENGTH_LONG).show();
+                    }
+                });
+
             }
         });
         //holder.btnTrack.setVisibility(View.VISIBLE);
         holder.btnTrack.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
                 BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(context);
                 View sheetView = LayoutInflater.from(context).inflate(R.layout.botton_track_order, null);
                 bottomSheetDialog.setContentView(sheetView);
@@ -196,7 +298,7 @@ public class MyOrderAdapter extends RecyclerView.Adapter<MyOrderAdapter.ViewHold
         TextView txtTxnId, txtDate, txtAmount, txtDeliverySlot, txtAddress,txtDeliveryDate,
                 txtDeliveryType,txtCoupon,txtItemCount,txtStatus;
         ImageView imgProduct;
-        ProgressBar progressDetails;
+        ProgressBar progressDetails,progressCancel;
         MaterialButton btnViewDetails,btnCancel,btnTrack;
         public ViewHolder(View itemView) {
             super(itemView);
@@ -216,6 +318,7 @@ public class MyOrderAdapter extends RecyclerView.Adapter<MyOrderAdapter.ViewHold
             txtDeliveryType = itemView.findViewById(R.id.txtDeliveryType);
             txtCoupon = itemView.findViewById(R.id.txtCoupon);
             progressDetails = itemView.findViewById(R.id.progressDetails);
+            progressCancel = itemView.findViewById(R.id.progressCancel);
         }
     }
 }

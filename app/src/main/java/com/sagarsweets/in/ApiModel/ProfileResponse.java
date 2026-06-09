@@ -1,6 +1,8 @@
 package com.sagarsweets.in.ApiModel;
 
 import com.google.gson.annotations.SerializedName;
+
+import java.util.ArrayList;
 import java.util.List;
 
 public class ProfileResponse {
@@ -10,6 +12,9 @@ public class ProfileResponse {
 
     @SerializedName("email")
     private String email;
+
+    @SerializedName("email_verified")
+    private String email_verified;
 
     @SerializedName("mobile")
     private String mobile;
@@ -108,6 +113,10 @@ public class ProfileResponse {
     }
 
     public List<Address> getAddress() {
+        if (address == null) {
+            return new ArrayList<>();
+        }
+
         return address;
     }
 
@@ -115,4 +124,11 @@ public class ProfileResponse {
         this.address = address;
     }
 
+    public String getEmail_verified() {
+        return email_verified;
+    }
+
+    public void setEmail_verified(String email_verified) {
+        this.email_verified = email_verified;
+    }
 }

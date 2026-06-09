@@ -574,7 +574,7 @@ public class ProductDetailsFragment extends Fragment
                         SpecificationAdapter specificationAdapter =
                                 new SpecificationAdapter(product.getSpecification());
                         rvSpecification.setLayoutManager(new LinearLayoutManager(getContext()));
-                        rvSpecification.setHasFixedSize(true);
+                        // rvSpecification.setHasFixedSize(true); remove bcos build error
                         rvSpecification.setAdapter(specificationAdapter);
                     } else {
                         Log.e("SPEC_DEBUG", "Specification is NULL");
