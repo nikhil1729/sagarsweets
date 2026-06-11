@@ -270,7 +270,6 @@ public class AddAddressBottomSheet extends BottomSheetDialogFragment {
         // Example API call
         // sendToServer(name, mobile, address, landMark, pincode, area, district, state, addressType);
 
-        Toast.makeText(getContext(), "All fields valid ✅", Toast.LENGTH_SHORT).show();
 
         //btnSave.setEnabled(true);
     }

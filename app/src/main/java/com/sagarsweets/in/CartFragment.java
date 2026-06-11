@@ -34,6 +34,7 @@ import com.sagarsweets.in.Session.CartItem;
 import com.sagarsweets.in.Session.LoginSession;
 import com.sagarsweets.in.utils.ButtonLoaderUtil;
 import com.sagarsweets.in.utils.CartSaveOnServer;
+import com.sagarsweets.in.utils.CustomToast;
 import com.sagarsweets.in.utils.DeviceInfo;
 
 import java.util.List;
@@ -93,13 +94,13 @@ public class CartFragment extends Fragment {
             @Override
             public void onClick(View v) {
 
+                if(!loginSession.isLoggedIn()){
+                    CustomToast.warning(getContext(),"Login now and complete your order in seconds");
+                    return;
+                }
+
                 if (currentCartList == null || currentCartList.isEmpty()) {
-
-                    ButtonLoaderUtil.makeToast(
-                            getContext(),
-                            "Cart is empty"
-                    );
-
+                    CustomToast.warning(getContext(),"Please add some product in your cart.");
                     return;
                 }
                 CheckoutFragment checkoutFragment = new CheckoutFragment();
@@ -309,7 +310,7 @@ public class CartFragment extends Fragment {
 
     private void removeCouponCode() {
         if(!couponDiscount.equals("0.0")){
-            Toast.makeText(getContext(),"Coupon Removed,Please try again.",Toast.LENGTH_SHORT).show();
+            CustomToast.error(getContext(),"Coupon Removed,Please try again.");
         }
         couponDiscount = "0.0";
         layoutCouponInput.setVisibility(View.VISIBLE);
@@ -346,7 +347,7 @@ public class CartFragment extends Fragment {
                         requireActivity().runOnUiThread(() -> {
                             model.setQuantity(finalStock);
                             adapter.notifyDataSetChanged();
-                            Toast.makeText(getContext(), "Adjusted to max stock.", Toast.LENGTH_SHORT).show();
+                            CustomToast.warning(getContext(),"Adjusted to max stock.");
                             Log.d("STOCK", "Adjusted to max stock");
                         });
 

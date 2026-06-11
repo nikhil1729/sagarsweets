@@ -70,6 +70,7 @@ import com.sagarsweets.in.RoomDatabase.AppDatabase;
 import com.sagarsweets.in.Session.LoginSession;
 import com.sagarsweets.in.Session.PincodeSession;
 import com.sagarsweets.in.utils.ButtonLoaderUtil;
+import com.sagarsweets.in.utils.CustomToast;
 import com.sagarsweets.in.utils.DeviceInfo;
 
 import java.util.ArrayList;
@@ -214,10 +215,7 @@ public class HomeActivity extends AppCompatActivity
                 if (currentFragment instanceof HomeFragment ||
                         fm.getBackStackEntryCount() <= 1) {
 
-                    Toast.makeText(HomeActivity.this,
-                            "Thank You, Shop again",
-                            Toast.LENGTH_LONG).show();
-
+                    CustomToast.success(HomeActivity.this,"Thank you, shop again.");
                     finishAffinity();
                     return;
                 }
@@ -723,7 +721,7 @@ public class HomeActivity extends AppCompatActivity
         else if(id == R.id.draw_profile) loadFragment(new MyProfileFragment(),"my_profile",false);
         else if (id == R.id.draw_logout) {
             loginSession.logout();
-            Toast.makeText(this,"Successfully logout",Toast.LENGTH_SHORT).show();
+            CustomToast.success(this,"Successfully logout");
             startActivity(new Intent(this, MainActivity.class).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_CLEAR_TASK));
             finish();
         }else if(id == R.id.draw_myorders){ loadFragment(new MyOrderFragment(),"My Orders",false);}

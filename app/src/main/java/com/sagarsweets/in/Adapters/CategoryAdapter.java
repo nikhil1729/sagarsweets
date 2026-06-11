@@ -61,7 +61,6 @@ public class CategoryAdapter
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(context,"id = "+model.getId(),Toast.LENGTH_LONG).show();
                 String categoryId = model.getId();
                 String categoryName = model.getName();
                 openCategoryProduct(categoryId,categoryName);

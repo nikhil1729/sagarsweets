@@ -305,7 +305,6 @@ public class LoginFragment extends Fragment {
 
         // TODO: Call Login API here
         login(mobile,password);
-        // Toast.makeText(getContext(), "Login Successful", Toast.LENGTH_SHORT).show();
     }
 
 

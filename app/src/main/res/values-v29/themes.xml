@@ -1,8 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <style
-        name="Base.Theme.SagarSweets"
-        parent="Theme.Material3.DayNight.NoActionBar">
+    <style name="Base.Theme.SagarSweets" parent="Theme.Material3.DayNight.NoActionBar">
 
         <item name="colorPrimary">
             @color/md_theme_primary
@@ -12,16 +11,13 @@
             @color/md_theme_secondary
         </item>
 
-        <!-- Correct -->
+        <!-- Disable auto dark -->
 
         <item name="android:forceDarkAllowed">
             false
         </item>
 
+
+
     </style>
-
-    <style
-        name="Theme.SagarSweets"
-        parent="Base.Theme.SagarSweets"/>
-
 </resources>

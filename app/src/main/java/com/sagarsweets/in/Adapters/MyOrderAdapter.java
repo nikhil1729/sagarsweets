@@ -1,7 +1,11 @@
 package com.sagarsweets.in.Adapters;
 
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Color;
+import android.net.Uri;
+import android.os.Environment;
+import android.text.Html;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -10,6 +14,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -31,14 +36,27 @@ import com.sagarsweets.in.ApiModel.CancellationWindowResponse;
 import com.sagarsweets.in.ApiModel.MyOrderDetailsRequest;
 import com.sagarsweets.in.ApiModel.MyOrderDetailsResponse;
 import com.sagarsweets.in.ApiModel.OrderData;
+import com.sagarsweets.in.ApiModel.TimelineItem;
+import com.sagarsweets.in.ApiModel.TrackOrderRequest;
+import com.sagarsweets.in.ApiModel.TrackOrderResponse;
 import com.sagarsweets.in.R;
 import com.sagarsweets.in.utils.ButtonLoaderUtil;
+import com.sagarsweets.in.utils.CustomToast;
 
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.w3c.dom.Text;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
+import okhttp3.MediaType;
+import okhttp3.RequestBody;
+import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -96,10 +114,12 @@ public class MyOrderAdapter extends RecyclerView.Adapter<MyOrderAdapter.ViewHold
                 .into(holder.imgProduct);
         if("HOME_DELIVERY".equals(item.getDelivery_type())){
             holder.txtDeliveryType.setText("HOME DELIVERY");
-            holder.txtDeliveryType.setBackgroundResource(R.drawable.bg_delivery_type_home);
+           // holder.txtDeliveryType.setBackgroundResource(R.drawable.bg_delivery_type_home);
+            holder.txtDeliveryType.setTextColor(Color.parseColor("#4CAF50"));
         }else{
             holder.txtDeliveryType.setText("PICKUP STORE");
-            holder.txtDeliveryType.setBackgroundResource(R.drawable.bg_delivery_type_pickup);
+            holder.txtDeliveryType.setTextColor(Color.parseColor("#2196F3"));
+            //holder.txtDeliveryType.setBackgroundResource(R.drawable.bg_delivery_type_pickup);
         }
         if(item.getCoupon_code() != null && !item.getCoupon_code().isEmpty()){
             holder.txtCoupon.setVisibility(View.VISIBLE);
@@ -116,7 +136,7 @@ public class MyOrderAdapter extends RecyclerView.Adapter<MyOrderAdapter.ViewHold
                 apiService.getCancellationWindow(cancellationWindowResponse).enqueue(new Callback<CancellationWindowRequest>() {
                     @Override
                     public void onResponse(Call<CancellationWindowRequest> call, Response<CancellationWindowRequest> response) {
-                        ButtonLoaderUtil.hideLoading(holder.btnCancel,holder.progressCancel,"Cancel");
+                        ButtonLoaderUtil.hideLoading(holder.btnCancel,holder.progressCancel,"");
                         if(response.body() != null && response.body().isStatus()){
                             BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(context);
                             View sheetView = LayoutInflater.from(context).inflate(R.layout.bottom_cancel_order, null);
@@ -158,11 +178,11 @@ public class MyOrderAdapter extends RecyclerView.Adapter<MyOrderAdapter.ViewHold
                                     }
 
                                     String reson_value = spinnerCancelReason.getSelectedItem().toString();
-                                    String cancleNote = edtCancelNote.getText().toString().toString();
+                                    String cancleNote = edtCancelNote.getText().toString().trim();
                                     if(reson_value.equalsIgnoreCase("other issue")){
-                                        //Toast.makeText(context,"sasasasa",Toast.LENGTH_LONG).show();
                                         if(cancleNote.isEmpty()){
                                             edtCancelNote.setError("If other issue is selected then enter additional note");
+                                            edtCancelNote.setFocusable(true);
                                             return;
                                         }
                                     }
@@ -172,11 +192,18 @@ public class MyOrderAdapter extends RecyclerView.Adapter<MyOrderAdapter.ViewHold
                                         @Override
                                         public void onResponse(Call<CancelProductResponse> call, Response<CancelProductResponse> response) {
                                             ButtonLoaderUtil.hideLoading(btnCancelOrder,progressCancelOrder,"Cancel Order");
+                                            if(response.body().getStatus()){
+                                                CustomToast.success(context,response.body().getMessage());
+                                                bottomSheetDialog.dismiss();
+                                            }else{
+                                                CustomToast.error(context,response.body().getMessage());
+                                            }
                                         }
 
                                         @Override
                                         public void onFailure(Call<CancelProductResponse> call, Throwable t) {
                                             ButtonLoaderUtil.hideLoading(btnCancelOrder,progressCancelOrder,"Cancel Order");
+                                            CustomToast.error(context,t.getMessage());
                                         }
                                     });
 
@@ -194,14 +221,14 @@ public class MyOrderAdapter extends RecyclerView.Adapter<MyOrderAdapter.ViewHold
                             bottomSheetDialog.setCanceledOnTouchOutside(false);
                             bottomSheetDialog.show();
                         }else{
-                            Toast.makeText(context,response.body().getMessage(),Toast.LENGTH_LONG).show();
+                            CustomToast.error(context,response.body().getMessage());
                         }
                     }
 
                     @Override
                     public void onFailure(Call<CancellationWindowRequest> call, Throwable t) {
-                        ButtonLoaderUtil.hideLoading(holder.btnCancel,holder.progressCancel,"Cancel");
-                        Toast.makeText(context,t.getMessage(),Toast.LENGTH_LONG).show();
+                        ButtonLoaderUtil.hideLoading(holder.btnCancel,holder.progressCancel,"");
+                        CustomToast.error(context,t.getMessage());
                     }
                 });
 
@@ -209,13 +236,146 @@ public class MyOrderAdapter extends RecyclerView.Adapter<MyOrderAdapter.ViewHold
         });
         //holder.btnTrack.setVisibility(View.VISIBLE);
         holder.btnTrack.setOnClickListener(new View.OnClickListener() {
+
             @Override
             public void onClick(View v) {
 
-                BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(context);
+
+                BottomSheetDialog bottomSheetDialog =
+                        new BottomSheetDialog(context);
+                View sheetView =
+                        LayoutInflater.from(context)
+                                .inflate(
+                                        R.layout.botton_track_order,
+                                        null
+                                );
+                bottomSheetDialog.setContentView(
+                        sheetView
+                );
+                // Views
+
+                LinearLayout layoutCancelled =
+                        sheetView.findViewById(
+                                R.id.layoutCancelled
+                        );
+
+                LinearLayout layoutWaiting =
+                        sheetView.findViewById(
+                                R.id.layoutWaiting
+                        );
+
+                LinearLayout layoutTracking =
+                        sheetView.findViewById(
+                                R.id.layoutTracking
+                        );
+
+                TextView txtCancelled =
+                        sheetView.findViewById(
+                                R.id.txtCancelled
+                        );
+
+                TextView txtWaiting =
+                        sheetView.findViewById(
+                                R.id.txtWaiting
+                        );
+
+                TextView txtCurrentStatus =
+                        sheetView.findViewById(
+                                R.id.txtCurrentStatus
+                        );
+
+                RecyclerView rvTimeline =
+                        sheetView.findViewById(
+                                R.id.rvTimeline
+                        );
+
+                rvTimeline.setLayoutManager(
+                        new LinearLayoutManager(
+                                context
+                        )
+                );
+                bottomSheetDialog.show();
+                TrackOrderRequest request = new TrackOrderRequest(userId,item.getTxn_id(),device);
+                apiService.trackMyOrder(request).enqueue(new Callback<TrackOrderResponse>() {
+                    @Override
+                    public void onResponse(Call<TrackOrderResponse> call, Response<TrackOrderResponse> response) {
+                        if (response.isSuccessful()
+                                && response.body() != null) {
+                            TrackOrderResponse data =
+                                    response.body();
+
+                            layoutCancelled.setVisibility(
+                                    View.GONE);
+
+                            layoutWaiting.setVisibility(
+                                    View.GONE);
+
+                            layoutTracking.setVisibility(
+                                    View.GONE);
+
+                            if ("cancelled".equals(response.body().getStatus())) {
+
+                                // show cancel screen
+                                layoutCancelled.setVisibility(
+                                        View.VISIBLE
+                                );
+
+                                txtCancelled.setText(
+                                        data.getTimeline()
+                                                .get(0)
+                                                .getMessage()
+                                );
+
+                            } else if (response.body().getTimeline() == null
+                                    || response.body().getTimeline().isEmpty()) {
+                                // Not Confirmed
+                                layoutWaiting.setVisibility(
+                                        View.VISIBLE
+                                );
+
+                                txtWaiting.setText(
+                                        Html.fromHtml(
+                                                data.getCurrentStatus()
+                                        )
+                                );
+
+                            } else {
+
+                                // show tracking timeline
+                                layoutTracking.setVisibility(
+                                        View.VISIBLE
+                                );
+
+                                txtCurrentStatus.setText(
+                                        Html.fromHtml(
+                                                data.getCurrentStatus()
+                                        )
+                                );
+
+                                TrackAdapter adapter =
+                                        new TrackAdapter(
+                                                data.getTimeline()
+                                        );
+
+                                rvTimeline.setAdapter(
+                                        adapter
+                                );
+                            }
+
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Call<TrackOrderResponse> call, Throwable t) {
+                        CustomToast.error(context,t.getMessage());
+                    }
+                });
+
+
+                /* BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(context);
                 View sheetView = LayoutInflater.from(context).inflate(R.layout.botton_track_order, null);
                 bottomSheetDialog.setContentView(sheetView);
-                bottomSheetDialog.show();
+                bottomSheetDialog.show(); */
             }
         });
 
@@ -227,7 +387,7 @@ public class MyOrderAdapter extends RecyclerView.Adapter<MyOrderAdapter.ViewHold
                 apiService.getOrderDetails(myOrderDetailsRequest).enqueue(new Callback<MyOrderDetailsResponse>() {
                     @Override
                     public void onResponse(Call<MyOrderDetailsResponse> call, Response<MyOrderDetailsResponse> response) {
-                        ButtonLoaderUtil.hideLoading(holder.btnViewDetails,holder.progressDetails,"Details");
+                        ButtonLoaderUtil.hideLoading(holder.btnViewDetails,holder.progressDetails,"");
                         if(response.body()!=null && response.body().isStatus()){
                             BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(context);
                             View sheetView = LayoutInflater.from(context).inflate(R.layout.bottomsheet_order_details, null);
@@ -243,6 +403,9 @@ public class MyOrderAdapter extends RecyclerView.Adapter<MyOrderAdapter.ViewHold
                             TextView tvCouponAmount = sheetView.findViewById(R.id.tvCouponAmount);
                             TextView tvCouponCode = sheetView.findViewById(R.id.tvCouponCode);
                             TextView tvTotalAmount = sheetView.findViewById(R.id.tvTotalAmount);
+                            MaterialButton btnInvoice = sheetView.findViewById(R.id.btnInvoice);
+                            ProgressBar progressInvoice = sheetView.findViewById(R.id.progressInvoice);
+
                             MyOrderDetailsResponse.Result result = response.body().getResult();
                             ///  setting data in views
                             Float subTotal = Float.valueOf(result.getTotalProductAmount());
@@ -265,6 +428,48 @@ public class MyOrderAdapter extends RecyclerView.Adapter<MyOrderAdapter.ViewHold
                             }else{
                                 tvCouponCode.setVisibility(View.GONE);
                             }
+                            btnInvoice.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View v) {
+                                    JSONObject json = new JSONObject();
+                                    try {
+                                        ButtonLoaderUtil.showLoading(btnInvoice,progressInvoice);
+                                        json.put("txn_id", result.getTxnId());
+                                        RequestBody requestBody =
+                                                RequestBody.create(
+                                                        json.toString(),
+                                                        MediaType.parse("application/json")
+                                                );
+                                        apiService.downloadInvoice(requestBody).enqueue(new Callback<ResponseBody>() {
+                                            @Override
+                                            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                                                ButtonLoaderUtil.hideLoading(btnInvoice,progressInvoice,"Invoice");
+                                                if(response.isSuccessful()
+                                                        && response.body()!=null){
+
+                                                    savePdf(
+                                                            response.body(),
+                                                            "invoice#"+result.getTxnId()+".pdf"
+                                                    );
+
+                                                }
+                                            }
+
+                                            @Override
+                                            public void onFailure(Call<ResponseBody> call, Throwable t) {
+                                                ButtonLoaderUtil.hideLoading(btnInvoice,progressInvoice,"Invoice");
+                                                CustomToast.error(context,t.getMessage());
+                                            }
+                                        });
+                                    } catch (JSONException e) {
+                                        //throw new RuntimeException(e);
+                                        ButtonLoaderUtil.hideLoading(btnInvoice,progressInvoice,"Invoice");
+                                        CustomToast.show(context,e.getMessage(),0);
+                                    }
+
+                                    //CustomToast.show(context,result.getTxnId(),0);
+                                }
+                            });
                             // product item
                             RecyclerView recyclerProducts = sheetView.findViewById(R.id.recyclerProducts);
                             recyclerProducts.setLayoutManager(new LinearLayoutManager(context));
@@ -274,19 +479,127 @@ public class MyOrderAdapter extends RecyclerView.Adapter<MyOrderAdapter.ViewHold
                             bottomSheetDialog.setContentView(sheetView);
                             bottomSheetDialog.show();
                         }else{
-                            Toast.makeText(context, response.body().getMessage(), Toast.LENGTH_SHORT).show();
+                            CustomToast.error(context,response.body().getMessage());
                         }
                     }
 
                     @Override
                     public void onFailure(Call<MyOrderDetailsResponse> call, Throwable t) {
-
+                        CustomToast.error(context,t.getMessage());
                     }
                 });
 
             }
         });
     }
+
+    private void savePdf(
+            ResponseBody body,
+            String fileName
+    ){
+
+        try{
+
+            File dir =
+                    context.getExternalFilesDir(
+                            Environment.DIRECTORY_DOWNLOADS
+                    );
+
+            if(dir == null){
+                CustomToast.error(
+                        context,
+                        "Download directory unavailable"
+                );
+                return;
+            }
+
+            File file =
+                    new File(
+                            dir,
+                            fileName
+                    );
+
+            InputStream input =
+                    body.byteStream();
+
+            OutputStream output =
+                    new FileOutputStream(
+                            file
+                    );
+
+            byte[] buffer =
+                    new byte[8192];
+
+            int read;
+
+            while(
+                    (read =
+                            input.read(
+                                    buffer
+                            )
+                    ) != -1
+            ){
+
+                output.write(
+                        buffer,
+                        0,
+                        read
+                );
+
+            }
+
+            output.flush();
+
+            output.close();
+
+            input.close();
+
+            CustomToast.success(
+                    context,
+                    "Invoice downloaded"
+            );
+
+            Intent intent =
+                    new Intent(
+                            Intent.ACTION_VIEW
+                    );
+
+            Uri uri =
+                    androidx.core.content
+                            .FileProvider
+                            .getUriForFile(
+                                    context,
+                                    context.getPackageName()
+                                            + ".provider",
+                                    file
+                            );
+
+            intent.setDataAndType(
+                    uri,
+                    "application/pdf"
+            );
+
+            intent.addFlags(
+                    Intent.FLAG_GRANT_READ_URI_PERMISSION
+            );
+
+            context.startActivity(
+                    intent
+            );
+
+        }
+
+        catch(Exception e){
+
+            CustomToast.error(
+                    context,
+                    e.getMessage()
+            );
+
+        }
+
+    }
+
 
     @Override
     public int getItemCount() {

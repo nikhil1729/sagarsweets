@@ -38,6 +38,7 @@ import com.sagarsweets.in.ApiModel.TopCategoryRequest;
 import com.sagarsweets.in.ApiModel.TopCategoryResponse;
 import com.sagarsweets.in.Session.LoginSession;
 import com.sagarsweets.in.Session.PincodeSession;
+import com.sagarsweets.in.utils.CustomToast;
 import com.sagarsweets.in.utils.DeviceInfo;
 import com.sagarsweets.in.wizard.ProfileWizardDialog;
 
@@ -98,6 +99,8 @@ public class HomeFragment extends Fragment
         pincodeSession = new PincodeSession(getContext());
         tvViewAllCategory = view.findViewById(R.id.tvViewAllCategory);
         rvCategoryWiseProducts = view.findViewById(R.id.rvCategoryWiseProducts);
+
+
 
         userId = "";
         pincode = "";

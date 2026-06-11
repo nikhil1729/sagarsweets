@@ -22,6 +22,7 @@ import com.sagarsweets.in.ApiInterface.ApiService;
 import com.sagarsweets.in.ApiModel.AllCategoryModel;
 import com.sagarsweets.in.ApiModel.AllCategoryResponse;
 import com.sagarsweets.in.ApiModel.CategoryModel;
+import com.sagarsweets.in.utils.CustomToast;
 
 import java.util.List;
 
@@ -85,15 +86,13 @@ public class ViewCategoryFragment extends Fragment {
                         rvCategory.setAdapter(categoryAdapter);
 
                     } else {
-                        Toast.makeText(getContext(),
-                                "No categories found",
-                                Toast.LENGTH_SHORT).show();
+                        CustomToast.error(getContext(),"Category not found");
+
                     }
 
                 } else {
-                    Toast.makeText(getContext(),
-                            "Something went wrong",
-                            Toast.LENGTH_SHORT).show();
+                    CustomToast.error(getContext(),"Something went wrong");
+
                 }
             }
 
@@ -103,9 +102,7 @@ public class ViewCategoryFragment extends Fragment {
                     @NonNull Throwable t
             ) {
                 Log.e("CategoryAPI", "Error: " + t.getMessage());
-                Toast.makeText(getContext(),
-                        "Failed to load categories",
-                        Toast.LENGTH_SHORT).show();
+                CustomToast.error(getContext(),t.getMessage());
             }
         });
     }

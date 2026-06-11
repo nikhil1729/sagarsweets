@@ -43,6 +43,7 @@ import com.sagarsweets.in.ApiModel.WishListByLoggedInUserResponse;
 import com.sagarsweets.in.BottomSheets.AddAddressBottomSheet;
 import com.sagarsweets.in.Session.LoginSession;
 import com.sagarsweets.in.utils.ButtonLoaderUtil;
+import com.sagarsweets.in.utils.CustomToast;
 import com.sagarsweets.in.utils.DeviceInfo;
 
 import java.util.ArrayList;
@@ -111,9 +112,8 @@ public class MyProfileFragment extends Fragment {
             public void onClick(View v) {
                 ButtonLoaderUtil.showLoading(btnLogout, progressLogout);
                 loginSession.logout();
-                Toast.makeText(getContext(),
-                        "Successfully logout",
-                        Toast.LENGTH_SHORT).show();
+                CustomToast.success(getContext(),"Successfully logout");
+
                 Intent intent = new Intent(requireActivity(), MainActivity.class);
                 intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
                         | Intent.FLAG_ACTIVITY_CLEAR_TASK);
@@ -344,7 +344,7 @@ public class MyProfileFragment extends Fragment {
                 }else{
                     tvError.setText(response.body().getMessage());
                     tvError.setVisibility(View.VISIBLE);
-                    Toast.makeText(getContext(),response.body().getMessage(),Toast.LENGTH_LONG).show();
+                    CustomToast.error(getContext(),response.body().getMessage());
                 }
             }
 
@@ -358,7 +358,6 @@ public class MyProfileFragment extends Fragment {
                         "Profile API Error",
                         t
                 );
-                Toast.makeText(getContext(),t.getMessage(),Toast.LENGTH_LONG).show();
             }
         });
     }

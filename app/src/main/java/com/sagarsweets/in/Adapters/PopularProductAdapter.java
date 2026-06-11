@@ -35,6 +35,7 @@ import com.sagarsweets.in.RoomDatabase.AppDatabase;
 import com.sagarsweets.in.Session.CartItem;
 import com.sagarsweets.in.Session.LoginSession;
 import com.sagarsweets.in.utils.CartSaveOnServer;
+import com.sagarsweets.in.utils.CustomToast;
 import com.sagarsweets.in.utils.DeviceInfo;
 import com.sagarsweets.in.utils.WishListClicked;
 
@@ -297,7 +298,7 @@ public class PopularProductAdapter
                 int availableStock = getAvailableStock(product, vh.selectedSizeId);
 
                 if (vh.quantity >= availableStock) {
-                    Toast.makeText(context, "Maximum stock reached", Toast.LENGTH_SHORT).show();
+                    CustomToast.warning(context,"Maximum stock reached");
                     return;
                 }
                 vh.quantity++;
@@ -393,7 +394,7 @@ public class PopularProductAdapter
         int availableStock = getAvailableStock(product, selectedSizeId);
 
         if (availableStock <= 0) {
-            Toast.makeText(context, "Out of stock", Toast.LENGTH_SHORT).show();
+            CustomToast.warning(context,"Out of stock");
             return;
         }
         vh.layoutCartSection.setVisibility(View.VISIBLE);

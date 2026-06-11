@@ -37,7 +37,7 @@ public class ButtonLoaderUtil {
         button.setText(buttonText);
     }
     public static void makeToast(Context context,String message){
-        Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
+        CustomToast.warning(context,message);
     }
 
     public static void showSizeSelected(Context context, View view) {

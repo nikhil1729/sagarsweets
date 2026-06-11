@@ -24,6 +24,7 @@ import com.sagarsweets.in.ApiModel.NotificationItem;
 import com.sagarsweets.in.ApiModel.NotificationRequest;
 import com.sagarsweets.in.ApiModel.NotificationResponse;
 import com.sagarsweets.in.Session.LoginSession;
+import com.sagarsweets.in.utils.CustomToast;
 
 import java.util.List;
 
@@ -87,17 +88,12 @@ public class NotificationFragment extends Fragment {
                                 .apply();
                         ((HomeActivity) requireActivity()).updateNotificationBadge();
                     } else {
-                        Toast.makeText(getContext(),
-                                "No notifications found",
-                                Toast.LENGTH_SHORT).show();
+                        CustomToast.error(getContext(),"No notification found");
+
                     }
                 }else{
                     showError("No notifications found");
-                    Toast.makeText(
-                            getContext(),
-                            "No notifications found",
-                            Toast.LENGTH_SHORT
-                    ).show();
+
                 }
             }
 

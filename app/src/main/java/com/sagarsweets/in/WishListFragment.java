@@ -34,6 +34,7 @@ import com.sagarsweets.in.RoomDatabase.AppDatabase;
 import com.sagarsweets.in.Session.LoginSession;
 import com.sagarsweets.in.Session.PincodeSession;
 import com.sagarsweets.in.Session.WishlistItem;
+import com.sagarsweets.in.utils.CustomToast;
 import com.sagarsweets.in.utils.DeviceInfo;
 
 import java.util.List;
@@ -244,7 +245,7 @@ public class WishListFragment extends Fragment
                                     false,WishListFragment.this);
                     rvWishlist.setAdapter(adapter);
                 }else{
-                    Toast.makeText(getContext(),"Response body is null or false",Toast.LENGTH_LONG).show();
+                    CustomToast.error(getContext(),"Response body is null or false");
                 }
             }
 
@@ -258,8 +259,8 @@ public class WishListFragment extends Fragment
                         layoutEmpty.setVisibility(View.VISIBLE);
                     }
                 }
+                CustomToast.error(getContext(),t.getMessage());
 
-                Toast.makeText(getContext(), t.getMessage(), Toast.LENGTH_LONG).show();
             }
         });
     }

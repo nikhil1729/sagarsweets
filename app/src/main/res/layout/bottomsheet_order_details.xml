@@ -269,16 +269,30 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:backgroundTint="@color/slot_active_red"
-                android:text="Cancel this Order"/>
+                android:text="Close"/>
 
-            <Button
-                android:id="@+id/btnInvoice"
+            <FrameLayout
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:backgroundTint="@color/sagar_button"
-                android:text="Invoice"
-                android:layout_marginStart="8dp"/>
+                android:layout_marginStart="8dp">
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnInvoice"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Invoice"
+                    android:backgroundTint="@color/sagar_button" />
+
+                <ProgressBar
+                    android:id="@+id/progressInvoice"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:layout_gravity="center"
+                    android:visibility="gone"
+                    android:indeterminate="true"/>
+
+            </FrameLayout>
         </LinearLayout>
 
     </LinearLayout>

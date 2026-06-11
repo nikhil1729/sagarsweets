@@ -59,6 +59,7 @@ import com.sagarsweets.in.Session.LoginSession;
 import com.sagarsweets.in.Session.PincodeSession;
 import com.sagarsweets.in.utils.AddressFormatter;
 import com.sagarsweets.in.utils.ButtonLoaderUtil;
+import com.sagarsweets.in.utils.CustomToast;
 import com.sagarsweets.in.utils.DeviceInfo;
 
 import org.json.JSONObject;
@@ -167,10 +168,7 @@ public class CheckoutFragment extends Fragment{
         backPressedCallback = new OnBackPressedCallback(false) {
             @Override
             public void handleOnBackPressed() {
-
-                Toast.makeText(requireContext(),
-                        "Please wait, order confirmation is in progress.",
-                        Toast.LENGTH_SHORT).show();
+                CustomToast.warning(getContext(),"Please wait, order confirmation is in progress.");
             }
         };
 
@@ -362,18 +360,13 @@ public class CheckoutFragment extends Fragment{
 
         }
         catch (Exception e) {
+            CustomToast.error(getContext(),"Payment error.");
 
-            Toast.makeText(getContext(),
-                    "Payment Error",
-                    Toast.LENGTH_LONG).show();
         }
     }
 
     public void handlePaymentError(int code, String response) {
-
-        Toast.makeText(getContext(),
-                "Payment Failed: " + response,
-                Toast.LENGTH_LONG).show();
+        CustomToast.error(getContext(),"Payment Failed: " + response);
     }
 
 
@@ -443,10 +436,7 @@ public class CheckoutFragment extends Fragment{
             public void onFailure(Call<PodVerifyOtpResponse> call, Throwable t) {
                 isPaymentProcessing = false;
                 backPressedCallback.setEnabled(false);
-
-                Toast.makeText(getContext(),
-                        "Order verification failed",
-                        Toast.LENGTH_SHORT).show();
+                CustomToast.error(getContext(),"Order verification failed");
 
             }
         });
@@ -494,7 +484,7 @@ public class CheckoutFragment extends Fragment{
                                 //Log.d("USERADDRESS",addresses.getFirst().getFullAddress());
                             }else{
                                 // show error
-                                Toast.makeText(getContext(),response.body().getMessage(),Toast.LENGTH_LONG).show();
+                                CustomToast.error(getContext(),response.body().getMessage());
                             }
                         }
                     }

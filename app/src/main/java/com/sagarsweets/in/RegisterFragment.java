@@ -25,6 +25,7 @@ import com.sagarsweets.in.ApiInterface.ApiService;
 import com.sagarsweets.in.ApiModel.OtpResponse;
 import com.sagarsweets.in.ApiModel.RegisterUserRequest;
 import com.sagarsweets.in.utils.ButtonLoaderUtil;
+import com.sagarsweets.in.utils.CustomToast;
 import com.sagarsweets.in.utils.DeviceInfo;
 
 import retrofit2.Call;
@@ -166,7 +167,7 @@ public class RegisterFragment extends Fragment {
                         btnRegister, progressRegister, "Register");
                 if (response.isSuccessful() && response.body() != null) {
                     if (response.body().isStatus()) {
-                        Toast.makeText(getContext(),response.body().getMessage(), Toast.LENGTH_LONG).show();
+                        CustomToast.success(getContext(),response.body().getMessage());
                         showSuccess(response.body().getMessage());
                         LoginFragment loginFragment = new LoginFragment();
                         requireActivity()
@@ -279,10 +280,7 @@ public class RegisterFragment extends Fragment {
                 if (response.isSuccessful() && response.body() != null) {
 
                     if (response.body().isStatus()) {
-
-                        Toast.makeText(getContext(),
-                                response.body().getMessage(),
-                                Toast.LENGTH_SHORT).show();
+                        CustomToast.success(getContext(),response.body().getMessage());
                         tvError.setVisibility(View.GONE);
                         startResendOtpCountdown();
                         showSuccess(response.body().getMessage());

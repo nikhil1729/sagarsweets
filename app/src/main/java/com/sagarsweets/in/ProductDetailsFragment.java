@@ -42,6 +42,7 @@ import com.sagarsweets.in.Session.CartItem;
 import com.sagarsweets.in.Session.LoginSession;
 import com.sagarsweets.in.Session.PincodeSession;
 import com.sagarsweets.in.utils.CartSaveOnServer;
+import com.sagarsweets.in.utils.CustomToast;
 import com.sagarsweets.in.utils.DeviceInfo;
 import com.sagarsweets.in.utils.WishListClicked;
 
@@ -168,7 +169,7 @@ public class ProductDetailsFragment extends Fragment
                     sizeName = selectedSizeName;
                     int availableStock = getAvailableStock(product,selectedSizeId);
                     if (availableStock <= 0) {
-                        Toast.makeText(getContext(), "Out of stock", Toast.LENGTH_SHORT).show();
+                        CustomToast.warning(getContext(),"Out of stock");
                         return;
                     }
                     addedToCart(product,selecteSize,currentQuantity,sizeName,v,sellingPrice,mrp);
@@ -206,7 +207,7 @@ public class ProductDetailsFragment extends Fragment
         btnPlus.setOnClickListener(v -> {
             int availableStock = getAvailableStock(product, selectedSizeId);
             if (currentQuantity >= availableStock) {
-                Toast.makeText(getContext(), "Maximum stock reached", Toast.LENGTH_SHORT).show();
+                CustomToast.warning(getContext(),"Maximum stock reached");
                 return;
             }
             Log.d("currentQuantity","curr quan-"+currentQuantity);
@@ -656,7 +657,6 @@ public class ProductDetailsFragment extends Fragment
     }
 
     private void wishListCkicked(Integer pId) {
-        Toast.makeText(getContext(),"Product id = "+String.valueOf(pId),Toast.LENGTH_LONG).show();
         if(loginSession.isLoggedIn()){
             // save in api
             WishListClicked.clicked(getContext(),loginSession.getUserId(),String.valueOf(pId),imgWishlist);

@@ -4,226 +4,236 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    app:cardCornerRadius="12dp"
-    app:cardElevation="4dp"
-    android:layout_margin="8dp">
+    android:layout_margin="8dp"
+    app:cardCornerRadius="14dp"
+    app:cardElevation="4dp">
 
     <LinearLayout
-        android:orientation="horizontal"
-        android:padding="12dp"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="12dp">
 
-        <!-- 🖼 Product Image -->
+        <!-- Product -->
         <ImageView
             android:id="@+id/imgProduct"
-            android:layout_width="70dp"
-            android:layout_height="70dp"
+            android:layout_width="75dp"
+            android:layout_height="75dp"
+            android:layout_marginEnd="12dp"
             android:scaleType="centerCrop"
-            android:src="@drawable/ic_filter"
-            android:layout_marginEnd="10dp"/>
+            android:src="@drawable/ic_filter"/>
 
-        <!-- Right Content -->
+        <!-- Content -->
         <LinearLayout
-            android:orientation="vertical"
             android:layout_width="0dp"
+            android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:layout_height="wrap_content">
+            android:orientation="vertical">
 
-            <!-- Top Row -->
-            <LinearLayout
-                android:orientation="horizontal"
+            <!-- Header -->
+            <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
 
                 <TextView
                     android:id="@+id/txtTxnId"
-                    android:text="Order #12345"
-                    android:textStyle="bold"
-                    android:textSize="15sp"
-                    android:textColor="#000"
-                    android:layout_weight="1"
                     android:layout_width="0dp"
-                    android:layout_height="wrap_content"/>
-
-                <!-- Delivery Type -->
-                <TextView
-                    android:id="@+id/txtDeliveryType"
-                    android:text="HOME"
-                    android:textSize="10sp"
+                    android:layout_height="wrap_content"
+                    android:text="Order #123456789123"
                     android:textStyle="bold"
-                    android:textColor="#fff"
-                    android:padding="4dp"
-                    android:layout_marginEnd="5dp"
-                    android:background="@drawable/bg_delivery_type_pickup"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"/>
+                    android:textSize="16sp"
+                    android:textColor="@color/black"
+                    android:maxLines="1"
+                    android:ellipsize="end"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toStartOf="@id/txtStatus"
+                    app:layout_constraintTop_toTopOf="parent"/>
 
                 <TextView
                     android:id="@+id/txtStatus"
-                    android:text="Delivered"
-                    android:textSize="11sp"
-                    android:textStyle="bold"
-                    android:padding="5dp"
-                    android:textColor="#fff"
-                    android:background="@drawable/bg_status_delivered"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"/>
-            </LinearLayout>
+                    android:layout_height="wrap_content"
+                    android:text="Delivered"
+                    android:textColor="@android:color/white"
+                    android:textStyle="bold"
+                    android:textSize="10sp"
+                    android:paddingHorizontal="10dp"
+                    android:paddingVertical="5dp"
+                    android:background="@drawable/bg_status_delivered"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"/>
 
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <!-- Delivery Type -->
+            <TextView
+                android:id="@+id/txtDeliveryType"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:text="HOME DELIVERY"
+                android:textStyle="bold"
+                android:textSize="10sp"
+                android:textColor="@color/slot_closed_green"
+                android:paddingHorizontal="10dp"
+                android:paddingVertical="4dp"
+                android:background="@drawable/bg_coupon_box"/>
 
             <!-- Date -->
             <TextView
                 android:id="@+id/txtDate"
-                android:text="12 Mar 2026"
-                android:textSize="12sp"
-                android:textColor="#777"
-                android:layout_marginTop="4dp"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"/>
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="12 Mar 2026"
+                android:textColor="#777"
+                android:textSize="12sp"/>
 
-            <!-- Delivery -->
             <TextView
                 android:id="@+id/txtDeliveryDate"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="2dp"
                 android:text="Delivered on 14 Mar"
-                android:textColor="@color/black"
-                android:textSize="12sp" />
+                android:textSize="12sp"/>
+
             <TextView
                 android:id="@+id/txtDeliverySlot"
-                android:text="Delivered on 14 Mar"
-                android:textSize="12sp"
-                android:textColor="@color/black"
-                android:layout_marginTop="2dp"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"/>
-            <!-- 📍 Address -->
+                android:layout_height="wrap_content"
+                android:text="Morning Slot"
+                android:textSize="12sp"/>
+
             <TextView
                 android:id="@+id/txtAddress"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="3dp"
                 android:text="DLW, Varanasi"
                 android:textSize="12sp"
-                android:textColor="#555"
-                android:layout_marginTop="3dp"
+                android:textColor="#666"
                 android:maxLines="1"
                 android:ellipsize="end"
-                android:visibility="gone"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"/>
+                android:visibility="gone"/>
 
-            <!-- Items -->
-            <TextView
-                android:id="@+id/txtItemCount"
-                android:text="3 Items"
-                android:textSize="12sp"
-                android:textColor="#555"
-                android:layout_marginTop="3dp"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"/>
-
-            <!-- Amount -->
-            <TextView
-                android:id="@+id/txtAmount"
-                android:text="₹450"
-                android:textSize="14sp"
-                android:textStyle="bold"
-                android:textColor="#000"
-                android:layout_marginTop="4dp"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"/>
-            <TextView
-                android:id="@+id/txtCoupon"
-                android:text="Coupon: SAGAR20 Applied"
-                android:textSize="11sp"
-                android:textStyle="bold"
-                android:textColor="#2E7D32"
-                android:background="@drawable/bg_coupon_box"
-                android:padding="4dp"
-                android:layout_marginTop="4dp"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"/>
-            <!-- Buttons Row -->
+            <!-- Item + Amount -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
                 android:orientation="horizontal">
 
-                <!-- Details Button -->
-                <FrameLayout
+                <TextView
+                    android:id="@+id/txtItemCount"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="3 Items"
+                    android:textSize="13sp"
+                    android:textColor="#666"/>
+
+                <TextView
+                    android:id="@+id/txtAmount"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="₹450"
+                    android:textStyle="bold"
+                    android:textSize="20sp"
+                    android:textColor="@color/slot_closed_green"/>
+
+            </LinearLayout>
+
+            <!-- Coupon -->
+            <TextView
+                android:id="@+id/txtCoupon"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:padding="5dp"
+                android:text="Coupon: SAGAR20 Applied"
+                android:textSize="11sp"
+                android:textStyle="bold"
+                android:textColor="#2E7D32"
+                android:background="@drawable/bg_coupon_box"/>
+
+            <!-- Buttons -->
+            <!-- Buttons -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:orientation="horizontal">
+
+                <!-- Details -->
+                <FrameLayout
+                    android:layout_width="0dp"
+                    android:layout_height="48dp"
                     android:layout_weight="1">
 
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/btnViewDetails"
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="Details"
-                        android:backgroundTint="@color/sagar_button" />
+                        android:layout_height="match_parent"
+                        android:backgroundTint="@color/slot_closed_green"
+                        app:icon="@drawable/ic_receipt_long"
+                        app:iconGravity="textStart"
+                        app:iconPadding="0dp"/>
 
                     <ProgressBar
                         android:id="@+id/progressDetails"
-                        android:layout_width="24dp"
-                        android:layout_height="24dp"
+                        android:layout_width="22dp"
+                        android:layout_height="22dp"
                         android:layout_gravity="center"
-                        android:visibility="gone" />
+                        android:visibility="gone"/>
 
                 </FrameLayout>
 
-                <!-- Cancel Button -->
+                <!-- Cancel -->
                 <FrameLayout
                     android:layout_width="0dp"
-                    android:layout_height="wrap_content"
+                    android:layout_height="48dp"
                     android:layout_weight="1"
-                    android:layout_marginStart="6dp">
+                    android:layout_marginStart="8dp">
 
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/btnCancle"
                         android:layout_width="match_parent"
-                        android:layout_height="48dp"
-                        android:minHeight="48dp"
-                        android:text="Cancel"
-                        android:textAllCaps="false"
-                        android:paddingStart="12dp"
-                        android:paddingEnd="12dp"
-                        android:backgroundTint="@color/slot_active_red" />
+                        android:layout_height="match_parent"
+                        android:backgroundTint="@color/slot_active_red"
+                        app:icon="@drawable/ic_cancel"
+                        app:iconGravity="textStart"
+                        app:iconPadding="0dp"/>
 
                     <ProgressBar
                         android:id="@+id/progressCancel"
                         android:layout_width="22dp"
                         android:layout_height="22dp"
                         android:layout_gravity="center"
-                        android:visibility="gone" />
+                        android:visibility="gone"/>
 
                 </FrameLayout>
 
-                <!-- Track Button -->
+                <!-- Track -->
                 <FrameLayout
                     android:layout_width="0dp"
-                    android:layout_height="wrap_content"
+                    android:layout_height="48dp"
                     android:layout_weight="1"
-                    android:layout_marginStart="6dp">
+                    android:layout_marginStart="8dp">
 
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/btnTrack"
                         android:layout_width="match_parent"
-                        android:layout_height="48dp"
-                        android:minHeight="48dp"
-                        android:text="Track"
-                        android:textAllCaps="false"
-                        android:paddingStart="12dp"
-                        android:paddingEnd="12dp"
-                        android:backgroundTint="@color/wallet_highlighted_text_holo_dark"
-                        android:visibility="visible" />
+                        android:layout_height="match_parent"
+                        android:backgroundTint="@color/wallet_holo_blue_light"
+                        app:icon="@drawable/ic_local_shipping"
+                        app:iconGravity="textStart"
+                        app:iconPadding="0dp"/>
 
                     <ProgressBar
                         android:id="@+id/progressTrack"
                         android:layout_width="22dp"
                         android:layout_height="22dp"
                         android:layout_gravity="center"
-                        android:visibility="gone" />
+                        android:visibility="gone"/>
 
                 </FrameLayout>
 

@@ -40,13 +40,13 @@ public class WishListClicked {
                     imgWishlist.setScaleY(0.8f);
                     imgWishlist.animate().scaleX(1f).scaleY(1f).setDuration(200);
                 }else{
-                    Toast.makeText(context,response.body().getMessage(),Toast.LENGTH_LONG).show();
+                    CustomToast.warning(context,response.body().getMessage());
                 }
             }
 
             @Override
             public void onFailure(Call<WishListResponse> call, Throwable t) {
-                Toast.makeText(context,t.getMessage(),Toast.LENGTH_LONG).show();
+                CustomToast.error(context,t.getMessage());
             }
         });
     }

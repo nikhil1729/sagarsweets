@@ -71,6 +71,8 @@ import com.sagarsweets.in.ApiModel.TokenRequest;
 import com.sagarsweets.in.ApiModel.TokenResponse;
 import com.sagarsweets.in.ApiModel.TopCategoryRequest;
 import com.sagarsweets.in.ApiModel.TopCategoryResponse;
+import com.sagarsweets.in.ApiModel.TrackOrderRequest;
+import com.sagarsweets.in.ApiModel.TrackOrderResponse;
 import com.sagarsweets.in.ApiModel.UpdateCartRequest;
 import com.sagarsweets.in.ApiModel.UserAddressRequest;
 import com.sagarsweets.in.ApiModel.WishListByLoggedInUserRequest;
@@ -85,6 +87,8 @@ import com.sagarsweets.in.Session.WishlistItem;
 
 import java.util.List;
 
+import okhttp3.RequestBody;
+import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.Field;
@@ -231,8 +235,16 @@ public interface ApiService {
     @POST("rest/order/get-cancellation-window")
     Call<CancellationWindowRequest> getCancellationWindow(@Body CancellationWindowResponse cancellationWindowResponse);
 
-    @POST("rest/order/cancel-product")
+    @POST("rest/order/request-cancellation")
     Call<CancelProductResponse> cancelProduct(@Body CancelProductRequest cancelProductRequest);
+
+    @POST("rest/order/order-track")
+    Call<TrackOrderResponse> trackMyOrder(@Body TrackOrderRequest trackOrderRequest);
+
+    @POST("rest/order/print-invoice")
+    Call<ResponseBody> downloadInvoice(
+            @Body RequestBody body
+    );
     /* MY ORDER API END */
 
     /* PROFILE API */

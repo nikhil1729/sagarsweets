@@ -30,6 +30,7 @@ import com.sagarsweets.in.ApiModel.MyOrderRequest;
 import com.sagarsweets.in.ApiModel.MyOrderResponse;
 import com.sagarsweets.in.ApiModel.OrderData;
 import com.sagarsweets.in.Session.LoginSession;
+import com.sagarsweets.in.utils.CustomToast;
 import com.sagarsweets.in.utils.DeviceInfo;
 
 import java.util.ArrayList;
@@ -226,7 +227,6 @@ public class MyOrderFragment extends Fragment {
                             // Get selected text
                             order_status = radioButton.getText().toString();
 
-                            //Toast.makeText(getContext(), order_status, Toast.LENGTH_SHORT).show();
                         }else{
                             order_status = "";
                         }
@@ -384,10 +384,8 @@ public class MyOrderFragment extends Fragment {
 
                     recyclerOrders.setVisibility(View.VISIBLE);
                 }
+                CustomToast.error(getContext(),t.getMessage());
 
-                Toast.makeText(getContext(),
-                        t.getMessage(),
-                        Toast.LENGTH_SHORT).show();
             }
         });
     }

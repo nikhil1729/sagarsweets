@@ -20,6 +20,7 @@ import com.sagarsweets.in.ApiModel.OtpResponse;
 import com.sagarsweets.in.ApiModel.TokenRequest;
 import com.sagarsweets.in.ApiModel.TokenResponse;
 import com.sagarsweets.in.Session.LoginSession;
+import com.sagarsweets.in.utils.CustomToast;
 import com.sagarsweets.in.utils.DeviceInfo;
 
 import retrofit2.Call;
@@ -46,14 +47,14 @@ public class MyFirebaseService extends FirebaseMessagingService {
                 if(response.body() != null && response.body().getStatus()){
                     Log.d("FCM_TOKEN",response.body().getMessage());
                 }else{
-                    Toast.makeText(MyFirebaseService.this,
-                            response.body().getMessage(), Toast.LENGTH_SHORT).show();
+                    CustomToast.warning(MyFirebaseService.this,response.body().getMessage());
+
                 }
             }
 
             @Override
             public void onFailure(Call<TokenResponse> call, Throwable t) {
-                Toast.makeText(MyFirebaseService.this, t.getMessage(), Toast.LENGTH_SHORT).show();
+                CustomToast.error(MyFirebaseService.this,t.getMessage());
             }
         });
     }
