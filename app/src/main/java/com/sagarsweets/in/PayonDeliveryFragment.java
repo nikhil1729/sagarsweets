@@ -2,6 +2,7 @@ package com.sagarsweets.in;
 
 import android.os.Bundle;
 
+import androidx.activity.OnBackPressedCallback;
 import androidx.fragment.app.Fragment;
 
 import android.util.Log;
@@ -70,6 +71,22 @@ public class PayonDeliveryFragment extends Fragment {
             reSendOtp();
             verifyOtp();
         }
+        // Handle back press
+        requireActivity().getOnBackPressedDispatcher().addCallback(
+                getViewLifecycleOwner(),
+                new OnBackPressedCallback(true) {
+                    @Override
+                    public void handleOnBackPressed() {
+
+                        CartFragment cartFragment = new CartFragment();
+
+                        requireActivity()
+                                .getSupportFragmentManager()
+                                .beginTransaction()
+                                .replace(R.id.container, cartFragment)
+                                .commit();
+                    }
+                });
         // Inflate the layout for this fragment
         return view;
     }

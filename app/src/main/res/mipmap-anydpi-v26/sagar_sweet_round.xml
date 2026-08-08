@@ -2,4 +2,5 @@
 <adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
     <background android:drawable="@drawable/sagar_sweet_background"/>
     <foreground android:drawable="@mipmap/sagar_sweet_foreground"/>
+    <monochrome android:drawable="@mipmap/sagar_sweet_foreground"/>
 </adaptive-icon>

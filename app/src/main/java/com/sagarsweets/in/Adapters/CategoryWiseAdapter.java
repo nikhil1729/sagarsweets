@@ -2,6 +2,7 @@ package com.sagarsweets.in.Adapters;
 
 import android.content.Context;
 import android.content.res.Resources;
+import android.os.Bundle;
 import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -9,12 +10,15 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.fragment.app.FragmentActivity;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.sagarsweets.in.ApiModel.TopCategoryDataModel;
+import com.sagarsweets.in.ProductViewCategoryFragment;
 import com.sagarsweets.in.R;
+import com.sagarsweets.in.utils.CustomToast;
 
 import java.util.List;
 
@@ -65,7 +69,15 @@ public class CategoryWiseAdapter
         holder.tvCategoryName.setText(
                 category.getCategory_name()
         );
-
+        holder.tvViewAll.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //CustomToast.success(context,String.valueOf(category.getId()));
+                String categoryId = String.valueOf(category.getId());
+                String categoryName = category.getCategory_name();
+                openCategoryProduct(categoryId,categoryName);
+            }
+        });
         holder.rvProducts.setLayoutManager(
                 new GridLayoutManager(
                         context,
@@ -86,6 +98,23 @@ public class CategoryWiseAdapter
         );
     }
 
+    private void openCategoryProduct(String categoryId, String categoryName) {
+        if (!(context instanceof FragmentActivity)) return;
+        FragmentActivity activity = (FragmentActivity) context;
+        ProductViewCategoryFragment productViewCategoryFragment = new ProductViewCategoryFragment();
+        // Optional: pass categoryId
+        Bundle bundle = new Bundle();
+        bundle.putString("category_id", categoryId);
+        bundle.putString("category_name", categoryName);
+        productViewCategoryFragment.setArguments(bundle);
+
+        activity.getSupportFragmentManager()
+                .beginTransaction()
+                .replace(R.id.container, productViewCategoryFragment)
+                .addToBackStack("product_details_By_top_category")
+                .commit();
+    }
+
     @Override
     public int getItemCount() {
         return list.size();
@@ -94,13 +123,14 @@ public class CategoryWiseAdapter
     // 🔹 VIEW HOLDER
     static class ViewHolder extends RecyclerView.ViewHolder {
 
-        TextView tvCategoryName;
+        TextView tvCategoryName,tvViewAll;
         RecyclerView rvProducts;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
 
             tvCategoryName = itemView.findViewById(R.id.tvCategoryName);
+            tvViewAll = itemView.findViewById(R.id.tvViewAll);
             rvProducts = itemView.findViewById(R.id.rvProducts);
         }
     }

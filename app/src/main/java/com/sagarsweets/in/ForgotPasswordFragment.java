@@ -24,6 +24,7 @@ import com.sagarsweets.in.ApiInterface.ApiService;
 import com.sagarsweets.in.ApiModel.ForgetPasswordRequest;
 import com.sagarsweets.in.ApiModel.OtpResponse;
 import com.sagarsweets.in.utils.ButtonLoaderUtil;
+import com.sagarsweets.in.utils.CustomToast;
 import com.sagarsweets.in.utils.DeviceInfo;
 
 import retrofit2.Call;
@@ -41,7 +42,7 @@ public class ForgotPasswordFragment extends Fragment {
     private CountDownTimer resendTimer;
     private static final int OTP_RESEND_TIME = 120; // seconds
     private String ip, deviceInfo;
-
+    private TextView tvLogin,tvRegister;
     @Override
     public void onDestroyView() {
         super.onDestroyView();
@@ -62,6 +63,8 @@ public class ForgotPasswordFragment extends Fragment {
         // buttons
         btnGetOtp = view.findViewById(R.id.btnGetOtp);
         btnResetPassword = view.findViewById(R.id.btnResetPassword);
+        tvLogin = view.findViewById(R.id.tvLogin);
+        tvRegister = view.findViewById(R.id.tvRegister);
         // error text view
         tvError = view.findViewById(R.id.tvError);
         tvSuccess = view.findViewById(R.id.tvSuccess);
@@ -70,6 +73,30 @@ public class ForgotPasswordFragment extends Fragment {
         progressForgot = view.findViewById(R.id.progressForgot);
         ip = DeviceInfo.getLocalIpAddress();
         deviceInfo = DeviceInfo.getDeviceString(getContext());
+        tvLogin.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                LoginFragment loginFragment = new LoginFragment();
+                requireActivity()
+                        .getSupportFragmentManager()
+                        .beginTransaction()
+                        .replace(R.id.container, loginFragment)
+                        .addToBackStack("login_fragment")
+                        .commit();
+            }
+        });
+        tvRegister.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                RegisterFragment resRegisterFragment = new RegisterFragment();
+                requireActivity()
+                        .getSupportFragmentManager()
+                        .beginTransaction()
+                        .replace(R.id.container, resRegisterFragment)
+                        .addToBackStack("register_fragment")
+                        .commit();
+            }
+        });
         btnResetPassword.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -121,6 +148,7 @@ public class ForgotPasswordFragment extends Fragment {
                         ButtonLoaderUtil.hideLoading(btnResetPassword,progressForgot,"Reset Password");
                         if (response.isSuccessful() && response.body() != null) {
                             if (response.body().isStatus()) {
+                                CustomToast.success(getContext(),"Login success");
                                 showSuccess(response.body().getMessage());
                                 LoginFragment loginFragment = new LoginFragment();
                                 requireActivity()

@@ -1,53 +1,62 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- item_sub_category_square.xml -->
 
 <com.google.android.material.card.MaterialCardView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_width="92dp"
-    android:layout_height="112dp"
-    android:layout_marginEnd="12dp"
+    android:layout_width="110dp"
+    android:layout_height="140dp"
+    android:layout_marginEnd="14dp"
     android:foreground="?attr/selectableItemBackground"
-    app:cardCornerRadius="18dp"
+    app:cardCornerRadius="28dp"
     app:cardElevation="0dp"
-    app:cardBackgroundColor="#F7F7F7">
+    app:cardBackgroundColor="#FFF7F0"
+    app:strokeWidth="1dp"
+    app:strokeColor="#F3E3D6">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="vertical"
         android:gravity="center"
-        android:padding="10dp">
+        android:orientation="vertical"
+        android:padding="14dp">
 
-        <!-- Icon background -->
-        <com.google.android.material.card.MaterialCardView
-            android:layout_width="52dp"
-            android:layout_height="52dp"
-            app:cardCornerRadius="14dp"
-            app:cardElevation="0dp"
-            app:cardBackgroundColor="#FFFFFF">
+        <!-- Floating Image -->
+        <FrameLayout
+            android:layout_width="72dp"
+            android:layout_height="72dp"
+            android:background="@drawable/bg_subcategory_circle"
+            android:elevation="2dp">
 
             <ImageView
                 android:id="@+id/imgSubCategory"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:padding="10dp"
-                android:scaleType="centerInside"/>
-        </com.google.android.material.card.MaterialCardView>
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:layout_gravity="center"
+                android:scaleType="fitCenter"/>
 
-        <!-- Name -->
+        </FrameLayout>
+
+        <!-- Category -->
         <TextView
             android:id="@+id/tvSubCategoryName"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
+            android:layout_marginTop="14dp"
+            android:gravity="center"
             android:text="Meal Bowls"
-            android:textSize="13sp"
             android:textStyle="bold"
-            android:textColor="#1F1F1F"
-            android:maxLines="2"
-            android:ellipsize="end"
-            android:gravity="center"/>
+            android:textSize="14sp"
+            android:textColor="#161616"
+            android:maxLines="1"
+            android:singleLine="true"
+            android:ellipsize="end"/>
+        <!-- Decorative line -->
+        <View
+            android:layout_width="22dp"
+            android:layout_height="3dp"
+            android:layout_marginTop="8dp"
+            android:background="#FF8A00"/>
+
     </LinearLayout>
 
 </com.google.android.material.card.MaterialCardView>

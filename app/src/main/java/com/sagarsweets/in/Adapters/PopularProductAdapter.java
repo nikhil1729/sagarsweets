@@ -28,6 +28,7 @@ import com.google.android.material.badge.BadgeDrawable;
 import com.sagarsweets.in.ApiControllers.SuperController;
 import com.sagarsweets.in.ApiModel.ProductModel;
 import com.sagarsweets.in.ApiModel.SizeModel;
+import com.sagarsweets.in.BottomSheets.BuyNowBottomSheet;
 import com.sagarsweets.in.HomeActivity;
 import com.sagarsweets.in.ProductDetailsFragment;
 import com.sagarsweets.in.R;
@@ -178,12 +179,14 @@ public class PopularProductAdapter
                 vh.tvStockStatus.setText("IN STOCK");
                 vh.tvStockStatus.setBackgroundResource(R.drawable.bg_stock_in);
                 vh.ivAddToCart.setEnabled(true);
+                vh.ivBuyNow.setEnabled(true);
                 vh.itemView.setAlpha(1f);
             }else{
                 // product is out of stock
                 vh.tvStockStatus.setText("OUT OF STOCK");
                 vh.tvStockStatus.setBackgroundResource(R.drawable.bg_stock_out);
                 vh.ivAddToCart.setEnabled(false);
+                vh.ivBuyNow.setEnabled(false);
                 vh.itemView.setAlpha(0.6f);
             }
             Log.d("PRODUCTSTOCKDEBUG","if-"+product.getProductName()+"-size-"+sizes.size()+",Totalstock-"+totalStock);
@@ -194,6 +197,7 @@ public class PopularProductAdapter
                 vh.tvStockStatus.setText("OUT OF STOCK");
                 vh.tvStockStatus.setBackgroundResource(R.drawable.bg_stock_out);
                 vh.ivAddToCart.setEnabled(false);
+                vh.ivBuyNow.setEnabled(false);
                 vh.itemView.setAlpha(0.6f);
                 Log.d("PRODUCTSTOCKDEBUG","ifstock -"+product.getProductName()+"-stock-"+product.getStock());
             }else{
@@ -201,6 +205,7 @@ public class PopularProductAdapter
                 vh.tvStockStatus.setText("IN STOCK");
                 vh.tvStockStatus.setBackgroundResource(R.drawable.bg_stock_in);
                 vh.ivAddToCart.setEnabled(true);
+                vh.ivBuyNow.setEnabled(true);
                 vh.itemView.setAlpha(1f);
                 Log.d("PRODUCTSTOCKDEBUG","elsestock -"+product.getProductName()+"-stock-"+product.getStock());
             }
@@ -308,7 +313,53 @@ public class PopularProductAdapter
                 animateAddToCart(vh.imgProduct);
             }
         });
+        vh.ivBuyNow.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                List<SizeModel> sizes = product.getSizeList();
+                if (sizes != null && !sizes.isEmpty()) {
+                    if (!vh.sizeSelected) {
+                        showSizeSelected(vh);
+                        return;
+                    }else{
 
+                    }
+                }else{
+
+                }
+                BuyNowBottomSheet sheet =
+                        new BuyNowBottomSheet();
+                Bundle bundle = new Bundle();
+                bundle.putInt("product_id", product.getId());
+
+                bundle.putString("product_name", product.getProductName());
+                bundle.putString("product_image", product.getImagePath());
+                bundle.putString("product_price",product.getSellingPrice());
+
+                int stock = getAvailableStock(product, vh.selectedSizeId);
+
+                bundle.putInt("stock", stock);
+
+                // size info
+
+                bundle.putString("size_id", String.valueOf(vh.selectedSizeId));
+                bundle.putString(
+                        "size_name",
+                        vh.sizeSelectedName == null ? "" : vh.sizeSelectedName
+                );
+
+                sheet.setArguments(bundle);
+                // back press disable (optional)
+                sheet.setCancelable(false);
+                sheet.setContext(context);
+                sheet.show(
+                        ((FragmentActivity) context)
+                                .getSupportFragmentManager(),
+                        "BUY_NOW"
+                );
+
+            }
+        });
         vh.ivAddToCart.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -678,7 +729,7 @@ public class PopularProductAdapter
 
     public static class ProductVH extends RecyclerView.ViewHolder {
 
-        ImageView imgProduct, ivAddToCart,imgWishlist;
+        ImageView imgProduct, ivAddToCart,imgWishlist,ivBuyNow;
         TextView tvProductName, tvSalePrice, tvPrice,
                 tvRatingCount, tvStockStatus;
         RatingBar ratingBar;
@@ -711,6 +762,7 @@ public class PopularProductAdapter
             btnPlus = itemView.findViewById(R.id.btnPlus);
             tvQuantity = itemView.findViewById(R.id.tvQuantity);
             frIvCart = itemView.findViewById(R.id.frIvCart);
+            ivBuyNow = itemView.findViewById(R.id.ivBuyNow);
         }
     }
 

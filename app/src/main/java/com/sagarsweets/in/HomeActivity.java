@@ -59,6 +59,7 @@ import com.sagarsweets.in.Adapters.SearchSuggestionAdapter;
 import com.sagarsweets.in.ApiControllers.LoginRetrofitClient;
 import com.sagarsweets.in.ApiControllers.ResetOtpRetrofitClient;
 import com.sagarsweets.in.ApiInterface.ApiService;
+import com.sagarsweets.in.ApiInterface.PaymentCallback;
 import com.sagarsweets.in.ApiModel.NotificationCountRequest;
 import com.sagarsweets.in.ApiModel.NotificationCountResponse;
 import com.sagarsweets.in.ApiModel.PincodeData;
@@ -85,6 +86,8 @@ public class HomeActivity extends AppCompatActivity
         PaymentResultListener
 {
 
+    public static PaymentCallback paymentCallback;
+
     TextView tvLocation;
     TextView drawName, drawEmail;
     DrawerLayout drawerLayout;
@@ -106,26 +109,25 @@ public class HomeActivity extends AppCompatActivity
     @Override
     public void onPaymentSuccess(String razorpayPaymentID) {
 
-        Fragment fragment =
-                getSupportFragmentManager()
-                        .findFragmentById(R.id.container);
+        if(paymentCallback!=null){
 
-        if (fragment instanceof CheckoutFragment) {
-            ((CheckoutFragment) fragment)
-                    .handlePaymentSuccess(razorpayPaymentID);
+            paymentCallback
+                    .onPaymentSuccess(
+                            razorpayPaymentID
+                    );
         }
     }
 
     @Override
     public void onPaymentError(int code, String response) {
 
-        Fragment fragment =
-                getSupportFragmentManager()
-                        .findFragmentById(R.id.container);
+        if(paymentCallback!=null){
 
-        if (fragment instanceof CheckoutFragment) {
-            ((CheckoutFragment) fragment)
-                    .handlePaymentError(code, response);
+            paymentCallback
+                    .onPaymentError(
+                            code,
+                            response
+                    );
         }
     }
 
@@ -176,7 +178,10 @@ public class HomeActivity extends AppCompatActivity
                 return true;
             }
             if (item.getItemId() == R.id.action_notification) {
-
+                if(!loginSession.isLoggedIn()){
+                    CustomToast.warning(this,"Please login to view notification");
+                   return false;
+                }
                 loadFragment(new NotificationFragment(),
                         "Notifications",
                         false);

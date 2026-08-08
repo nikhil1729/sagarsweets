@@ -223,6 +223,47 @@
                             android:visibility="gone"/>
                     </FrameLayout>
 
+                    <!-- LOGIN LINK -->
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_horizontal"
+                        android:orientation="horizontal"
+                        android:layout_marginTop="18dp"
+                        android:gravity="center">
+
+                        <TextView
+                            android:id="@+id/tvLogin"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Login"
+                            android:textColor="@color/sagar_button"
+                            android:textStyle="bold"
+                            android:textSize="15sp"
+                            android:padding="8dp"
+                            android:clickable="true"
+                            android:focusable="true"/>
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text=" | "
+                            android:textColor="#999999"
+                            android:textSize="15sp"/>
+
+                        <TextView
+                            android:id="@+id/tvForgotPassword"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Forgot Password"
+                            android:textColor="@color/sagar_button"
+                            android:textStyle="bold"
+                            android:textSize="15sp"
+                            android:padding="8dp"
+                            android:clickable="true"
+                            android:focusable="true"/>
+
+                    </LinearLayout>
 
                 </LinearLayout>
             </androidx.cardview.widget.CardView>

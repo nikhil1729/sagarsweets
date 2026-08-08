@@ -39,7 +39,7 @@ public class RegisterFragment extends Fragment {
 
     ProgressBar progressRegister,progressOtp;
 
-    TextView tvError,tvSuccess;
+    TextView tvError,tvSuccess,tvLogin,tvForgotPassword;
 
     private static final int OTP_RESEND_TIME = 120; // seconds
     private CountDownTimer resendTimer;
@@ -83,6 +83,32 @@ public class RegisterFragment extends Fragment {
         // textview error
         tvError = view.findViewById(R.id.tvError);
         tvSuccess= view.findViewById(R.id.tvSuccess);
+        tvForgotPassword = view.findViewById(R.id.tvForgotPassword);
+        tvLogin = view.findViewById(R.id.tvLogin);
+        tvLogin.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                LoginFragment loginFragment = new LoginFragment();
+                requireActivity()
+                        .getSupportFragmentManager()
+                        .beginTransaction()
+                        .replace(R.id.container, loginFragment)
+                        .addToBackStack("login_fragment")
+                        .commit();
+            }
+        });
+        tvForgotPassword.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ForgotPasswordFragment forgotPasswordFragment = new ForgotPasswordFragment();
+                requireActivity()
+                        .getSupportFragmentManager()
+                        .beginTransaction()
+                        .replace(R.id.container, forgotPasswordFragment)
+                        .addToBackStack("forgot_password_fragment")
+                        .commit();
+            }
+        });
         btnGetOtp.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

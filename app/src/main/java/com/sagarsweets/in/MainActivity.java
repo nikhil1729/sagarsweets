@@ -42,6 +42,7 @@ import com.sagarsweets.in.ApiModel.PincodeResponse;
 import com.sagarsweets.in.Session.LoginSession;
 import com.sagarsweets.in.Session.PincodeSession;
 import com.sagarsweets.in.utils.ButtonLoaderUtil;
+import com.sagarsweets.in.utils.CustomToast;
 import com.sagarsweets.in.utils.DeviceInfo;
 
 import java.util.List;
@@ -329,14 +330,14 @@ public class MainActivity extends AppCompatActivity {
                             //showError("Delivery not available for this pincode");
                         }
                     }else {
-                        tvPincodeError.setText("Something went wrong");
+                        tvPincodeError.setText("Something went wrong.");
                         tvPincodeError.setVisibility(View.VISIBLE);
                     }
                 }
 
                 @Override
                 public void onFailure(Call<PincodeResponse> call, Throwable t) {
-
+                    CustomToast.error(MainActivity.this,t.getMessage());
                 }
             });
 

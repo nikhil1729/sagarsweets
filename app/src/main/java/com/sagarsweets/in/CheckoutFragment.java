@@ -39,6 +39,7 @@ import com.sagarsweets.in.Adapters.PickupPreviewAdapter;
 import com.sagarsweets.in.ApiControllers.LoginRetrofitClient;
 import com.sagarsweets.in.ApiControllers.SuperController;
 import com.sagarsweets.in.ApiInterface.ApiService;
+import com.sagarsweets.in.ApiInterface.PaymentCallback;
 import com.sagarsweets.in.ApiModel.CheckoutProcessData;
 import com.sagarsweets.in.ApiModel.CheckoutRequest;
 import com.sagarsweets.in.ApiModel.CheckoutResponse;
@@ -78,7 +79,7 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 
-public class CheckoutFragment extends Fragment{
+public class CheckoutFragment extends Fragment implements PaymentCallback {
     TextView btnAddAddress,btnChangeAddress,txtCheckoutAddress,txtPickupAddress;
     ProgressBar progressChangeAddress,progressPlaceOrder;
     TextView txtDeliveryDate;
@@ -139,6 +140,9 @@ public class CheckoutFragment extends Fragment{
     private OnBackPressedCallback backPressedCallback;
     private boolean isPaymentProcessing = false;
     private String deliveryType=Constants.HOME_DELIVERY;
+
+
+
     public class Constants {
 
         public static final String HOME_DELIVERY = "HOME_DELIVERY";
@@ -196,6 +200,7 @@ public class CheckoutFragment extends Fragment{
         radioCodOnlineSetting();
         deliveryPickup();
         addressRelatedFunctions();
+        HomeActivity.paymentCallback = this;
         functionForCheckout();
 
         // Inflate the layout for this fragment
@@ -365,12 +370,14 @@ public class CheckoutFragment extends Fragment{
         }
     }
 
-    public void handlePaymentError(int code, String response) {
+
+    @Override
+    public void onPaymentError(int code, String response) {
         CustomToast.error(getContext(),"Payment Failed: " + response);
     }
 
-
-    public void handlePaymentSuccess(String paymentId) {
+    @Override
+    public void onPaymentSuccess(String paymentId) {
 
         isPaymentProcessing = true;
         backPressedCallback.setEnabled(true);

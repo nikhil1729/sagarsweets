@@ -23,6 +23,9 @@ import com.sagarsweets.in.ApiModel.ContactUsFormResponse;
 import com.sagarsweets.in.ApiModel.ContactUsResponse;
 import com.sagarsweets.in.ApiModel.CouponRequest;
 import com.sagarsweets.in.ApiModel.CouponResponse;
+import com.sagarsweets.in.ApiModel.FastCheckoutOrderRequest;
+import com.sagarsweets.in.ApiModel.FastCheckoutRequest;
+import com.sagarsweets.in.ApiModel.FastCheckoutResponse;
 import com.sagarsweets.in.ApiModel.ForgetPasswordRequest;
 import com.sagarsweets.in.ApiModel.GetUserAddressResponse;
 import com.sagarsweets.in.ApiModel.LoginOtpRequest;
@@ -262,4 +265,12 @@ public interface ApiService {
     @POST("rest/user/save-dob")
     Call<SaveEmailResponse> saveDobProfile (@Body SaveDobRequest saveDobRequest);
     /* PROFILE END */
+
+    /* FAST CHECK OUT */
+    @POST("rest/fast-checkout/index")
+    Call<FastCheckoutResponse> fastCheckoutIndex(@Body FastCheckoutRequest fastCheckoutRequest);
+
+    @POST("rest/fast-checkout/checkout")
+    Call<PodVerifyOtpResponse> fastCheckoutSuccess(@Body FastCheckoutOrderRequest fastCheckoutOrderRequest);
+    /* END FAST CHECKOUT */
 }

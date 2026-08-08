@@ -23,6 +23,30 @@ public class CancellationWindowRequest {
     @Expose
     private String message;
 
+    @SerializedName("order_status")
+    @Expose
+    private String orderStatus;
+
+    @SerializedName("data")
+    @Expose
+    private CancelData data;
+
+    public String getOrderStatus() {
+        return orderStatus;
+    }
+
+    public void setOrderStatus(String orderStatus) {
+        this.orderStatus = orderStatus;
+    }
+
+    public CancelData getData() {
+        return data;
+    }
+
+    public void setData(CancelData data) {
+        this.data = data;
+    }
+
     public boolean isStatus() {
         return status;
     }

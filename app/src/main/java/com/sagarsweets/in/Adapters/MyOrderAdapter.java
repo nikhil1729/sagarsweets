@@ -13,6 +13,7 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
@@ -221,7 +222,9 @@ public class MyOrderAdapter extends RecyclerView.Adapter<MyOrderAdapter.ViewHold
                             bottomSheetDialog.setCanceledOnTouchOutside(false);
                             bottomSheetDialog.show();
                         }else{
-                            CustomToast.error(context,response.body().getMessage());
+                            showCancleDeliveryDetails(response);
+
+                            //CustomToast.error(context,response.body().getMessage());
                         }
                     }
 
@@ -408,7 +411,14 @@ public class MyOrderAdapter extends RecyclerView.Adapter<MyOrderAdapter.ViewHold
 
                             MyOrderDetailsResponse.Result result = response.body().getResult();
                             ///  setting data in views
-                            Float subTotal = Float.valueOf(result.getTotalProductAmount());
+                            String totalProductAmount =result.getTotalProductAmount();
+                            Float subTotal = 0f;
+                            if(totalProductAmount.equals("")){
+                                subTotal = 0f;
+                            }else{
+                                subTotal = Float.valueOf(result.getTotalProductAmount());
+                            }
+
                             Float delivery = Float.valueOf(result.getDeliveryCharge());
                             Float couponAmount = Float.valueOf(result.getCouponDiscount());
                             Float total = (subTotal+delivery)-couponAmount;
@@ -492,6 +502,69 @@ public class MyOrderAdapter extends RecyclerView.Adapter<MyOrderAdapter.ViewHold
             }
         });
     }
+
+    private void showCancleDeliveryDetails(Response<CancellationWindowRequest> response) {
+        BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(context);
+        View sheetView = LayoutInflater.from(context).inflate(R.layout.layout_order_cancelled, null);
+        if(!response.body().isStatus()){
+            TextView tvOrderStatus = sheetView.findViewById(R.id.tvOrderStatus);
+            ImageButton btnClose   = sheetView.findViewById(R.id.btnClose);
+            TextView tvMessage = sheetView.findViewById(R.id.tvMessage);
+            TextView tvReason = sheetView.findViewById(R.id.tvReason);
+            TextView tvReturnDate = sheetView.findViewById(R.id.tvReturnDate);
+            TextView tvCancelledBy = sheetView.findViewById(R.id.tvCancelledBy);
+            TextView tvRefundAmount = sheetView.findViewById(R.id.tvRefundAmount);
+            TextView tvNote = sheetView.findViewById(R.id.tvNote);
+            Button btnDismiss = sheetView.findViewById(R.id.btnDismiss);
+            TextView tvDescription = sheetView.findViewById(R.id.tvDescription);
+            // setting response data
+            tvOrderStatus.setText(response.body().getOrderStatus());
+            tvMessage.setText(response.body().getMessage());
+            tvReason.setText(response.body().getData().getCustomerReason());
+            tvReturnDate.setText("Return Date : "+response.body().getData().getReturnDate());
+            tvCancelledBy.setText("Cancelled By : "+response.body().getData().getCancelledBy().toUpperCase());
+            tvRefundAmount.setText("₹"+response.body().getData().getApproveReturnAmt());
+            String description = response.body().getData().getDescription();
+            if(description == null){
+                tvDescription.setVisibility(View.GONE);
+            }else{
+                tvDescription.setText(description);
+            }
+            String refund_status = response.body().getData().getRefundStatus();
+            if(refund_status == null){
+                tvNote.setText("Your refund request is currently under review. Please wait some time or contact support with your transaction ID.");
+            }else{
+                String refund_date = response.body().getData().getRefundDatetime();
+                String refund_id = response.body().getData().getRefundId();
+                String note = "Your refund has been processed successfully on "
+                        + refund_date
+                        + ". Refund ID: "
+                        + refund_id;
+                tvNote.setText(note);
+            }
+            btnDismiss.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    bottomSheetDialog.dismiss();
+                }
+            });
+            btnClose.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    bottomSheetDialog.dismiss();
+                }
+            });
+            bottomSheetDialog.setContentView(sheetView);
+            bottomSheetDialog.setCanceledOnTouchOutside(false);
+            bottomSheetDialog.show();
+
+        }else{
+            CustomToast.error(context,"Somthing went wrong.please try after some time.");
+        }
+
+    }
+
+
 
     private void savePdf(
             ResponseBody body,

@@ -207,8 +207,9 @@
                     android:layout_gravity="center_horizontal"
                     android:layout_marginTop="12dp"
                     android:text="New user? Sign Up"
-                    android:textColor="#8D2B0B"
-                    android:textSize="14sp" />
+                    android:textColor="@color/sagar_button"
+                    android:textStyle="bold"
+                    android:textSize="15sp" />
 
             </LinearLayout>
 
